@@ -108,160 +108,166 @@ export default function SolicitudModal({ open, onOpenChange, solicitud = null })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-lg flex flex-col max-h-[90vh] p-0 gap-0">
+        {/* Header fijo */}
+        <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b">
           <DialogTitle className="text-xl font-bold text-[#1E293B]">
             {isEditing ? 'Editar Solicitud' : 'Nueva Solicitud de Cotización'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="producto" className="text-sm font-medium">
-              Producto o Servicio <span className="text-red-500">*</span>
-            </Label>
-            <Input
-              id="producto"
-              placeholder="Ej: Papel bond carta 75g"
-              value={formData.producto_servicio}
-              onChange={(e) => setFormData({ ...formData, producto_servicio: e.target.value })}
-              className="h-11"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        {/* Cuerpo scrollable */}
+        <div className="overflow-y-auto flex-1 px-6 py-5">
+          <form id="solicitud-form" onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="cantidad" className="text-sm font-medium">
-                Cantidad <span className="text-red-500">*</span>
+              <Label htmlFor="producto" className="text-sm font-medium">
+                Producto o Servicio <span className="text-red-500">*</span>
               </Label>
               <Input
-                id="cantidad"
-                type="number"
-                placeholder="100"
-                value={formData.cantidad}
-                onChange={(e) => setFormData({ ...formData, cantidad: parseFloat(e.target.value) })}
+                id="producto"
+                placeholder="Ej: Papel bond carta 75g"
+                value={formData.producto_servicio}
+                onChange={(e) => setFormData({ ...formData, producto_servicio: e.target.value })}
                 className="h-11"
               />
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="cantidad" className="text-sm font-medium">
+                  Cantidad <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="cantidad"
+                  type="number"
+                  placeholder="100"
+                  value={formData.cantidad}
+                  onChange={(e) => setFormData({ ...formData, cantidad: parseFloat(e.target.value) })}
+                  className="h-11"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Unidad</Label>
+                <Select
+                  value={formData.unidad_medida}
+                  onValueChange={(value) => setFormData({ ...formData, unidad_medida: value })}
+                >
+                  <SelectTrigger className="h-11">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {UNIDADES.map((unidad) => (
+                      <SelectItem key={unidad} value={unidad}>{unidad}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Unidad</Label>
+              <Label className="text-sm font-medium">Categoría</Label>
               <Select
-                value={formData.unidad_medida}
-                onValueChange={(value) => setFormData({ ...formData, unidad_medida: value })}
+                value={formData.categoria}
+                onValueChange={(value) => setFormData({ ...formData, categoria: value })}
               >
                 <SelectTrigger className="h-11">
-                  <SelectValue />
+                  <SelectValue placeholder="Selecciona una categoría" />
                 </SelectTrigger>
                 <SelectContent>
-                  {UNIDADES.map((unidad) => (
-                    <SelectItem key={unidad} value={unidad}>{unidad}</SelectItem>
+                  {CATEGORIAS.map((cat) => (
+                    <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Categoría</Label>
-            <Select
-              value={formData.categoria}
-              onValueChange={(value) => setFormData({ ...formData, categoria: value })}
-            >
-              <SelectTrigger className="h-11">
-                <SelectValue placeholder="Selecciona una categoría" />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIAS.map((cat) => (
-                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="descripcion" className="text-sm font-medium">
-              Descripción (opcional)
-            </Label>
-            <Textarea
-              id="descripcion"
-              placeholder="Agrega detalles adicionales sobre tu solicitud..."
-              value={formData.descripcion}
-              onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
-              className="min-h-[100px] resize-none"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Fecha límite (opcional)</Label>
-            <Input
-              type="date"
-              value={formData.fecha_vencimiento}
-              onChange={(e) => setFormData({ ...formData, fecha_vencimiento: e.target.value })}
-              className="h-11"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">Archivos adjuntos</Label>
-            <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 hover:border-[#D2FC31] transition-colors">
-              <input
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                className="hidden"
-                id="file-upload"
+            <div className="space-y-2">
+              <Label htmlFor="descripcion" className="text-sm font-medium">
+                Descripción (opcional)
+              </Label>
+              <Textarea
+                id="descripcion"
+                placeholder="Agrega detalles adicionales sobre tu solicitud..."
+                value={formData.descripcion}
+                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                className="min-h-[100px] resize-none"
               />
-              <label
-                htmlFor="file-upload"
-                className="flex flex-col items-center gap-2 cursor-pointer"
-              >
-                <Upload className="w-8 h-8 text-slate-400" />
-                <span className="text-sm text-slate-500">
-                  Arrastra archivos aquí o haz clic para seleccionar
-                </span>
-              </label>
             </div>
-            {files.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {files.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 text-sm"
-                  >
-                    <span className="truncate max-w-[150px]">{file.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(index)}
-                      className="text-slate-400 hover:text-red-500"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
 
-          <DialogFooter className="gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-              disabled={createMutation.isPending || uploading}
-              className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]"
-            >
-              {(createMutation.isPending || uploading) && (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Fecha límite (opcional)</Label>
+              <Input
+                type="date"
+                value={formData.fecha_vencimiento}
+                onChange={(e) => setFormData({ ...formData, fecha_vencimiento: e.target.value })}
+                className="h-11"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Archivos adjuntos</Label>
+              <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 hover:border-[#D2FC31] transition-colors">
+                <input
+                  type="file"
+                  multiple
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="file-upload"
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="flex flex-col items-center gap-2 cursor-pointer"
+                >
+                  <Upload className="w-8 h-8 text-slate-400" />
+                  <span className="text-sm text-slate-500">
+                    Arrastra archivos aquí o haz clic para seleccionar
+                  </span>
+                </label>
+              </div>
+              {files.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {files.map((file, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-1.5 text-sm"
+                    >
+                      <span className="truncate max-w-[150px]">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeFile(index)}
+                        className="text-slate-400 hover:text-red-500"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               )}
-              {isEditing ? 'Guardar Cambios' : 'Publicar Solicitud'}
-            </Button>
-          </DialogFooter>
-        </form>
+            </div>
+          </form>
+        </div>
+
+        {/* Footer fijo */}
+        <DialogFooter className="px-6 py-4 flex-shrink-0 border-t gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+          >
+            Cancelar
+          </Button>
+          <Button
+            type="submit"
+            form="solicitud-form"
+            disabled={createMutation.isPending || uploading}
+            className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]"
+          >
+            {(createMutation.isPending || uploading) && (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            )}
+            {isEditing ? 'Guardar Cambios' : 'Publicar Solicitud'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

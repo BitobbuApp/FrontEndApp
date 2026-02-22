@@ -23,12 +23,21 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       setIsAuthenticated(true);
     } catch (error) {
-      console.error('Auth check failed:', error);
-      setAuthError({ type: 'unknown', message: error.message || 'Auth failed' });
+      const errorType = error.type ?? (error.message === 'auth_required' ? 'auth_required' : 'unknown');
+      setAuthError({ type: errorType, message: error.message });
       setIsAuthenticated(false);
+      setUser(null);
     } finally {
       setIsLoadingAuth(false);
     }
+  };
+
+  const login = async (email, password) => {
+    const loggedUser = await base44.auth.login(email, password);
+    setUser(loggedUser);
+    setIsAuthenticated(true);
+    setAuthError(null);
+    return loggedUser;
   };
 
   const logout = () => {
@@ -49,6 +58,7 @@ export const AuthProvider = ({ children }) => {
       isLoadingPublicSettings,
       authError,
       appPublicSettings,
+      login,
       logout,
       navigateToLogin,
       checkAppState,
