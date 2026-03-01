@@ -8,6 +8,8 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import Login from '@/pages/Login';
+import Register from '@/pages/Register';
+import { useState } from 'react';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -19,6 +21,7 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated } = useAuth();
+  const [showRegister, setShowRegister] = useState(false);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -38,7 +41,15 @@ const AuthenticatedApp = () => {
   }
 
   if (!isAuthenticated) {
-    return <Login />;
+    if (showRegister) {
+      return (
+        <Register
+          onGoToLogin={() => setShowRegister(false)}
+          onRegistered={() => setShowRegister(false)}
+        />
+      );
+    }
+    return <Login onGoToRegister={() => setShowRegister(true)} />;
   }
 
   return (
@@ -63,6 +74,7 @@ const AuthenticatedApp = () => {
     </Routes>
   );
 };
+
 
 
 function App() {

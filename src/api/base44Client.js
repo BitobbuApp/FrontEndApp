@@ -1,3 +1,5 @@
+import { loginUser, saveSession, loadSession, clearSession } from './apiClient';
+
 // ─── Seed Data ────────────────────────────────────────────────────────────────
 
 const DEV_EMAIL = 'dev@bitobbu.com';
@@ -718,33 +720,32 @@ const MOCK_USERS = {
 
 export const base44 = {
   appLogs: {
-    logUserInApp: async (_pageName) => {},
+    logUserInApp: async (_pageName) => { },
   },
   auth: {
+    /** Called on every app load to restore session from localStorage */
     me: async () => {
-      const raw = localStorage.getItem(SESSION_KEY);
-      if (!raw) {
-        const err = new Error('auth_required');
-        err.type = 'auth_required';
-        throw err;
-      }
-      return JSON.parse(raw);
+      return loadSession(); // Throws { type: 'auth_required' } if no session exists
     },
+
+    /** Called by Login.jsx via AuthContext.login() */
     login: async (email, password) => {
-      const user = MOCK_USERS[email];
-      if (!user || user.password !== password) {
-        throw new Error('Credenciales incorrectas. Verifica tu email y contraseña.');
-      }
-      const { password: _pw, ...sessionUser } = user;
-      localStorage.setItem(SESSION_KEY, JSON.stringify(sessionUser));
-      return sessionUser;
+      // Calls POST /api/v1/users/login on the Fastify backend
+      const userData = await loginUser(email, password);
+      // userData = { id, first_name, last_name, email, is_active, last_access, token }
+      saveSession(userData); // Saves user (without token) and token separately
+      // Return the clean user object (no token) so AuthContext can store it in state
+      const { token: _t, ...user } = userData;
+      return user;
     },
+
     logout: () => {
-      localStorage.removeItem(SESSION_KEY);
+      clearSession();
       window.location.reload();
     },
+
     redirectToLogin: (_redirectUrl) => {
-      localStorage.removeItem(SESSION_KEY);
+      clearSession();
       window.location.reload();
     },
   },

@@ -13,7 +13,7 @@ const FEATURES = [
   { icon: Zap, text: 'Negocia directamente con proveedores' },
 ];
 
-export default function Login() {
+export default function Login({ onGoToRegister }) {
   const { login } = useAuth();
   const [email, setEmail] = useState('dev@bitobbu.com');
   const [password, setPassword] = useState('123456');
@@ -180,16 +180,15 @@ export default function Login() {
             </Button>
           </form>
 
-          {/* Hint de credenciales demo */}
-          <div className="mt-8 p-4 bg-[#1E293B]/5 rounded-xl border border-[#1E293B]/10">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-              Credenciales de demo
-            </p>
-            <div className="space-y-1 font-mono text-sm text-slate-700">
-              <p><span className="text-slate-400">Email:</span> dev@bitobbu.com</p>
-              <p><span className="text-slate-400">Contraseña:</span> 123456</p>
-            </div>
-          </div>
+          <p className="mt-6 text-center text-sm text-slate-500">
+            ¿No tienes cuenta?{' '}
+            <button
+              onClick={onGoToRegister}
+              className="text-[#1E293B] font-semibold hover:underline"
+            >
+              Regístrate gratis
+            </button>
+          </p>
         </motion.div>
       </div>
     </div>
