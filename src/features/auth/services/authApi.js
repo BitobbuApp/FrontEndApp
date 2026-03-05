@@ -1,23 +1,10 @@
 // src/features/auth/services/authApi.js
 // All auth-related HTTP calls and session management live here.
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:3000/api/v1';
+import apiClient from '@/api/axiosClient';
 
 const SESSION_KEY = 'bitobbu_session';
-
-// ─── HTTP helpers ──────────────────────────────────────────────────────────────
-
-async function handleResponse(res) {
-    const json = await res.json();
-    if (!res.ok) {
-        const message = json.message ?? json.error ?? 'Unknown error';
-        const err = new Error(message);
-        err.status = res.status;
-        err.details = json.details ?? null;
-        throw err;
-    }
-    return json;
-}
+const TOKEN_KEY = 'bitobbu_token';
 
 // ─── Auth API ─────────────────────────────────────────────────────────────────
 
@@ -26,13 +13,10 @@ async function handleResponse(res) {
  * Returns: { id, first_name, last_name, email, is_active, last_access, token }
  */
 export async function loginUser(email, password) {
-    const res = await fetch(`${API_BASE}/users/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-    });
-    const json = await handleResponse(res);
-    return json.data;
+    // apiClient already maps response to response.data (which represents the body)
+    // and expects the body to have { data: {...} } based on our backend responses.
+    const responseBody = await apiClient.post('/users/login', { email, password });
+    return responseBody.data;
 }
 
 /**
@@ -40,13 +24,13 @@ export async function loginUser(email, password) {
  * Returns: { id, first_name, last_name, email }
  */
 export async function registerUser({ first_name, last_name, email, password }) {
-    const res = await fetch(`${API_BASE}/users/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ first_name, last_name, email, password }),
+    const responseBody = await apiClient.post('/users/register', {
+        first_name,
+        last_name,
+        email,
+        password
     });
-    const json = await handleResponse(res);
-    return json.data;
+    return responseBody.data;
 }
 
 // ─── Session helpers ──────────────────────────────────────────────────────────
@@ -55,7 +39,7 @@ export async function registerUser({ first_name, last_name, email, password }) {
 export function saveSession(userData) {
     const { token, ...user } = userData;
     localStorage.setItem(SESSION_KEY, JSON.stringify(user));
-    if (token) localStorage.setItem('bitobbu_token', token);
+    if (token) localStorage.setItem(TOKEN_KEY, token);
 }
 
 /** Load the current session from localStorage, or throw if missing */
@@ -72,5 +56,5 @@ export function loadSession() {
 /** Clear all session data */
 export function clearSession() {
     localStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem('bitobbu_token');
+    localStorage.removeItem(TOKEN_KEY);
 }
