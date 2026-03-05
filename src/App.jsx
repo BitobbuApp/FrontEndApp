@@ -5,10 +5,10 @@ import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
-import { AuthProvider, useAuth } from '@/lib/AuthContext';
+import { AuthProvider, useAuth } from '@/features/auth/hooks/useAuth';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import Login from '@/pages/Login';
-import Register from '@/pages/Register';
+import LoginPage from '@/features/auth/LoginPage';
+import RegisterPage from '@/features/auth/RegisterPage';
 import { useState } from 'react';
 
 const { Pages, Layout, mainPage } = pagesConfig;
@@ -43,13 +43,12 @@ const AuthenticatedApp = () => {
   if (!isAuthenticated) {
     if (showRegister) {
       return (
-        <Register
+        <RegisterPage
           onGoToLogin={() => setShowRegister(false)}
-          onRegistered={() => setShowRegister(false)}
         />
       );
     }
-    return <Login onGoToRegister={() => setShowRegister(true)} />;
+    return <LoginPage onGoToRegister={() => setShowRegister(true)} />;
   }
 
   return (

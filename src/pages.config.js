@@ -47,15 +47,15 @@
  *
  * The mainPage value must match a key in the PAGES object exactly.
  */
-import Chat from './pages/Chat';
-import Configuracion from './pages/Configuracion';
-import Dashboard from './pages/Dashboard';
-import Marketplace from './pages/Marketplace';
-import MisSolicitudes from './pages/MisSolicitudes';
-import Ofertas from './pages/Ofertas';
-import PosiblesClientes from './pages/PosiblesClientes';
-import Proveedores from './pages/Proveedores';
-import __Layout from './Layout.jsx';
+import Chat from './features/chat/ChatPage';
+import Configuracion from './features/settings/SettingsPage';
+import Dashboard from './features/dashboard/DashboardPage';
+import Marketplace from './features/marketplace/MarketplacePage';
+import Requests from './features/requests/RequestsPage';
+import Offers from './features/offers/OffersPage';
+import PosiblesClientes from './features/prospects/ProspectsPage';
+import Proveedores from './features/suppliers/SuppliersPage';
+import __Layout from './layouts/MainLayout/MainLayout.jsx';
 
 
 export const PAGES = {
@@ -63,8 +63,8 @@ export const PAGES = {
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
     "Marketplace": Marketplace,
-    "MisSolicitudes": MisSolicitudes,
-    "Ofertas": Ofertas,
+    "Requests": Requests,
+    "Offers": Offers,
     "PosiblesClientes": PosiblesClientes,
     "Proveedores": Proveedores,
 }
