@@ -19,6 +19,7 @@ import {
     TabsTrigger,
 } from '@/components/ui/tabs';
 
+import { useAuth } from '@/features/auth/AuthContext';
 import { useSettingsForm } from './hooks/useSettingsForm';
 import CompanyTab from './components/CompanyTab';
 import LocationTab from './components/LocationTab';
@@ -44,6 +45,9 @@ export default function SettingsPage() {
         toggleCategoria,
         toggleMetodoPago,
     } = useSettingsForm();
+
+    const { user } = useAuth();
+    const hasCompany = user?.has_company || !!company?.id;
 
     if (isLoading) {
         return (
@@ -74,7 +78,7 @@ export default function SettingsPage() {
                     ) : (
                         <Save className="w-4 h-4 mr-2" />
                     )}
-                    Guardar Cambios
+                    {hasCompany ? 'Guardar Cambios' : 'Crear Compañía'}
                 </Button>
             </div>
 

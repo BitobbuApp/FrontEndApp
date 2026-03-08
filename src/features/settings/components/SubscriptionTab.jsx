@@ -8,39 +8,39 @@ export default function SubscriptionTab({ company }) {
     return (
         <div className="space-y-6">
             <Card
-                className={`border-2 ${company?.plan_suscripcion === 'Premium'
-                        ? 'border-[#D2FC31]'
-                        : 'border-slate-200'
+                className={`border-2 ${company?.subscription_plan === 'Premium'
+                    ? 'border-[#D2FC31]'
+                    : 'border-slate-200'
                     }`}
             >
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
                             <div
-                                className={`w-16 h-16 rounded-xl flex items-center justify-center ${company?.plan_suscripcion === 'Premium'
-                                        ? 'bg-[#D2FC31]'
-                                        : 'bg-slate-100'
+                                className={`w-16 h-16 rounded-xl flex items-center justify-center ${company?.subscription_plan === 'Premium'
+                                    ? 'bg-[#D2FC31]'
+                                    : 'bg-slate-100'
                                     }`}
                             >
                                 <BadgeCheck
-                                    className={`w-8 h-8 ${company?.plan_suscripcion === 'Premium'
-                                            ? 'text-[#1E293B]'
-                                            : 'text-slate-400'
+                                    className={`w-8 h-8 ${company?.subscription_plan === 'Premium'
+                                        ? 'text-[#1E293B]'
+                                        : 'text-slate-400'
                                         }`}
                                 />
                             </div>
                             <div>
                                 <h3 className="text-xl font-bold text-[#1E293B]">
-                                    Plan {company?.plan_suscripcion || 'Gratuito'}
+                                    Plan {company?.subscription_plan || 'Gratuito'}
                                 </h3>
-                                {company?.badge_fundador && (
+                                {company?.founding_badge && (
                                     <Badge className="bg-[#1E293B] text-white mt-1">
                                         Badge Fundador - 3 meses gratis
                                     </Badge>
                                 )}
                             </div>
                         </div>
-                        {company?.plan_suscripcion !== 'Premium' && (
+                        {company?.subscription_plan !== 'Premium' && (
                             <Button className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]">
                                 Actualizar a Premium
                             </Button>

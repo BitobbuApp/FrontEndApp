@@ -25,9 +25,9 @@ export default function NotificationsTab({ formData, setFormData }) {
                             <p className="text-sm text-slate-500">Recibir notificaciones por correo</p>
                         </div>
                         <Switch
-                            checked={formData.notificaciones_email}
+                            checked={formData.email_notifications}
                             onCheckedChange={(v) =>
-                                setFormData((prev) => ({ ...prev, notificaciones_email: v }))
+                                setFormData((prev) => ({ ...prev, email_notifications: v }))
                             }
                         />
                     </div>
@@ -38,9 +38,9 @@ export default function NotificationsTab({ formData, setFormData }) {
                             <p className="text-sm text-slate-500">Alertas en el navegador</p>
                         </div>
                         <Switch
-                            checked={formData.notificaciones_web}
+                            checked={formData.web_notifications}
                             onCheckedChange={(v) =>
-                                setFormData((prev) => ({ ...prev, notificaciones_web: v }))
+                                setFormData((prev) => ({ ...prev, web_notifications: v }))
                             }
                         />
                     </div>
@@ -53,9 +53,9 @@ export default function NotificationsTab({ formData, setFormData }) {
                             </p>
                         </div>
                         <Switch
-                            checked={formData.notificaciones_whatsapp}
+                            checked={formData.whatsapp_notifications}
                             onCheckedChange={(v) =>
-                                setFormData((prev) => ({ ...prev, notificaciones_whatsapp: v }))
+                                setFormData((prev) => ({ ...prev, whatsapp_notifications: v }))
                             }
                         />
                     </div>

@@ -40,8 +40,8 @@ export default function CommercialTab({ formData, setFormData, toggleCategoria, 
                 <div className="space-y-3">
                     <Label>Interés Principal *</Label>
                     <RadioGroup
-                        value={formData.interes}
-                        onValueChange={(v) => setFormData((prev) => ({ ...prev, interes: v }))}
+                        value={formData.interest}
+                        onValueChange={(v) => setFormData((prev) => ({ ...prev, interest: v }))}
                         className="flex gap-4"
                     >
                         <div className="flex items-center space-x-2">
@@ -66,9 +66,9 @@ export default function CommercialTab({ formData, setFormData, toggleCategoria, 
                             <Badge
                                 key={cat}
                                 variant={
-                                    formData.categorias_interes?.includes(cat) ? 'default' : 'outline'
+                                    formData.interest_categories?.includes(cat) ? 'default' : 'outline'
                                 }
-                                className={`cursor-pointer transition-colors ${formData.categorias_interes?.includes(cat)
+                                className={`cursor-pointer transition-colors ${formData.interest_categories?.includes(cat)
                                         ? 'bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]'
                                         : 'hover:bg-slate-100'
                                     }`}
@@ -83,9 +83,9 @@ export default function CommercialTab({ formData, setFormData, toggleCategoria, 
                 <div className="space-y-2">
                     <Label>Volumen Aproximado</Label>
                     <Select
-                        value={formData.volumen_aproximado}
+                        value={formData.approximate_volume}
                         onValueChange={(v) =>
-                            setFormData((prev) => ({ ...prev, volumen_aproximado: v }))
+                            setFormData((prev) => ({ ...prev, approximate_volume: v }))
                         }
                     >
                         <SelectTrigger className="w-48">
@@ -110,9 +110,9 @@ export default function CommercialTab({ formData, setFormData, toggleCategoria, 
                             </p>
                         </div>
                         <Switch
-                            checked={formData.agente_retencion}
+                            checked={formData.retention_agent}
                             onCheckedChange={(v) =>
-                                setFormData((prev) => ({ ...prev, agente_retencion: v }))
+                                setFormData((prev) => ({ ...prev, retention_agent: v }))
                             }
                         />
                     </div>
@@ -125,9 +125,9 @@ export default function CommercialTab({ formData, setFormData, toggleCategoria, 
                             </p>
                         </div>
                         <Switch
-                            checked={formData.trabaja_credito}
+                            checked={formData.works_with_credit}
                             onCheckedChange={(v) =>
-                                setFormData((prev) => ({ ...prev, trabaja_credito: v }))
+                                setFormData((prev) => ({ ...prev, works_with_credit: v }))
                             }
                         />
                     </div>
@@ -139,11 +139,11 @@ export default function CommercialTab({ formData, setFormData, toggleCategoria, 
                                 <Badge
                                     key={metodo}
                                     variant={
-                                        formData.metodos_pago?.includes(metodo)
+                                        formData.payment_methods?.includes(metodo)
                                             ? 'default'
                                             : 'outline'
                                     }
-                                    className={`cursor-pointer transition-colors ${formData.metodos_pago?.includes(metodo)
+                                    className={`cursor-pointer transition-colors ${formData.payment_methods?.includes(metodo)
                                             ? 'bg-[#1E293B] text-white hover:bg-slate-700'
                                             : 'hover:bg-slate-100'
                                         }`}

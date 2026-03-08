@@ -85,9 +85,9 @@ export default function CompanyTab({ formData, setFormData, handleLogoChange, up
                     <div className="space-y-2">
                         <Label>Nombre Comercial *</Label>
                         <Input
-                            value={formData.nombre_comercial}
+                            value={formData.trade_name}
                             onChange={(e) =>
-                                setFormData((prev) => ({ ...prev, nombre_comercial: e.target.value }))
+                                setFormData((prev) => ({ ...prev, trade_name: e.target.value }))
                             }
                             placeholder="Mi Empresa C.A."
                         />
@@ -95,9 +95,9 @@ export default function CompanyTab({ formData, setFormData, handleLogoChange, up
                     <div className="space-y-2">
                         <Label>Nombre Legal *</Label>
                         <Input
-                            value={formData.nombre_legal}
+                            value={formData.legal_name}
                             onChange={(e) =>
-                                setFormData((prev) => ({ ...prev, nombre_legal: e.target.value }))
+                                setFormData((prev) => ({ ...prev, legal_name: e.target.value }))
                             }
                             placeholder="Mi Empresa, C.A."
                         />
@@ -105,8 +105,8 @@ export default function CompanyTab({ formData, setFormData, handleLogoChange, up
                     <div className="space-y-2">
                         <Label>RIF *</Label>
                         <Input
-                            value={formData.rif}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, rif: e.target.value }))}
+                            value={formData.tax_id}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, tax_id: e.target.value }))}
                             placeholder="J-12345678-9"
                         />
                     </div>
@@ -114,11 +114,11 @@ export default function CompanyTab({ formData, setFormData, handleLogoChange, up
                         <Label>Año de Fundación</Label>
                         <Input
                             type="number"
-                            value={formData.ano_fundacion}
+                            value={formData.founding_year}
                             onChange={(e) =>
                                 setFormData((prev) => ({
                                     ...prev,
-                                    ano_fundacion: parseInt(e.target.value),
+                                    founding_year: parseInt(e.target.value),
                                 }))
                             }
                             placeholder="2010"
@@ -145,8 +145,8 @@ export default function CompanyTab({ formData, setFormData, handleLogoChange, up
                     <div className="space-y-2">
                         <Label>Tipo de Empresa</Label>
                         <Select
-                            value={formData.tipo_empresa}
-                            onValueChange={(v) => setFormData((prev) => ({ ...prev, tipo_empresa: v }))}
+                            value={formData.company_type}
+                            onValueChange={(v) => setFormData((prev) => ({ ...prev, company_type: v }))}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Selecciona un tipo" />

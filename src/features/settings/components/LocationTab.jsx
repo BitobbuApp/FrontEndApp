@@ -56,9 +56,9 @@ export default function LocationTab({ formData, setFormData }) {
                 <div className="space-y-2">
                     <Label>Dirección Fiscal *</Label>
                     <Textarea
-                        value={formData.direccion_fiscal}
+                        value={formData.tax_address}
                         onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, direccion_fiscal: e.target.value }))
+                            setFormData((prev) => ({ ...prev, tax_address: e.target.value }))
                         }
                         placeholder="Av. Principal, Edificio..."
                     />
@@ -68,9 +68,9 @@ export default function LocationTab({ formData, setFormData }) {
                     <div className="space-y-2">
                         <Label>Estado *</Label>
                         <Select
-                            value={formData.ubicacion_estado}
+                            value={formData.location_state}
                             onValueChange={(v) =>
-                                setFormData((prev) => ({ ...prev, ubicacion_estado: v }))
+                                setFormData((prev) => ({ ...prev, location_state: v }))
                             }
                         >
                             <SelectTrigger>
@@ -88,9 +88,9 @@ export default function LocationTab({ formData, setFormData }) {
                     <div className="space-y-2">
                         <Label>Ciudad *</Label>
                         <Input
-                            value={formData.ubicacion_ciudad}
+                            value={formData.location_city}
                             onChange={(e) =>
-                                setFormData((prev) => ({ ...prev, ubicacion_ciudad: e.target.value }))
+                                setFormData((prev) => ({ ...prev, location_city: e.target.value }))
                             }
                             placeholder="Caracas"
                         />
@@ -103,9 +103,9 @@ export default function LocationTab({ formData, setFormData }) {
                         <p className="text-sm text-slate-500">¿Tu empresa opera en todo el país?</p>
                     </div>
                     <Switch
-                        checked={formData.cobertura_nacional}
+                        checked={formData.national_coverage}
                         onCheckedChange={(v) =>
-                            setFormData((prev) => ({ ...prev, cobertura_nacional: v }))
+                            setFormData((prev) => ({ ...prev, national_coverage: v }))
                         }
                     />
                 </div>

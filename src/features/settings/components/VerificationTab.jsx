@@ -18,33 +18,33 @@ export default function VerificationTab({ company }) {
             </CardHeader>
             <CardContent className="space-y-6">
                 <div
-                    className={`p-4 rounded-xl flex items-center gap-4 ${company?.estado_verificacion === 'Verificado'
-                            ? 'bg-emerald-50'
-                            : company?.estado_verificacion === 'Rechazado'
-                                ? 'bg-red-50'
-                                : 'bg-amber-50'
+                    className={`p-4 rounded-xl flex items-center gap-4 ${company?.verification_status === 'Verificado'
+                        ? 'bg-emerald-50'
+                        : company?.verification_status === 'Rechazado'
+                            ? 'bg-red-50'
+                            : 'bg-amber-50'
                         }`}
                 >
-                    {company?.estado_verificacion === 'Verificado' ? (
+                    {company?.verification_status === 'Verificado' ? (
                         <Check className="w-8 h-8 text-emerald-600" />
-                    ) : company?.estado_verificacion === 'Rechazado' ? (
+                    ) : company?.verification_status === 'Rechazado' ? (
                         <AlertCircle className="w-8 h-8 text-red-600" />
                     ) : (
                         <Clock className="w-8 h-8 text-amber-600" />
                     )}
                     <div>
                         <p
-                            className={`font-semibold ${company?.estado_verificacion === 'Verificado'
-                                    ? 'text-emerald-700'
-                                    : company?.estado_verificacion === 'Rechazado'
-                                        ? 'text-red-700'
-                                        : 'text-amber-700'
+                            className={`font-semibold ${company?.verification_status === 'Verificado'
+                                ? 'text-emerald-700'
+                                : company?.verification_status === 'Rechazado'
+                                    ? 'text-red-700'
+                                    : 'text-amber-700'
                                 }`}
                         >
-                            Estado: {company?.estado_verificacion || 'Pendiente'}
+                            Estado: {company?.verification_status || 'Pendiente'}
                         </p>
-                        {company?.motivo_rechazo && (
-                            <p className="text-sm text-red-600 mt-1">{company.motivo_rechazo}</p>
+                        {company?.rejection_reason && (
+                            <p className="text-sm text-red-600 mt-1">{company.rejection_reason}</p>
                         )}
                     </div>
                 </div>

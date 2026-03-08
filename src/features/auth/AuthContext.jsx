@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { base44 } from '@/api/base44Client';
+import * as authApi from './services/authApi';
 
 const AuthContext = createContext();
 
@@ -19,8 +20,19 @@ export const AuthProvider = ({ children }) => {
         try {
             setIsLoadingAuth(true);
             setAuthError(null);
-            const currentUser = await base44.auth.me();
-            setUser(currentUser);
+
+            // Try to load session from Bitobbu API or localStorage
+            const currentUser = await authApi.loadSession();
+
+            // Also keep base44 in sync if still used
+            try {
+                const b44User = await base44.auth.me();
+                setUser({ ...currentUser, ...b44User });
+            } catch (e) {
+                // If base44 fails, we still have the Bitobbu user
+                setUser(currentUser);
+            }
+
             setIsAuthenticated(true);
         } catch (error) {
             const errorType = error.type ?? (error.message === 'auth_required' ? 'auth_required' : 'unknown');
@@ -33,7 +45,9 @@ export const AuthProvider = ({ children }) => {
     };
 
     const login = async (email, password) => {
-        const loggedUser = await base44.auth.login(email, password);
+        const loggedUser = await authApi.loginUser(email, password);
+        authApi.saveSession(loggedUser);
+
         setUser(loggedUser);
         setIsAuthenticated(true);
         setAuthError(null);
@@ -43,7 +57,22 @@ export const AuthProvider = ({ children }) => {
     const logout = () => {
         setUser(null);
         setIsAuthenticated(false);
+        authApi.clearSession();
         base44.auth.logout();
+    };
+
+    const updateSession = (updates) => {
+        const newUser = { ...user, ...updates };
+        setUser(newUser);
+
+        // Persist to localStorage
+        const raw = localStorage.getItem('bitobbu_session');
+        if (raw) {
+            const current = JSON.parse(raw);
+            localStorage.setItem('bitobbu_session', JSON.stringify({ ...current, ...updates }));
+        } else {
+            localStorage.setItem('bitobbu_session', JSON.stringify(updates));
+        }
     };
 
     const navigateToLogin = () => {
@@ -60,6 +89,7 @@ export const AuthProvider = ({ children }) => {
             appPublicSettings,
             login,
             logout,
+            updateSession,
             navigateToLogin,
             checkAppState,
         }}>

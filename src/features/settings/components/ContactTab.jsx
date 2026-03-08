@@ -21,9 +21,9 @@ export default function ContactTab({ formData, setFormData }) {
                     <div className="space-y-2">
                         <Label>Persona Encargada *</Label>
                         <Input
-                            value={formData.persona_encargada}
+                            value={formData.contact_person}
                             onChange={(e) =>
-                                setFormData((prev) => ({ ...prev, persona_encargada: e.target.value }))
+                                setFormData((prev) => ({ ...prev, contact_person: e.target.value }))
                             }
                             placeholder="Juan Pérez"
                         />
@@ -31,8 +31,8 @@ export default function ContactTab({ formData, setFormData }) {
                     <div className="space-y-2">
                         <Label>Cargo *</Label>
                         <Input
-                            value={formData.cargo}
-                            onChange={(e) => setFormData((prev) => ({ ...prev, cargo: e.target.value }))}
+                            value={formData.contact_role}
+                            onChange={(e) => setFormData((prev) => ({ ...prev, contact_role: e.target.value }))}
                             placeholder="Gerente de Compras"
                         />
                     </div>
@@ -48,9 +48,9 @@ export default function ContactTab({ formData, setFormData }) {
                         <Label>Email Corporativo *</Label>
                         <Input
                             type="email"
-                            value={formData.email_corporativo}
+                            value={formData.corporate_email}
                             onChange={(e) =>
-                                setFormData((prev) => ({ ...prev, email_corporativo: e.target.value }))
+                                setFormData((prev) => ({ ...prev, corporate_email: e.target.value }))
                             }
                             placeholder="contacto@empresa.com"
                         />
