@@ -8,8 +8,8 @@ import { Label } from '@/components/ui/label';
 
 export default function LoginForm({ onGoToRegister }) {
     const { login } = useAuth();
-    const [email, setEmail] = useState('dev@bitobbu.com');
-    const [password, setPassword] = useState('123456');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
