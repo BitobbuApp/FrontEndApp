@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { requestsApi } from '@/features/requests/services/requestsApi';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Dialog,
@@ -22,75 +22,102 @@ import {
 import { Upload, X, Loader2 } from 'lucide-react';
 import { toast } from "sonner";
 
-const UNIDADES = ['Unidades', 'Kg', 'Litros', 'Metros', 'Cajas', 'Paletas', 'Toneladas', 'Galones'];
-const CATEGORIAS = ['Alimentos', 'Ferretería', 'Salud', 'IT', 'Automotriz', 'Embalaje', 'Químicos', 'Oficina', 'Textil', 'Logística', 'Mantenimiento', 'Seguridad', 'Marketing', 'Legal', 'RRHH'];
+// Values sent to the API → Spanish labels for the UI
+const UNIT_OPTIONS = [
+  { value: 'Units', label: 'Unidades' },
+  { value: 'Kg', label: 'Kg' },
+  { value: 'Liters', label: 'Litros' },
+  { value: 'Meters', label: 'Metros' },
+  { value: 'Boxes', label: 'Cajas' },
+  { value: 'Pallets', label: 'Paletas' },
+  { value: 'Tons', label: 'Toneladas' },
+  { value: 'Gallons', label: 'Galones' },
+];
 
-export default function SolicitudModal({ open, onOpenChange, solicitud = null }) {
+const CATEGORIAS = [
+  'Alimentos', 'Ferreteria', 'Salud', 'IT', 'Automotriz', 'Embalaje',
+  'Quimicos', 'Oficina', 'Textil', 'Logistica', 'Mantenimiento',
+  'Seguridad', 'Marketing', 'Legal', 'RRHH',
+];
+
+export default function SolicitudModal({ open, onOpenChange, request = null }) {
   const queryClient = useQueryClient();
-  const isEditing = !!solicitud;
-  
+  const isEditing = !!request;
+
   const [formData, setFormData] = useState({
-    producto_servicio: solicitud?.producto_servicio || '',
-    cantidad: solicitud?.cantidad || '',
-    unidad_medida: solicitud?.unidad_medida || 'Unidades',
-    descripcion: solicitud?.descripcion || '',
-    categoria: solicitud?.categoria || '',
-    fecha_vencimiento: solicitud?.fecha_vencimiento || '',
+    product_service: request?.product_service || '',
+    quantity: request?.quantity || '',
+    unit_of_measure: request?.unit_of_measure || 'Units',
+    description: request?.description || '',
+    category: request?.category || '',
+    expiration_date: request?.expiration_date
+      ? new Date(request.expiration_date).toISOString().split('T')[0]
+      : '',
   });
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
 
   const createMutation = useMutation({
     mutationFn: async (data) => {
-      let archivos_adjuntos = [];
-      
+      // Build file attachments
+      let fileAttachments = [];
+
       if (files.length > 0) {
         setUploading(true);
+        // TODO: Replace with a proper file upload API when available
+        // For now, files are not uploaded — only metadata is stored
         for (const file of files) {
-          const { file_url } = await base44.integrations.Core.UploadFile({ file });
-          archivos_adjuntos.push(file_url);
+          fileAttachments.push({
+            url: URL.createObjectURL(file), // Temporary — replace with real upload
+            file_name: file.name,
+          });
         }
         setUploading(false);
       }
 
       const payload = {
         ...data,
-        archivos_adjuntos,
-        estado: 'Activo',
-        numero_ofertas: 0,
+        quantity: Number(data.quantity),
+        files: fileAttachments.length > 0 ? fileAttachments : undefined,
       };
 
+      // Remove empty optional fields
+      if (!payload.description) delete payload.description;
+      if (!payload.category) delete payload.category;
+      if (!payload.expiration_date) delete payload.expiration_date;
+
       if (isEditing) {
-        return base44.entities.Solicitud.update(solicitud.id, payload);
+        return requestsApi.updateRequest(request.id, payload);
       }
-      return base44.entities.Solicitud.create(payload);
+      return requestsApi.createRequest(payload);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['solicitudes'] });
+      queryClient.invalidateQueries({ queryKey: ['requests'] });
       toast.success(isEditing ? 'Solicitud actualizada' : 'Solicitud publicada exitosamente');
       onOpenChange(false);
       resetForm();
     },
-    onError: () => {
-      toast.error('Error al procesar la solicitud');
+    onError: (error) => {
+      const message = error.response?.data?.message || 'Error al procesar la solicitud';
+      toast.error(message);
     }
   });
 
   const resetForm = () => {
     setFormData({
-      producto_servicio: '',
-      cantidad: '',
-      unidad_medida: 'Unidades',
-      descripcion: '',
-      categoria: '',
-      fecha_vencimiento: '',
+      product_service: '',
+      quantity: '',
+      unit_of_measure: 'Units',
+      description: '',
+      category: '',
+      expiration_date: '',
     });
     setFiles([]);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.producto_servicio || !formData.cantidad) {
+    if (!formData.product_service || !formData.quantity) {
       toast.error('Por favor completa los campos requeridos');
       return;
     }
@@ -126,8 +153,8 @@ export default function SolicitudModal({ open, onOpenChange, solicitud = null })
               <Input
                 id="producto"
                 placeholder="Ej: Papel bond carta 75g"
-                value={formData.producto_servicio}
-                onChange={(e) => setFormData({ ...formData, producto_servicio: e.target.value })}
+                value={formData.product_service}
+                onChange={(e) => setFormData({ ...formData, product_service: e.target.value })}
                 className="h-11"
               />
             </div>
@@ -141,23 +168,23 @@ export default function SolicitudModal({ open, onOpenChange, solicitud = null })
                   id="cantidad"
                   type="number"
                   placeholder="100"
-                  value={formData.cantidad}
-                  onChange={(e) => setFormData({ ...formData, cantidad: parseFloat(e.target.value) })}
+                  value={formData.quantity}
+                  onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                   className="h-11"
                 />
               </div>
               <div className="space-y-2">
                 <Label className="text-sm font-medium">Unidad</Label>
                 <Select
-                  value={formData.unidad_medida}
-                  onValueChange={(value) => setFormData({ ...formData, unidad_medida: value })}
+                  value={formData.unit_of_measure}
+                  onValueChange={(value) => setFormData({ ...formData, unit_of_measure: value })}
                 >
                   <SelectTrigger className="h-11">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {UNIDADES.map((unidad) => (
-                      <SelectItem key={unidad} value={unidad}>{unidad}</SelectItem>
+                    {UNIT_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -167,8 +194,8 @@ export default function SolicitudModal({ open, onOpenChange, solicitud = null })
             <div className="space-y-2">
               <Label className="text-sm font-medium">Categoría</Label>
               <Select
-                value={formData.categoria}
-                onValueChange={(value) => setFormData({ ...formData, categoria: value })}
+                value={formData.category}
+                onValueChange={(value) => setFormData({ ...formData, category: value })}
               >
                 <SelectTrigger className="h-11">
                   <SelectValue placeholder="Selecciona una categoría" />
@@ -188,8 +215,8 @@ export default function SolicitudModal({ open, onOpenChange, solicitud = null })
               <Textarea
                 id="descripcion"
                 placeholder="Agrega detalles adicionales sobre tu solicitud..."
-                value={formData.descripcion}
-                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="min-h-[100px] resize-none"
               />
             </div>
@@ -198,8 +225,8 @@ export default function SolicitudModal({ open, onOpenChange, solicitud = null })
               <Label className="text-sm font-medium">Fecha límite (opcional)</Label>
               <Input
                 type="date"
-                value={formData.fecha_vencimiento}
-                onChange={(e) => setFormData({ ...formData, fecha_vencimiento: e.target.value })}
+                value={formData.expiration_date}
+                onChange={(e) => setFormData({ ...formData, expiration_date: e.target.value })}
                 className="h-11"
               />
             </div>

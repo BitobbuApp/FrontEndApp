@@ -57,11 +57,12 @@ export default function RequestsHeader({
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">Todos los estados</SelectItem>
-                                <SelectItem value="Activo">Activo</SelectItem>
-                                <SelectItem value="Pausada">Pausada</SelectItem>
-                                <SelectItem value="Vencida">Vencida</SelectItem>
-                                <SelectItem value="Concretada">Concretada</SelectItem>
-                                <SelectItem value="Por expirar">Por expirar</SelectItem>
+                                <SelectItem value="Active">Activo</SelectItem>
+                                <SelectItem value="Paused">Pausada</SelectItem>
+                                <SelectItem value="Expired">Vencida</SelectItem>
+                                <SelectItem value="Completed">Concretada</SelectItem>
+                                <SelectItem value="Expiring_Soon">Por expirar</SelectItem>
+                                <SelectItem value="Closed">Cerrada</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
