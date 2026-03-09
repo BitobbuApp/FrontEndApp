@@ -1,6 +1,7 @@
 // src/features/dashboard/hooks/useDashboardData.js
 // Centralises every react-query call the Dashboard page needs.
 
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { base44 } from '@/api/base44Client';
 
@@ -56,17 +57,21 @@ export default function useDashboardData() {
         enabled: !!user?.email,
     });
 
-    const stats = {
-        cotizacionesActivas: allSolicitudes.filter((s) => s.estado === 'Activo')
-            .length,
-        ofertasRecibidas: allOfertas.filter((o) => o.estado === 'Pendiente').length,
-        ventasGeneradas: transacciones.length,
-        proveedoresConectados: new Set(allOfertas.map((o) => o.proveedor_id)).size,
-        ahorroEstimado: transacciones.reduce(
-            (acc, t) => acc + t.monto_total * 0.15,
-            0,
-        ),
-    };
+    const stats = useMemo(() => {
+        return {
+            cotizacionesActivas: allSolicitudes.filter((s) => s.estado === 'Activo')
+                .length,
+            ofertasRecibidas: allOfertas.filter((o) => o.estado === 'Pendiente')
+                .length,
+            ventasGeneradas: transacciones.length,
+            proveedoresConectados: new Set(allOfertas.map((o) => o.proveedor_id))
+                .size,
+            ahorroEstimado: transacciones.reduce(
+                (acc, t) => acc + t.monto_total * 0.15,
+                0,
+            ),
+        };
+    }, [allSolicitudes, allOfertas, transacciones]);
 
     return {
         user,
