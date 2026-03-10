@@ -1,7 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { MessageSquare, BadgeCheck } from 'lucide-react';
+import { MessageSquare } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -19,67 +17,64 @@ export default function SupplierProfileModal({
 }) {
     if (!selectedProveedor) return null;
 
+    const company = selectedProveedor;
+    const mainLocation = company.locations?.[0] || {};
+    const primaryContact = company.contacts?.[0] || {};
+    const commercial = company.commercial_profile || {};
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-lg">
-                <DialogHeader>
-                    <DialogTitle>Perfil del Proveedor</DialogTitle>
+            <DialogContent className="sm:max-w-lg flex flex-col max-h-[90vh] p-0 gap-0">
+                <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b">
+                    <DialogTitle className="text-xl font-bold text-[#1E293B]">Perfil del Proveedor</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-6">
+
+                <div className="overflow-y-auto flex-1 px-6 py-5 space-y-6">
+                    {/* Header */}
                     <div className="flex items-center gap-4">
-                        <div className="w-20 h-20 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden">
-                            {selectedProveedor.logo_url ? (
+                        <div className="w-20 h-20 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                            {company.logo_url ? (
                                 <img
-                                    src={selectedProveedor.logo_url}
-                                    alt={selectedProveedor.nombre_comercial}
+                                    src={company.logo_url}
+                                    alt={company.trade_name}
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
                                 <span className="text-3xl font-bold text-[#1E293B]">
-                                    {selectedProveedor.nombre_comercial?.[0] || 'P'}
+                                    {company.trade_name?.[0] || 'P'}
                                 </span>
                             )}
                         </div>
                         <div>
-                            <div className="flex items-center gap-2">
-                                <h3 className="font-bold text-xl text-[#1E293B]">
-                                    {selectedProveedor.nombre_comercial}
-                                </h3>
-                                {selectedProveedor.plan_suscripcion === 'Premium' && (
-                                    <Badge className="bg-[#D2FC31] text-[#1E293B]">
-                                        <BadgeCheck className="w-3 h-3 mr-1" />
-                                        Verificado
-                                    </Badge>
-                                )}
-                            </div>
-                            <RatingStars rating={selectedProveedor.calificacion_promedio || 0} />
+                            <h3 className="font-bold text-xl text-[#1E293B]">
+                                {company.trade_name}
+                            </h3>
+                            <RatingStars rating={company.average_rating || 0} />
                             <p className="text-sm text-slate-500 mt-1">
-                                {selectedProveedor.numero_transacciones || 0} transacciones •{' '}
-                                {selectedProveedor.numero_resenas || 0} reseñas
+                                {company.transaction_count || 0} transacciones •{' '}
+                                {company.review_count || 0} reseñas
                             </p>
                         </div>
                     </div>
 
+                    {/* Info Grid */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="bg-slate-50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Sector</p>
                             <p className="font-semibold text-[#1E293B]">
-                                {selectedProveedor.sector}
+                                {company.sector || '-'}
                             </p>
                         </div>
                         <div className="bg-slate-50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Tipo</p>
                             <p className="font-semibold text-[#1E293B]">
-                                {selectedProveedor.tipo_empresa || 'Empresa'}
+                                {company.company_type || 'Empresa'}
                             </p>
                         </div>
                         <div className="bg-slate-50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Ubicación</p>
                             <p className="font-semibold text-[#1E293B]">
-                                {[
-                                    selectedProveedor.ubicacion_ciudad,
-                                    selectedProveedor.ubicacion_estado,
-                                ]
+                                {[mainLocation.location_city, mainLocation.location_state]
                                     .filter(Boolean)
                                     .join(', ') || 'No especificada'}
                             </p>
@@ -87,18 +82,78 @@ export default function SupplierProfileModal({
                         <div className="bg-slate-50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Cobertura</p>
                             <p className="font-semibold text-[#1E293B]">
-                                {selectedProveedor.cobertura_nacional ? 'Nacional' : 'Local'}
+                                {mainLocation.national_coverage ? 'Nacional' : 'Local'}
                             </p>
                         </div>
                     </div>
 
-                    {selectedProveedor.bio && (
+                    {/* Bio */}
+                    {company.bio && (
                         <div>
                             <p className="text-sm text-slate-500 mb-2">Acerca de</p>
-                            <p className="text-slate-700">{selectedProveedor.bio}</p>
+                            <p className="text-slate-700 text-sm leading-relaxed">{company.bio}</p>
                         </div>
                     )}
 
+                    {/* Contact Info */}
+                    {primaryContact.contact_person && (
+                        <div>
+                            <p className="text-sm text-slate-500 mb-2">Contacto</p>
+                            <div className="bg-slate-50 p-4 rounded-xl space-y-1">
+                                <p className="font-semibold text-[#1E293B]">{primaryContact.contact_person}</p>
+                                {primaryContact.position && (
+                                    <p className="text-sm text-slate-500">{primaryContact.position}</p>
+                                )}
+                                {primaryContact.corporate_email && (
+                                    <p className="text-sm text-slate-600">{primaryContact.corporate_email}</p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Commercial Info */}
+                    <div className="flex flex-wrap gap-2">
+                        {commercial.works_with_credit && (
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                Trabaja a crédito
+                            </Badge>
+                        )}
+                        {commercial.retention_agent && (
+                            <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                                Agente de retención
+                            </Badge>
+                        )}
+                    </div>
+
+                    {/* Payment Methods */}
+                    {company.payment_methods && company.payment_methods.length > 0 && (
+                        <div>
+                            <p className="text-sm text-slate-500 mb-2">Métodos de pago</p>
+                            <div className="flex flex-wrap gap-2">
+                                {company.payment_methods.map((method, i) => (
+                                    <Badge key={i} variant="secondary" className="text-xs">
+                                        {typeof method === 'string' ? method : method.method}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Categories */}
+                    {company.categories_of_interest && company.categories_of_interest.length > 0 && (
+                        <div>
+                            <p className="text-sm text-slate-500 mb-2">Categorías de interés</p>
+                            <div className="flex flex-wrap gap-2">
+                                {company.categories_of_interest.map((cat, i) => (
+                                    <Badge key={i} variant="outline" className="text-xs">
+                                        {typeof cat === 'string' ? cat : cat.category}
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Actions */}
                     <div className="flex gap-2 pt-2">
                         <Button
                             variant="outline"
@@ -107,18 +162,10 @@ export default function SupplierProfileModal({
                         >
                             Cerrar
                         </Button>
-                        <Link
-                            to={
-                                createPageUrl('Chat') +
-                                `?proveedor=${selectedProveedor.created_by}`
-                            }
-                            className="flex-1"
-                        >
-                            <Button className="w-full bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]">
-                                <MessageSquare className="w-4 h-4 mr-1" />
-                                Contactar
-                            </Button>
-                        </Link>
+                        <Button className="flex-1 bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]">
+                            <MessageSquare className="w-4 h-4 mr-1" />
+                            Contactar
+                        </Button>
                     </div>
                 </div>
             </DialogContent>

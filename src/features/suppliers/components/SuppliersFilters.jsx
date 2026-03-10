@@ -10,25 +10,25 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 
+// Match backend enum values (no accents)
 export const SECTORES = [
     'Todos',
     'Alimentos',
-    'Ferretería',
+    'Ferreteria',
     'Salud',
     'IT',
     'Automotriz',
     'Embalaje',
-    'Químicos',
+    'Quimicos',
     'Oficina',
     'Textil',
-    'Logística',
+    'Logistica',
     'Mantenimiento',
     'Seguridad',
     'Marketing',
     'Legal',
     'RRHH',
 ];
-export const PLANES = ['Todos', 'Premium', 'Gratuito'];
 export const RATINGS = ['Todos', '4+ Estrellas', '3+ Estrellas'];
 
 export default function SuppliersFilters({
@@ -36,8 +36,6 @@ export default function SuppliersFilters({
     setSearchTerm,
     sectorFilter,
     setSectorFilter,
-    planFilter,
-    setPlanFilter,
     ratingFilter,
     setRatingFilter,
 }) {
@@ -63,18 +61,6 @@ export default function SuppliersFilters({
                                 {SECTORES.map((sector) => (
                                     <SelectItem key={sector} value={sector}>
                                         {sector}
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <Select value={planFilter} onValueChange={setPlanFilter}>
-                            <SelectTrigger className="w-36 h-11">
-                                <SelectValue placeholder="Nivel" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {PLANES.map((plan) => (
-                                    <SelectItem key={plan} value={plan}>
-                                        {plan}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

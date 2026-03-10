@@ -13,14 +13,20 @@ import {
 export const CATEGORIAS = [
     'Todas',
     'Alimentos',
-    'Ferretería',
+    'Ferreteria',
     'Salud',
     'IT',
     'Automotriz',
     'Embalaje',
-    'Químicos',
+    'Quimicos',
     'Oficina',
     'Textil',
+    'Logistica',
+    'Mantenimiento',
+    'Seguridad',
+    'Marketing',
+    'Legal',
+    'RRHH',
 ];
 
 export default function ProspectsFilters({

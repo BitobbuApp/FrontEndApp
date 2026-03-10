@@ -1,38 +1,45 @@
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/features/auth/AuthContext';
+import { requestsApi } from '@/features/requests/services/requestsApi';
+import { useState } from 'react';
 
 export function useProspectsData(searchTerm, categoryFilter) {
-    const { data: user } = useQuery({
-        queryKey: ['currentUser'],
-        queryFn: () => base44.auth.me(),
-    });
+    const { user } = useAuth();
 
-    const { data: myCompany } = useQuery({
-        queryKey: ['myCompany', user?.email],
-        queryFn: () => base44.entities.Company.filter({ created_by: user?.email }),
-        enabled: !!user?.email,
-    });
+    const [page, setPage] = useState(1);
+    const limit = 10;
 
-    const { data: solicitudes = [], isLoading } = useQuery({
-        queryKey: ['leads'],
+    const { data: paginatedData, isLoading } = useQuery({
+        queryKey: ['marketplace-requests', page, limit],
         queryFn: async () => {
-            const all = await base44.entities.Solicitud.filter({ estado: 'Activo' }, '-created_date');
-            return all.filter((s) => s.created_by !== user?.email);
+            const response = await requestsApi.getMarketplaceRequests({ page, limit });
+            return response.data; // { data: [...], total, page, limit }
         },
-        enabled: !!user?.email,
+        enabled: !!user,
     });
 
-    const filteredSolicitudes = solicitudes.filter((sol) => {
-        const matchesSearch = sol.producto_servicio.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = categoryFilter === 'Todas' || sol.categoria === categoryFilter;
+    const requests = paginatedData?.data || [];
+    const total = paginatedData?.total || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    // Client-side filters (search + category)
+    const filteredSolicitudes = requests.filter((req) => {
+        const matchesSearch =
+            !searchTerm ||
+            req.product_service?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            req.description?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory =
+            categoryFilter === 'Todas' || req.category === categoryFilter;
         return matchesSearch && matchesCategory;
     });
 
     return {
         user,
-        myCompany,
-        solicitudes,
         filteredSolicitudes,
         isLoading,
+        page,
+        setPage,
+        total,
+        totalPages,
     };
 }

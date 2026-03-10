@@ -35,4 +35,12 @@ export const requestsApi = {
     async deleteRequest(id) {
         return await apiClient.delete(`/requests/${id}`);
     },
+
+    /**
+     * GET /requests/marketplace?page=X&limit=Y
+     * Lists active requests from other companies.
+     */
+    async getMarketplaceRequests({ page = 1, limit = 10 } = {}) {
+        return await apiClient.get('/requests/marketplace', { params: { page, limit } });
+    },
 };

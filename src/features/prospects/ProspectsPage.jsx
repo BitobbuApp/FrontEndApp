@@ -13,10 +13,13 @@ export default function ProspectsPage() {
     const {
         filteredSolicitudes,
         isLoading,
+        page,
+        setPage,
+        totalPages,
     } = useProspectsData(searchTerm, categoryFilter);
 
-    const handleViewDetail = (sol) => {
-        setSelectedSolicitud(sol);
+    const handleViewDetail = (req) => {
+        setSelectedSolicitud(req);
         setDetailModalOpen(true);
     };
 
@@ -47,6 +50,9 @@ export default function ProspectsPage() {
                 searchTerm={searchTerm}
                 categoryFilter={categoryFilter}
                 handleViewDetail={handleViewDetail}
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
             />
 
             {/* Detail Modal */}

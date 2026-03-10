@@ -7,21 +7,19 @@ import SupplierProfileModal from './components/SupplierProfileModal';
 export default function SuppliersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [sectorFilter, setSectorFilter] = useState('Todos');
-    const [planFilter, setPlanFilter] = useState('Todos');
     const [ratingFilter, setRatingFilter] = useState('Todos');
 
     const [profileModalOpen, setProfileModalOpen] = useState(false);
     const [selectedProveedor, setSelectedProveedor] = useState(null);
 
-    const { filteredProveedores, isLoading } = useSuppliersData(
+    const { filteredProveedores, isLoading, page, setPage, totalPages } = useSuppliersData(
         searchTerm,
         sectorFilter,
-        planFilter,
         ratingFilter
     );
 
-    const handleViewProfile = (prov) => {
-        setSelectedProveedor(prov);
+    const handleViewProfile = (company) => {
+        setSelectedProveedor(company);
         setProfileModalOpen(true);
     };
 
@@ -43,8 +41,6 @@ export default function SuppliersPage() {
                 setSearchTerm={setSearchTerm}
                 sectorFilter={sectorFilter}
                 setSectorFilter={setSectorFilter}
-                planFilter={planFilter}
-                setPlanFilter={setPlanFilter}
                 ratingFilter={ratingFilter}
                 setRatingFilter={setRatingFilter}
             />
@@ -56,6 +52,9 @@ export default function SuppliersPage() {
                 searchTerm={searchTerm}
                 sectorFilter={sectorFilter}
                 handleViewProfile={handleViewProfile}
+                page={page}
+                totalPages={totalPages}
+                onPageChange={setPage}
             />
 
             {/* Profile Modal */}

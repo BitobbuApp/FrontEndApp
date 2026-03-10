@@ -33,5 +33,16 @@ export const companyApi = {
     async getMyCompany() {
         // This might change depending on the actual endpoint for getting the user's company
         return await apiClient.get('/companies/me');
-    }
+    },
+
+    /**
+     * GET /companies?page=X&limit=Y&sector=Z&interest=W
+     * Lists companies with pagination and optional filters.
+     */
+    async listCompanies({ page = 1, limit = 10, sector, interest } = {}) {
+        const params = { page, limit };
+        if (sector) params.sector = sector;
+        if (interest) params.interest = interest;
+        return await apiClient.get('/companies', { params });
+    },
 };

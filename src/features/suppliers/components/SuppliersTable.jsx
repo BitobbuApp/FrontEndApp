@@ -1,7 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/utils';
-import { Store, Eye, MessageSquare, BadgeCheck, Globe, Package } from 'lucide-react';
+import { Store, Eye, Globe, ChevronLeft, ChevronRight } from 'lucide-react';
 import {
     Table,
     TableBody,
@@ -22,6 +20,9 @@ export default function SuppliersTable({
     searchTerm,
     sectorFilter,
     handleViewProfile,
+    page,
+    totalPages,
+    onPageChange,
 }) {
     if (isLoading) {
         return (
@@ -75,105 +76,105 @@ export default function SuppliersTable({
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {filteredProveedores.map((prov) => (
-                            <TableRow key={prov.id} className="hover:bg-slate-50/50">
-                                <TableCell>
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0">
-                                            {prov.logo_url ? (
-                                                <img
-                                                    src={prov.logo_url}
-                                                    alt={prov.nombre_comercial}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <span className="text-lg font-bold text-[#1E293B]">
-                                                    {prov.nombre_comercial?.[0] || 'P'}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <p className="font-semibold text-[#1E293B]">
-                                                    {prov.nombre_comercial}
-                                                </p>
-                                                {prov.plan_suscripcion === 'Premium' && (
-                                                    <BadgeCheck className="w-4 h-4 text-[#D2FC31]" />
-                                                )}
-                                                {prov.badge_fundador && (
-                                                    <Badge variant="outline" className="text-xs">
-                                                        Fundador
-                                                    </Badge>
+                        {filteredProveedores.map((company) => {
+                            const mainLocation = company.locations?.[0] || {};
+
+                            return (
+                                <TableRow key={company.id} className="hover:bg-slate-50/50">
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                                                {company.logo_url ? (
+                                                    <img
+                                                        src={company.logo_url}
+                                                        alt={company.trade_name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <span className="text-lg font-bold text-[#1E293B]">
+                                                        {company.trade_name?.[0] || 'P'}
+                                                    </span>
                                                 )}
                                             </div>
-                                            {prov.cobertura_nacional && (
-                                                <div className="flex items-center gap-1 text-emerald-600 text-xs mt-0.5">
-                                                    <Globe className="w-3 h-3" />
-                                                    <span>Nacional</span>
-                                                </div>
-                                            )}
+                                            <div>
+                                                <p className="font-semibold text-[#1E293B]">
+                                                    {company.trade_name}
+                                                </p>
+                                                {mainLocation.national_coverage && (
+                                                    <div className="flex items-center gap-1 text-emerald-600 text-xs mt-0.5">
+                                                        <Globe className="w-3 h-3" />
+                                                        <span>Nacional</span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                </TableCell>
-                                <TableCell>
-                                    <Badge variant="secondary" className="text-xs">
-                                        {prov.sector}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="text-slate-600">
-                                    {prov.tipo_empresa || 'Empresa'}
-                                </TableCell>
-                                <TableCell className="text-slate-600 text-sm">
-                                    {[prov.ubicacion_ciudad, prov.ubicacion_estado]
-                                        .filter(Boolean)
-                                        .join(', ') || '-'}
-                                </TableCell>
-                                <TableCell>
-                                    <RatingStars rating={prov.calificacion_promedio || 0} size="sm" />
-                                </TableCell>
-                                <TableCell className="text-center">
-                                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-sm font-medium text-slate-700">
-                                        {prov.numero_transacciones || 0}
-                                    </span>
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex items-center justify-end gap-2">
-                                        <Link
-                                            to={
-                                                createPageUrl('Marketplace') +
-                                                `?proveedor=${prov.created_by}`
-                                            }
-                                        >
-                                            <Button variant="outline" size="sm">
-                                                <Package className="w-4 h-4 mr-1" />
-                                                Catálogo
-                                            </Button>
-                                        </Link>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant="secondary" className="text-xs">
+                                            {company.sector || '-'}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-slate-600">
+                                        {company.company_type || 'Empresa'}
+                                    </TableCell>
+                                    <TableCell className="text-slate-600 text-sm">
+                                        {[mainLocation.location_city, mainLocation.location_state]
+                                            .filter(Boolean)
+                                            .join(', ') || '-'}
+                                    </TableCell>
+                                    <TableCell>
+                                        <RatingStars rating={company.average_rating || 0} size="sm" />
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-sm font-medium text-slate-700">
+                                            {company.transaction_count || 0}
+                                        </span>
+                                    </TableCell>
+                                    <TableCell className="text-right">
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => handleViewProfile(prov)}
+                                            onClick={() => handleViewProfile(company)}
                                         >
                                             <Eye className="w-4 h-4 mr-1" />
                                             Perfil
                                         </Button>
-                                        <Link
-                                            to={createPageUrl('Chat') + `?proveedor=${prov.created_by}`}
-                                        >
-                                            <Button
-                                                size="sm"
-                                                className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]"
-                                            >
-                                                <MessageSquare className="w-4 h-4 mr-1" />
-                                                Chat
-                                            </Button>
-                                        </Link>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
+                                    </TableCell>
+                                </TableRow>
+                            );
+                        })}
                     </TableBody>
                 </Table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+                <span className="text-sm text-slate-500">
+                    {filteredProveedores.length} proveedor{filteredProveedores.length !== 1 ? 'es' : ''}
+                </span>
+                <span className="text-sm text-slate-500">
+                    Página {page || 1} de {totalPages || 1}
+                </span>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPageChange(Math.max(1, page - 1))}
+                        disabled={!page || page <= 1}
+                    >
+                        <ChevronLeft className="w-4 h-4 mr-1" />
+                        Anterior
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+                        disabled={!totalPages || page >= totalPages}
+                    >
+                        Siguiente
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                </div>
             </div>
         </Card>
     );
