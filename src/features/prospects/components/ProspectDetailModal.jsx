@@ -22,11 +22,11 @@ const unitLabels = {
     Tons: 'Toneladas',
     Gallons: 'Galones',
 };
-
 export default function ProspectDetailModal({
     open,
     onOpenChange,
     selectedSolicitud,
+    onQuoteRequest,
 }) {
     if (!selectedSolicitud) return null;
 
@@ -169,9 +169,15 @@ export default function ProspectDetailModal({
                         >
                             Cerrar
                         </Button>
-                        <Button className="flex-1 bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]">
+                        <Button 
+                            className="flex-1 bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]"
+                            onClick={() => {
+                                onOpenChange(false);
+                                onQuoteRequest?.(req);
+                            }}
+                        >
                             <MessageSquare className="w-4 h-4 mr-1" />
-                            Contactar Cliente
+                            Enviar Cotización
                         </Button>
                     </div>
                 </div>

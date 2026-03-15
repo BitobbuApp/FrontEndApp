@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import EmptyState from '@/components/ui/EmptyState';
-import SolicitudModal from '@/components/solicitud/SolicitudModal';
+import { useNavigate } from 'react-router-dom';
 
 import { useMarketplaceData } from './hooks/useMarketplaceData';
 import MarketplaceFilters from './components/MarketplaceFilters';
@@ -18,8 +18,9 @@ export default function MarketplacePage() {
 
     const [detailModalOpen, setDetailModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [solicitudModalOpen, setSolicitudModalOpen] = useState(false);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+    const navigate = useNavigate();
 
     const { filteredProducts, isLoading } = useMarketplaceData(
         searchTerm,
@@ -36,7 +37,7 @@ export default function MarketplacePage() {
     const handleRequestQuote = (product) => {
         setSelectedProduct(product);
         setDetailModalOpen(false);
-        setSolicitudModalOpen(true);
+        navigate('/Requests/new', { state: { product: product.name } });
     };
 
     return (
@@ -108,12 +109,6 @@ export default function MarketplacePage() {
                 selectedImageIndex={selectedImageIndex}
                 setSelectedImageIndex={setSelectedImageIndex}
                 handleRequestQuote={handleRequestQuote}
-            />
-
-            {/* Quote Request Modal */}
-            <SolicitudModal
-                open={solicitudModalOpen}
-                onOpenChange={setSolicitudModalOpen}
             />
         </div>
     );

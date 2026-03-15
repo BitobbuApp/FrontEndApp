@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import useRequestsData from './hooks/useRequestsData';
 import RequestsHeader from './components/RequestsHeader';
 import RequestsTable from './components/RequestsTable';
-import SolicitudModal from '@/components/solicitud/SolicitudModal';
 import RequestDetailModal from './components/RequestDetailModal';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 export default function RequestsPage() {
-    const [solicitudModalOpen, setSolicitudModalOpen] = useState(false);
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [expandedRow, setExpandedRow] = useState(null);
@@ -40,7 +40,7 @@ export default function RequestsPage() {
                 onSearchChange={setSearchTerm}
                 statusFilter={statusFilter}
                 onStatusFilterChange={setStatusFilter}
-                onNewSolicitud={() => setSolicitudModalOpen(true)}
+                onNewSolicitud={() => navigate('/Requests/new')}
             />
 
             <RequestsTable
@@ -51,17 +51,12 @@ export default function RequestsPage() {
                 onTogglePause={handleTogglePause}
                 onDelete={handleDelete}
                 onViewDetail={(id) => setSelectedRequestId(id)}
-                onNewSolicitud={() => setSolicitudModalOpen(true)}
+                onNewSolicitud={() => navigate('/Requests/new')}
                 searchTerm={searchTerm}
                 statusFilter={statusFilter}
                 page={page}
                 totalPages={totalPages}
                 onPageChange={setPage}
-            />
-
-            <SolicitudModal
-                open={solicitudModalOpen}
-                onOpenChange={setSolicitudModalOpen}
             />
 
             <RequestDetailModal

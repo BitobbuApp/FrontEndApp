@@ -3,12 +3,17 @@ import { useProspectsData } from './hooks/useProspectsData';
 import ProspectsFilters from './components/ProspectsFilters';
 import ProspectsTable from './components/ProspectsTable';
 import ProspectDetailModal from './components/ProspectDetailModal';
+import QuoteResponseModal from './components/QuoteResponseModal';
 
 export default function ProspectsPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('Todas');
     const [detailModalOpen, setDetailModalOpen] = useState(false);
     const [selectedSolicitud, setSelectedSolicitud] = useState(null);
+    
+    // State for Quote Response flow
+    const [quoteModalOpen, setQuoteModalOpen] = useState(false);
+    const [quoteRequest, setQuoteRequest] = useState(null);
 
     const {
         filteredSolicitudes,
@@ -21,6 +26,11 @@ export default function ProspectsPage() {
     const handleViewDetail = (req) => {
         setSelectedSolicitud(req);
         setDetailModalOpen(true);
+    };
+
+    const handleQuoteRequest = (req) => {
+        setQuoteRequest(req);
+        setQuoteModalOpen(true);
     };
 
     return (
@@ -60,6 +70,14 @@ export default function ProspectsPage() {
                 open={detailModalOpen}
                 onOpenChange={setDetailModalOpen}
                 selectedSolicitud={selectedSolicitud}
+                onQuoteRequest={handleQuoteRequest}
+            />
+
+            {/* Quote Response Modal */}
+            <QuoteResponseModal
+                open={quoteModalOpen}
+                onOpenChange={setQuoteModalOpen}
+                request={quoteRequest}
             />
         </div>
     );

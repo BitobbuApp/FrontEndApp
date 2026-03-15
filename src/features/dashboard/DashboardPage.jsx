@@ -6,7 +6,7 @@ import StatsGrid from './components/StatsGrid';
 import RecentQuotationsTable from './components/RecentQuotationsTable';
 import OffersOfInterestTable from './components/OffersOfInterestTable';
 import QuickTipBanner from './components/QuickTipBanner';
-import SolicitudModal from '@/components/solicitud/SolicitudModal';
+import { useNavigate } from 'react-router-dom';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -14,7 +14,7 @@ const containerVariants = {
 };
 
 export default function DashboardPage() {
-    const [solicitudModalOpen, setSolicitudModalOpen] = useState(false);
+    const navigate = useNavigate();
 
     const { user, solicitudes, loadingSolicitudes, ofertas, loadingOfertas, stats } =
         useDashboardData();
@@ -28,7 +28,7 @@ export default function DashboardPage() {
         >
             <DashboardHeader
                 userName={user?.full_name?.split(' ')[0]}
-                onNewSolicitud={() => setSolicitudModalOpen(true)}
+                onNewSolicitud={() => navigate('/Requests/new')}
             />
 
             <StatsGrid stats={stats} />
@@ -37,7 +37,7 @@ export default function DashboardPage() {
                 <RecentQuotationsTable
                     solicitudes={solicitudes}
                     isLoading={loadingSolicitudes}
-                    onNewSolicitud={() => setSolicitudModalOpen(true)}
+                    onNewSolicitud={() => navigate('/Requests/new')}
                 />
                 <OffersOfInterestTable
                     ofertas={ofertas}
@@ -46,11 +46,6 @@ export default function DashboardPage() {
             </div>
 
             <QuickTipBanner />
-
-            <SolicitudModal
-                open={solicitudModalOpen}
-                onOpenChange={setSolicitudModalOpen}
-            />
         </motion.div>
     );
 }
