@@ -4,7 +4,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/features/auth/hooks/useAuth';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
@@ -70,7 +70,9 @@ const AuthenticatedApp = () => {
           }
         />
       ))}
-      <Route path="*" element={<PageNotFound />} />
+      {/* Unknown routes: send authenticated users to Dashboard, unauthenticated users
+          are already handled above by the !isAuthenticated guard (shows LoginPage) */}
+      <Route path="*" element={<Navigate to="/Dashboard" replace />} />
     </Routes>
   );
 };

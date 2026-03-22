@@ -50,10 +50,13 @@
 import Chat from './features/chat/ChatPage';
 import Configuracion from './features/settings/SettingsPage';
 import Dashboard from './features/dashboard/DashboardPage';
-import Marketplace from './features/marketplace/MarketplacePage';
+// import Marketplace from './features/marketplace/MarketplacePage';
 import Requests from './features/requests/RequestsPage';
 import RequestFormPage from './features/requests/RequestFormPage';
-import Offers from './features/offers/OffersPage';
+import RequestSummaryPage from './features/requests/RequestSummaryPage';
+import ProfilePage from './features/profile/ProfilePage';
+import PublicProfilePage from './features/profile/PublicProfilePage';
+// import Offers from './features/offers/OffersPage';
 import PosiblesClientes from './features/prospects/ProspectsPage';
 import Proveedores from './features/suppliers/SuppliersPage';
 import __Layout from './layouts/MainLayout/MainLayout.jsx';
@@ -62,11 +65,14 @@ export const PAGES = {
     "Chat": Chat,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
-    "Marketplace": Marketplace,
+    //"Marketplace": Marketplace,
     "Requests": Requests,
     "Requests/new": RequestFormPage,
     "Requests/:id/edit": RequestFormPage,
-    "Offers": Offers,
+    "Requests/:id/summary": RequestSummaryPage,
+    "Perfil": ProfilePage,
+    "Perfil/:id": PublicProfilePage,
+    // "Offers": Offers,
     "PosiblesClientes": PosiblesClientes,
     "Proveedores": Proveedores,
 }

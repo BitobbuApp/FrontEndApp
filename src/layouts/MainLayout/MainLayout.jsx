@@ -4,8 +4,12 @@ import useLayoutData from './useLayoutData';
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
 
+const SIDEBAR_EXPANDED_W = 'w-64';
+const SIDEBAR_COLLAPSED_W = 'w-[68px]';
+
 export default function MainLayout({ children, currentPageName }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [collapsed, setCollapsed] = useState(false);
 
     const {
         user,
@@ -25,14 +29,24 @@ export default function MainLayout({ children, currentPageName }) {
         myCompany,
     };
 
+    const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED_W : SIDEBAR_EXPANDED_W;
+    const contentPadding = collapsed ? 'lg:pl-[68px]' : 'lg:pl-64';
+
     return (
         <div className="min-h-screen bg-slate-50">
             {/* Desktop Sidebar */}
-            <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col bg-white border-r border-slate-200">
-                <Sidebar {...sidebarProps} onClose={() => { }} />
+            <aside
+                className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-white border-r border-slate-200 transition-all duration-300 overflow-visible ${sidebarWidth}`}
+            >
+                <Sidebar
+                    {...sidebarProps}
+                    onClose={() => { }}
+                    collapsed={collapsed}
+                    onToggleCollapse={() => setCollapsed((c) => !c)}
+                />
             </aside>
 
-            {/* Mobile Sidebar */}
+            {/* Mobile Sidebar (Sheet) */}
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
                 <SheetContent side="left" className="p-0 w-64">
                     <Sidebar {...sidebarProps} onClose={() => setSidebarOpen(false)} />
@@ -40,7 +54,7 @@ export default function MainLayout({ children, currentPageName }) {
             </Sheet>
 
             {/* Main Content */}
-            <div className="lg:pl-64">
+            <div className={`transition-all duration-300 ${contentPadding}`}>
                 <TopNavbar
                     currentPageName={currentPageName}
                     notifications={notifications}

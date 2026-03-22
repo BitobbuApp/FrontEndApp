@@ -11,4 +11,8 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    // Serve index.html for all routes in dev — fixes F5 refresh 404s
+    historyApiFallback: true,
+  },
 })

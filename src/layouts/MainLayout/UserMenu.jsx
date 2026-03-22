@@ -39,11 +39,11 @@ export default function UserMenu({ user, myCompany }) {
                 </div>
                 <DropdownMenuItem asChild>
                     <Link
-                        to={createPageUrl('Configuracion')}
+                        to={createPageUrl('Perfil')}
                         className="flex items-center gap-2 cursor-pointer"
                     >
                         <User className="w-4 h-4" />
-                        Editar Perfil
+                        Mi Perfil
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

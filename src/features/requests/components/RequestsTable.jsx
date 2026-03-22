@@ -1,4 +1,6 @@
 import React from 'react';
+import RequestRowExpanded from './RequestRowExpanded';
+import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -54,6 +56,7 @@ export default function RequestsTable({
     totalPages,
     onPageChange,
 }) {
+    const navigate = useNavigate();
     if (isLoading) {
         return (
             <Card className="border-0 shadow-sm overflow-hidden">
@@ -105,8 +108,9 @@ export default function RequestsTable({
                             <TableHead className="text-slate-500 font-medium">Producto</TableHead>
                             <TableHead className="text-slate-500 font-medium">Cantidad</TableHead>
                             <TableHead className="text-slate-500 font-medium">Estado</TableHead>
-                            <TableHead className="text-slate-500 font-medium">Fecha Finalización</TableHead>
+                            <TableHead className="text-slate-500 font-medium">Fecha Límite</TableHead>
                             <TableHead className="text-slate-500 font-medium text-center">Ofertas</TableHead>
+                            <TableHead className="text-slate-500 font-medium">Mejor Oferta</TableHead>
                             <TableHead className="text-slate-500 font-medium text-right">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -157,9 +161,15 @@ export default function RequestsTable({
                                                 )}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-[#D2FC31]/20 text-sm font-semibold text-[#1E293B]">
-                                                {req.response_count || 0}
-                                            </span>
+                                            <Badge variant="outline" className="bg-[#D2FC31]/20 text-[#1E293B] border-[#D2FC31]/40 font-semibold">
+                                                {req.response_count || 0} {req.response_count === 1 ? 'oferta' : 'ofertas'}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-emerald-600 font-semibold">
+                                            {req.best_offer_amount
+                                                ? `$${Number(req.best_offer_amount).toLocaleString()}`
+                                                : <span className="text-slate-400 font-normal text-sm">—</span>
+                                            }
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <div
@@ -169,8 +179,8 @@ export default function RequestsTable({
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    title="Ver más"
-                                                    onClick={() => onViewDetail(req.id)}
+                                                    title="Ver detalle completo"
+                                                    onClick={() => navigate(`/Requests/${req.id}/summary`)}
                                                 >
                                                     <Eye className="w-4 h-4 text-slate-400" />
                                                 </Button>
@@ -206,7 +216,7 @@ export default function RequestsTable({
                                     <AnimatePresence>
                                         {isExpanded && (
                                             <TableRow>
-                                                <TableCell colSpan={6} className="p-0 border-0">
+                                                <TableCell colSpan={7} className="p-0 border-0">
                                                     <motion.div
                                                         initial={{ height: 0, opacity: 0 }}
                                                         animate={{ height: 'auto', opacity: 1 }}
@@ -214,38 +224,7 @@ export default function RequestsTable({
                                                         transition={{ duration: 0.2 }}
                                                         className="overflow-hidden"
                                                     >
-                                                        <div className="bg-slate-50 p-6 border-y border-slate-100">
-                                                            <div className="space-y-3">
-                                                                {req.description && (
-                                                                    <div>
-                                                                        <h4 className="font-semibold text-[#1E293B] text-sm mb-1">Descripción</h4>
-                                                                        <p className="text-slate-600 text-sm">{req.description}</p>
-                                                                    </div>
-                                                                )}
-                                                                {req.files && req.files.length > 0 && (
-                                                                    <div>
-                                                                        <h4 className="font-semibold text-[#1E293B] text-sm mb-2">Archivos adjuntos</h4>
-                                                                        <div className="flex flex-wrap gap-2">
-                                                                            {req.files.map((file) => (
-                                                                                <a
-                                                                                    key={file.id}
-                                                                                    href={file.url}
-                                                                                    target="_blank"
-                                                                                    rel="noopener noreferrer"
-                                                                                    className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 border border-slate-200 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
-                                                                                >
-                                                                                    <FileText className="w-4 h-4" />
-                                                                                    {file.file_name}
-                                                                                </a>
-                                                                            ))}
-                                                                        </div>
-                                                                    </div>
-                                                                )}
-                                                                <div className="text-xs text-slate-400">
-                                                                    Creada el {format(new Date(req.created_at), "d 'de' MMMM 'de' yyyy, HH:mm", { locale: es })}
-                                                                </div>
-                                                            </div>
-                                                        </div>
+                                                        <RequestRowExpanded request={req} />
                                                     </motion.div>
                                                 </TableCell>
                                             </TableRow>
