@@ -1,29 +1,32 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { companyApi } from '@/features/settings/services/companyApi';
+import { useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, MapPin, Star, FileText, Package, Users, Loader2,
     Phone, Mail, Globe, Instagram, Linkedin, ExternalLink, Music,
-    Calendar, BadgeCheck, CreditCard,
+    Calendar, BadgeCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import usePublicProfileData from './hooks/usePublicProfileData';
 
 export default function PublicProfilePage() {
-    const { id } = useParams();
     const navigate = useNavigate();
 
-    const { data: company, isLoading } = useQuery({
-        queryKey: ['companyPublic', id],
-        queryFn: async () => {
-            const res = await companyApi.getCompanyById(id);
-            return res.data;
-        },
-        enabled: !!id,
-    });
+    const {
+        company,
+        isLoading,
+        initial,
+        tradeName,
+        sector,
+        companyType,
+        location,
+        rating,
+        totalReviews,
+        transactions,
+        products,
+    } = usePublicProfileData();
 
     if (isLoading) {
         return (
@@ -41,24 +44,11 @@ export default function PublicProfilePage() {
         );
     }
 
-    const initial = company.trade_name?.[0] || company.nombre_comercial?.[0] || '?';
-    const tradeName = company.trade_name || company.nombre_comercial || 'Empresa';
-    const sector = company.sector || '';
-    const companyType = company.company_type || company.tipo_empresa || '';
-    const location = [
-        company.locations?.[0]?.location_city,
-        company.locations?.[0]?.location_state,
-    ].filter(Boolean).join(', ') || company.ubicacion_ciudad || '';
-    const rating = company.average_rating ?? 0;
-    const totalReviews = company.total_reviews ?? 0;
-    const transactions = company.total_transactions ?? 0;
-    const products = company.products_count ?? 0;
-
     return (
-        <div className="max-w-5xl mx-auto space-y-0">
+        <div className="max-w-5xl mx-auto space-y-6">
 
             {/* Back button */}
-            <div className="mb-4">
+            <div>
                 <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1.5 text-slate-500">
                     <ArrowLeft className="w-4 h-4" />
                     Volver
@@ -107,102 +97,95 @@ export default function PublicProfilePage() {
                 )}
             </div>
 
-            {/* Contact / Social card — matches mockup design */}
-            <div className="mb-4">
-                <Card className="border border-slate-100 shadow-sm">
-                    <CardContent className="p-6 space-y-5">
-                        <h3 className="text-base font-semibold text-[#1E293B]">Contacto y Redes</h3>
+            {/* Contact / Social card */}
+            <Card className="border border-slate-100 shadow-sm">
+                <CardContent className="p-6 space-y-5">
+                    <h3 className="text-base font-semibold text-[#1E293B]">Contacto y Redes</h3>
 
-                        {/* Location */}
-                        {location && (
-                            <div className="flex items-start gap-3">
-                                <MapPin className="w-5 h-5 text-slate-400 mt-0.5 flex-shrink-0" />
-                                <div>
-                                    <p className="font-semibold text-[#1E293B] text-sm">{location}</p>
-                                    {company.locations?.[0]?.national_coverage && (
-                                        <span className="inline-block mt-1 text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Cobertura Nacional</span>
-                                    )}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Founded year */}
-                        {company.founding_year && (
-                            <div className="flex items-center gap-3">
-                                <Calendar className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                                <p className="text-sm text-[#1E293B]">Fundada en {company.founding_year}</p>
-                            </div>
-                        )}
-
-                        {/* Social links — 2-column grid */}
-                        {(() => {
-                            const contact = company.contacts?.[0] || {};
-                            const links = [
-                                company.website   && { icon: Globe,     label: 'Sitio Web',  href: company.website },
-                                company.instagram && { icon: Instagram, label: 'Instagram',  href: `https://instagram.com/${company.instagram.replace('@','')}` },
-                                company.linkedin  && { icon: Linkedin,  label: 'LinkedIn',   href: company.linkedin },
-                                company.tiktok    && { icon: Music,     label: 'TikTok',     href: `https://tiktok.com/@${company.tiktok.replace('@','')}` },
-                                contact.whatsapp  && { icon: Phone,     label: 'WhatsApp',   href: `https://wa.me/${contact.whatsapp.replace(/\D/g,'')}` },
-                                contact.corporate_email && { icon: Mail, label: 'Email',    href: `mailto:${contact.corporate_email}` },
-                            ].filter(Boolean);
-
-                            if (!links.length) return null;
-
-                            return (
-                                <div className="grid grid-cols-2 gap-2">
-                                    {links.map(({ icon: Icon, label, href }) => (
-                                        <a
-                                            key={label}
-                                            href={href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                                        >
-                                            <Icon className="w-4 h-4 text-slate-500 flex-shrink-0" />
-                                            {label}
-                                        </a>
-                                    ))}
-                                </div>
-                            );
-                        })()}
-
-                        {/* Divider */}
-                        <div className="border-t border-slate-100" />
-
-                        {/* Credit & payment methods */}
-                        {company.commercial_profile?.works_with_credit && (
-                            <div className="flex items-center gap-2 text-sm text-blue-600">
-                                <BadgeCheck className="w-4 h-4" />
-                                Trabaja con crédito
-                            </div>
-                        )}
-
-                        {company.payment_methods?.length > 0 && (
+                    {location && (
+                        <div className="flex items-start gap-3">
+                            <MapPin className="w-5 h-5 text-slate-400 mt-0.5 flex-shrink-0" />
                             <div>
-                                <p className="text-xs text-slate-400 mb-2">Métodos de pago:</p>
-                                <div className="flex flex-wrap gap-1.5">
-                                    {company.payment_methods.map((pm) => (
-                                        <span
-                                            key={typeof pm === 'string' ? pm : pm.method}
-                                            className="inline-block text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full"
-                                        >
-                                            {typeof pm === 'string' ? pm : pm.method}
-                                        </span>
-                                    ))}
-                                </div>
+                                <p className="font-semibold text-[#1E293B] text-sm">{location}</p>
+                                {company.locations?.[0]?.national_coverage && (
+                                    <span className="inline-block mt-1 text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Cobertura Nacional</span>
+                                )}
                             </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
+                        </div>
+                    )}
+
+                    {company.founding_year && (
+                        <div className="flex items-center gap-3">
+                            <Calendar className="w-5 h-5 text-slate-400 flex-shrink-0" />
+                            <p className="text-sm text-[#1E293B]">Fundada en {company.founding_year}</p>
+                        </div>
+                    )}
+
+                    {(() => {
+                        const contact = company.contacts?.[0] || {};
+                        const links = [
+                            company.website   && { icon: Globe,     label: 'Sitio Web',  href: company.website },
+                            company.instagram && { icon: Instagram, label: 'Instagram',  href: `https://instagram.com/${company.instagram.replace('@', '')}` },
+                            company.linkedin  && { icon: Linkedin,  label: 'LinkedIn',   href: company.linkedin },
+                            company.tiktok    && { icon: Music,     label: 'TikTok',     href: `https://tiktok.com/@${company.tiktok.replace('@', '')}` },
+                            contact.whatsapp  && { icon: Phone,     label: 'WhatsApp',   href: `https://wa.me/${contact.whatsapp.replace(/\D/g, '')}` },
+                            contact.corporate_email && { icon: Mail, label: 'Email',     href: `mailto:${contact.corporate_email}` },
+                        ].filter(Boolean);
+
+                        if (!links.length) return null;
+
+                        return (
+                            <div className="grid grid-cols-2 gap-2">
+                                {links.map(({ icon: Icon, label, href }) => (
+                                    <a
+                                        key={label}
+                                        href={href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                                    >
+                                        <Icon className="w-4 h-4 text-slate-500 flex-shrink-0" />
+                                        {label}
+                                    </a>
+                                ))}
+                            </div>
+                        );
+                    })()}
+
+                    <div className="border-t border-slate-100" />
+
+                    {company.commercial_profile?.works_with_credit && (
+                        <div className="flex items-center gap-2 text-sm text-blue-600">
+                            <BadgeCheck className="w-4 h-4" />
+                            Trabaja con crédito
+                        </div>
+                    )}
+
+                    {company.payment_methods?.length > 0 && (
+                        <div>
+                            <p className="text-xs text-slate-400 mb-2">Métodos de pago:</p>
+                            <div className="flex flex-wrap gap-1.5">
+                                {company.payment_methods.map((pm) => (
+                                    <span
+                                        key={typeof pm === 'string' ? pm : pm.method}
+                                        className="inline-block text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full"
+                                    >
+                                        {typeof pm === 'string' ? pm : pm.method}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
 
             {/* Stats row */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                    { icon: Package, label: 'Productos', value: products, color: 'text-blue-500' },
-                    { icon: Users, label: 'Transacciones', value: transactions, color: 'text-purple-500' },
-                    { icon: Star, label: 'Calificación', value: rating.toFixed(1), color: 'text-amber-500' },
-                    { icon: FileText, label: 'Reseñas', value: totalReviews, color: 'text-slate-400' },
+                    { icon: Package, label: 'Productos',     value: products,              color: 'text-blue-500' },
+                    { icon: Users,   label: 'Transacciones', value: transactions,           color: 'text-purple-500' },
+                    { icon: Star,    label: 'Calificación',  value: rating.toFixed(1),      color: 'text-amber-500' },
+                    { icon: FileText, label: 'Reseñas',      value: totalReviews,           color: 'text-slate-400' },
                 ].map(({ icon: Icon, label, value, color }) => (
                     <Card key={label} className="border border-slate-100 shadow-sm">
                         <CardContent className="p-5 flex flex-col items-center gap-2 text-center">
@@ -214,7 +197,7 @@ export default function PublicProfilePage() {
                 ))}
             </div>
 
-            {/* Tabs — read-only view, no edit actions */}
+            {/* Tabs — read-only */}
             <Tabs defaultValue="vitrina">
                 <TabsList className="bg-slate-100 p-1">
                     <TabsTrigger value="vitrina">Vitrina</TabsTrigger>

@@ -1,4 +1,5 @@
 import React from 'react';
+import ProspectMobileCard from './ProspectMobileCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Eye, Package, Clock, Users, ChevronLeft, ChevronRight, Star } from 'lucide-react';
@@ -70,7 +71,47 @@ export default function ProspectsTable({
     }
 
     return (
-        <Card className="border-0 shadow-sm overflow-hidden">
+        <div className="space-y-4">
+            {/* ── Mobile grid (hidden on sm+) ── */}
+            <div className="grid grid-cols-1 gap-4 sm:hidden">
+                {filteredSolicitudes.map((req) => (
+                    <ProspectMobileCard
+                        key={req.id}
+                        req={req}
+                        onViewDetail={handleViewDetail}
+                    />
+                ))}
+            </div>
+
+            {/* Mobile pagination */}
+            <div className="flex items-center justify-between sm:hidden px-1 py-2">
+                <span className="text-sm text-slate-500">
+                    Página {page || 1} de {totalPages || 1}
+                </span>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPageChange(Math.max(1, page - 1))}
+                        disabled={!page || page <= 1}
+                    >
+                        <ChevronLeft className="w-4 h-4 mr-1" />
+                        Ant.
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+                        disabled={!totalPages || page >= totalPages}
+                    >
+                        Sig.
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                </div>
+            </div>
+
+            {/* ── Desktop table (hidden on mobile) ── */}
+            <Card className="hidden sm:block border-0 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
@@ -204,6 +245,7 @@ export default function ProspectsTable({
                     </Button>
                 </div>
             </div>
-        </Card>
+            </Card>
+        </div>
     );
 }

@@ -3,11 +3,13 @@ import { useSuppliersData } from './hooks/useSuppliersData';
 import SuppliersFilters from './components/SuppliersFilters';
 import SuppliersTable from './components/SuppliersTable';
 import SupplierProfileModal from './components/SupplierProfileModal';
+import ViewToggle from './components/ViewToggle';
 
 export default function SuppliersPage() {
     const [searchTerm, setSearchTerm] = useState('');
     const [sectorFilter, setSectorFilter] = useState('Todos');
     const [ratingFilter, setRatingFilter] = useState('Todos');
+    const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
 
     const [profileModalOpen, setProfileModalOpen] = useState(false);
     const [selectedProveedor, setSelectedProveedor] = useState(null);
@@ -26,13 +28,18 @@ export default function SuppliersPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-[#1E293B]">
-                    Directorio de Proveedores
-                </h1>
-                <p className="text-slate-500 mt-1">
-                    Encuentra proveedores confiables para tu negocio
-                </p>
+            <div className="flex items-start justify-between">
+                <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-[#1E293B]">
+                        Directorio de Proveedores
+                    </h1>
+                    <p className="text-slate-500 mt-1">
+                        Encuentra proveedores confiables para tu negocio
+                    </p>
+                </div>
+                <span className="hidden sm:block">
+                    <ViewToggle mode={viewMode} onChange={setViewMode} />
+                </span>
             </div>
 
             {/* Filters */}
@@ -45,7 +52,7 @@ export default function SuppliersPage() {
                 setRatingFilter={setRatingFilter}
             />
 
-            {/* Providers Table */}
+            {/* Suppliers list — grid or list */}
             <SuppliersTable
                 filteredProveedores={filteredProveedores}
                 isLoading={isLoading}
@@ -55,6 +62,7 @@ export default function SuppliersPage() {
                 page={page}
                 totalPages={totalPages}
                 onPageChange={setPage}
+                viewMode={viewMode}
             />
 
             {/* Profile Modal */}

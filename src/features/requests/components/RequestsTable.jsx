@@ -1,5 +1,6 @@
 import React from 'react';
 import RequestRowExpanded from './RequestRowExpanded';
+import RequestMobileCard from './RequestMobileCard';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { format } from 'date-fns';
@@ -100,7 +101,48 @@ export default function RequestsTable({
     }
 
     return (
-        <Card className="border-0 shadow-sm overflow-hidden">
+        <div className="space-y-4">
+            {/* ── Mobile grid (hidden on sm+) ── */}
+            <div className="grid grid-cols-1 gap-4 sm:hidden">
+                {requests.map((req) => (
+                    <RequestMobileCard
+                        key={req.id}
+                        req={req}
+                        onTogglePause={onTogglePause}
+                        onDelete={onDelete}
+                    />
+                ))}
+            </div>
+
+            {/* Mobile pagination */}
+            <div className="flex items-center justify-between sm:hidden px-1 py-2">
+                <span className="text-sm text-slate-500">
+                    Página {page || 1} de {totalPages || 1}
+                </span>
+                <div className="flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPageChange(Math.max(1, page - 1))}
+                        disabled={!page || page <= 1}
+                    >
+                        <ChevronLeft className="w-4 h-4 mr-1" />
+                        Ant.
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+                        disabled={!totalPages || page >= totalPages}
+                    >
+                        Sig.
+                        <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                </div>
+            </div>
+
+            {/* ── Desktop table (hidden on mobile) ── */}
+            <Card className="hidden sm:block border-0 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
@@ -267,5 +309,6 @@ export default function RequestsTable({
                 </div>
             </div>
         </Card>
+        </div>
     );
 }
