@@ -11,8 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
-import AddProductModal from './components/AddProductModal';
 import useProfileData from './hooks/useProfileData';
+import useCompanyProducts from './hooks/useCompanyProducts';
+import ProductSmallCard from './components/ProductSmallCard';
+import AddProductModal from './components/AddProductModal';
 
 export default function ProfilePage() {
     const navigate = useNavigate();
@@ -32,6 +34,8 @@ export default function ProfilePage() {
         transactions,
         products,
     } = useProfileData();
+
+    const { data: companyProducts = [], isLoading: isLoadingProducts } = useCompanyProducts(company?.id);
 
     const score = rating;
     const reviews = totalReviews;
@@ -270,18 +274,29 @@ export default function ProfilePage() {
                         </Button>
                     </div>
 
-                    {/* Empty state */}
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="py-16 flex flex-col items-center gap-3 text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
-                                <Package className="w-8 h-8 text-slate-300" />
-                            </div>
-                            <p className="font-medium text-slate-600">Tu vitrina está vacía</p>
-                            <p className="text-sm text-slate-400 max-w-xs">
-                                Agrega productos para que los compradores puedan verlos
-                            </p>
-                        </CardContent>
-                    </Card>
+                    {isLoadingProducts ? (
+                        <div className="py-12 flex justify-center">
+                            <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
+                        </div>
+                    ) : companyProducts.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {companyProducts.map((p) => (
+                                <ProductSmallCard key={p.id} product={p} />
+                            ))}
+                        </div>
+                    ) : (
+                        <Card className="border-0 shadow-sm">
+                            <CardContent className="py-16 flex flex-col items-center gap-3 text-center">
+                                <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+                                    <Package className="w-8 h-8 text-slate-300" />
+                                </div>
+                                <p className="font-medium text-slate-600">Tu vitrina está vacía</p>
+                                <p className="text-sm text-slate-400 max-w-xs">
+                                    Agrega productos para que los compradores puedan verlos
+                                </p>
+                            </CardContent>
+                        </Card>
+                    )}
                 </TabsContent>
 
                 <TabsContent value="historial" className="mt-4">

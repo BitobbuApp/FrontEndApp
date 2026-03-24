@@ -69,7 +69,7 @@ export default function RecentQuotationsTable({
                                         Ofertas
                                     </TableHead>
                                     <TableHead className="text-slate-500 font-medium text-right">
-                                        Acción
+                                        Acciones
                                     </TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -77,14 +77,14 @@ export default function RecentQuotationsTable({
                                 {solicitudes.map((sol) => (
                                     <TableRow key={sol.id} className="hover:bg-slate-50/50">
                                         <TableCell className="font-medium text-[#1E293B]">
-                                            {sol.producto_servicio}
+                                            {sol.product_service}
                                         </TableCell>
                                         <TableCell>
-                                            <StatusBadge status={sol.estado} />
+                                            <StatusBadge status={sol.status} />
                                         </TableCell>
                                         <TableCell className="text-center">
                                             <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 text-sm font-medium">
-                                                {sol.numero_ofertas || 0}
+                                                {sol.response_count || 0}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right">
@@ -98,8 +98,7 @@ export default function RecentQuotationsTable({
                                                     size="sm"
                                                     className="text-slate-500 hover:text-[#1E293B]"
                                                 >
-                                                    <Eye className="w-4 h-4 mr-1" />
-                                                    Ver
+                                                    <Eye className="w-4 h-4" />
                                                 </Button>
                                             </Link>
                                         </TableCell>

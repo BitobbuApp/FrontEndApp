@@ -11,9 +11,9 @@ export default function DashboardHeader({ userName, onNewSolicitud }) {
         >
             <div>
                 <h1 className="text-2xl lg:text-3xl font-bold text-[#1E293B]">
-                    ¡Bienvenido{userName ? `, ${userName}` : ''}!
+                    Hola, {userName || 'Bienvenido'} 👋
                 </h1>
-                <p className="text-slate-500 mt-1">Aquí tienes un resumen de tu actividad</p>
+                <p className="text-slate-500 mt-1">Aquí está el resumen de tu actividad</p>
             </div>
             <Button
                 onClick={onNewSolicitud}

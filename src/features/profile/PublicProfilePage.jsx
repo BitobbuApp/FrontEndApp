@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import usePublicProfileData from './hooks/usePublicProfileData';
+import useCompanyProducts from './hooks/useCompanyProducts';
+import ProductSmallCard from './components/ProductSmallCard';
 
 export default function PublicProfilePage() {
     const navigate = useNavigate();
@@ -27,6 +29,8 @@ export default function PublicProfilePage() {
         transactions,
         products,
     } = usePublicProfileData();
+
+    const { data: companyProducts = [], isLoading: isLoadingProducts } = useCompanyProducts(company?.id);
 
     if (isLoading) {
         return (
@@ -205,15 +209,27 @@ export default function PublicProfilePage() {
                 </TabsList>
 
                 <TabsContent value="vitrina" className="mt-4">
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="py-16 flex flex-col items-center gap-3 text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
-                                <Package className="w-8 h-8 text-slate-300" />
-                            </div>
-                            <p className="font-medium text-slate-600">Vitrina vacía</p>
-                            <p className="text-sm text-slate-400">Esta empresa aún no tiene productos publicados</p>
-                        </CardContent>
-                    </Card>
+                    {isLoadingProducts ? (
+                        <div className="py-12 flex justify-center">
+                            <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
+                        </div>
+                    ) : companyProducts.length > 0 ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {companyProducts.map((p) => (
+                                <ProductSmallCard key={p.id} product={p} />
+                            ))}
+                        </div>
+                    ) : (
+                        <Card className="border-0 shadow-sm">
+                            <CardContent className="py-16 flex flex-col items-center gap-3 text-center">
+                                <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+                                    <Package className="w-8 h-8 text-slate-300" />
+                                </div>
+                                <p className="font-medium text-slate-600">Vitrina vacía</p>
+                                <p className="text-sm text-slate-400">Esta empresa aún no tiene productos publicados</p>
+                            </CardContent>
+                        </Card>
+                    )}
                 </TabsContent>
 
                 <TabsContent value="resenas" className="mt-4">

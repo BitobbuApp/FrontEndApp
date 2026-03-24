@@ -1,20 +1,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileText, Tag, DollarSign, Users, PiggyBank } from 'lucide-react';
+import { FileText, Tag, DollarSign, Users } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
 
 export default function StatsGrid({ stats }) {
     return (
         <motion.div
             variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-4"
         >
             <StatCard
                 title="Cotizaciones Activas"
                 value={stats.cotizacionesActivas}
                 icon={FileText}
-                trendValue="+12% este mes"
-                trend="up"
+                bgColor="bg-[#D2FC31]"
+                iconColor="text-[#1E293B]"
             />
             <StatCard
                 title="Ofertas Recibidas"
@@ -25,24 +25,17 @@ export default function StatsGrid({ stats }) {
             />
             <StatCard
                 title="Negocios Cerrados"
-                value={stats.ventasGeneradas}
+                value={stats.negociosCerrados}
                 icon={DollarSign}
                 bgColor="bg-emerald-100"
                 iconColor="text-emerald-600"
             />
             <StatCard
-                title="Proveedores"
+                title="Proveedores Conectados"
                 value={stats.proveedoresConectados}
                 icon={Users}
                 bgColor="bg-purple-100"
                 iconColor="text-purple-600"
-            />
-            <StatCard
-                title="Ahorro Estimado"
-                value={`$${stats.ahorroEstimado.toLocaleString()}`}
-                icon={PiggyBank}
-                bgColor="bg-amber-100"
-                iconColor="text-amber-600"
             />
         </motion.div>
     );

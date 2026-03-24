@@ -16,14 +16,13 @@ import {
 } from '@/components/ui/select';
 
 const CATEGORIAS = [
-    'Alimentos', 'Ferretería', 'Salud', 'IT', 'Automotriz', 'Embalaje',
-    'Químicos', 'Oficina', 'Textil', 'Logística', 'Mantenimiento',
-    'Seguridad', 'Marketing', 'Legal', 'RRHH', 'Otro',
+    'Alimentos', 'Ferreteria', 'Salud', 'IT', 'Automotriz', 'Embalaje',
+    'Quimicos', 'Oficina', 'Textil', 'Logistica', 'Mantenimiento',
+    'Seguridad', 'Marketing', 'Legal', 'RRHH',
 ];
 
 const UNIDADES = [
-    'Unidad', 'Kg', 'Gramos', 'Litros', 'Metros', 'M²', 'Caja', 'Palet',
-    'Tonelada', 'Galón', 'Rollo', 'Par', 'Docena', 'Servicio',
+    'Units', 'Kg', 'Liters', 'Meters', 'Boxes', 'Pallets', 'Tons', 'Gallons',
 ];
 
 const TIPOS = ['Producto', 'Servicio'];
@@ -34,12 +33,11 @@ const DEFAULT_FORM = {
     name: '',
     category: '',
     brand: '',
-    unit_price: '',
-    unit_of_measure: 'Unidad',
-    min_order_quantity: '1',
+    base_price: '',
+    unit_of_measure: 'Units',
+    moq: '1',
     availability: 'Disponible',
-    short_description: '',
-    full_description: '',
+    description: '',
     image_url: '',
 };
 
@@ -65,13 +63,18 @@ export default function AddProductModal({ open, onOpenChange }) {
 
     const handleSubmit = () => {
         if (!form.name.trim()) { toast.error('El nombre es requerido'); return; }
-        if (!form.unit_price || Number(form.unit_price) < 0) { toast.error('Ingresa un precio válido'); return; }
+        if (!form.base_price || Number(form.base_price) < 0) { toast.error('Ingresa un precio válido'); return; }
 
         mutation.mutate({
-            ...form,
-            unit_price: Number(form.unit_price),
-            min_order_quantity: Number(form.min_order_quantity) || 1,
+            name: form.name,
+            description: form.description,
+            category: form.category || null,
+            base_price: Number(form.base_price),
+            unit_of_measure: form.unit_of_measure,
+            moq: Number(form.moq) || 1,
+            is_active: form.availability === 'Disponible',
             company_id: user?.company_id,
+            photos: form.image_url ? [{ url: form.image_url, sort_order: 0 }] : []
         });
     };
 
@@ -155,8 +158,8 @@ export default function AddProductModal({ open, onOpenChange }) {
                                 type="number"
                                 min="0"
                                 step="0.01"
-                                value={form.unit_price}
-                                onChange={(e) => set('unit_price', e.target.value)}
+                                value={form.base_price}
+                                onChange={(e) => set('base_price', e.target.value)}
                                 placeholder="0.00"
                             />
                         </div>
@@ -181,8 +184,8 @@ export default function AddProductModal({ open, onOpenChange }) {
                                 <Input
                                     type="number"
                                     min="1"
-                                    value={form.min_order_quantity}
-                                    onChange={(e) => set('min_order_quantity', e.target.value)}
+                                    value={form.moq}
+                                    onChange={(e) => set('moq', e.target.value)}
                                     placeholder="1"
                                 />
                             </div>
@@ -200,22 +203,13 @@ export default function AddProductModal({ open, onOpenChange }) {
                         </div>
                     )}
 
-                    {/* Descriptions */}
                     <div className="space-y-2">
-                        <Label>Descripción Corta</Label>
-                        <Input
-                            value={form.short_description}
-                            onChange={(e) => set('short_description', e.target.value)}
-                            placeholder="Resumen breve del producto o servicio"
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Descripción Completa</Label>
+                        <Label>Descripción</Label>
                         <Textarea
-                            value={form.full_description}
-                            onChange={(e) => set('full_description', e.target.value)}
-                            placeholder="Descripción detallada..."
-                            className="min-h-[100px]"
+                            value={form.description}
+                            onChange={(e) => set('description', e.target.value)}
+                            placeholder="Descripción detallada del producto o servicio..."
+                            className="min-h-[120px]"
                         />
                     </div>
 

@@ -18,6 +18,14 @@ export const quoteResponsesApi = {
     },
 
     /**
+     * GET /quote-responses/received
+     * List quote responses received for the current company's own requests
+     */
+    async getReceivedQuoteResponses({ page = 1, limit = 10 } = {}) {
+        return await apiClient.get('/quote-responses/received', { params: { page, limit } });
+    },
+
+    /**
      * GET /quote-responses/:id
      * Fetch the details of a specific quote response
      */

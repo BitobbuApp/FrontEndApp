@@ -2,70 +2,50 @@
 // Centralises every react-query call the Dashboard page needs.
 
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { requestsApi } from '@/features/requests/services/requestsApi';
+import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
 
 export default function useDashboardData() {
-    const { data: user } = useQuery({
-        queryKey: ['currentUser'],
-        queryFn: () => base44.auth.me(),
+    const { user } = useAuth();
+
+    // My company's requests (cotizaciones)
+    const { data: requestsData, isLoading: loadingSolicitudes } = useQuery({
+        queryKey: ['dashboardRequests'],
+        queryFn: () => requestsApi.getCompanyRequests({ page: 1, limit: 5 }),
+        enabled: !!user,
     });
 
-    const { data: solicitudes = [], isLoading: loadingSolicitudes } = useQuery({
-        queryKey: ['solicitudes', user?.email],
-        queryFn: () =>
-            base44.entities.Solicitud.filter(
-                { created_by: user?.email },
-                '-created_date',
-                5,
-            ),
-        enabled: !!user?.email,
+    // Quote responses received for MY requests (offers others sent to me)
+    const { data: receivedData, isLoading: loadingOfertas } = useQuery({
+        queryKey: ['dashboardReceivedOffers'],
+        queryFn: () => quoteResponsesApi.getReceivedQuoteResponses({ page: 1, limit: 5 }),
+        enabled: !!user,
     });
 
-    const { data: ofertas = [], isLoading: loadingOfertas } = useQuery({
-        queryKey: ['ofertas', user?.email],
-        queryFn: () =>
-            base44.entities.Oferta.filter(
-                { comprador_id: user?.email, estado: 'Pendiente' },
-                '-created_date',
-                5,
-            ),
-        enabled: !!user?.email,
-    });
+    // API response shape after axiosClient interceptor:
+    // { success, message, data: { items: [...], total, page, totalPages } }
+    const solicitudes = Array.isArray(requestsData?.data)
+        ? requestsData.data
+        : requestsData?.data?.data || requestsData?.data?.items || [];
 
-    const { data: allSolicitudes = [] } = useQuery({
-        queryKey: ['allSolicitudes', user?.email],
-        queryFn: () =>
-            base44.entities.Solicitud.filter({ created_by: user?.email }),
-        enabled: !!user?.email,
-    });
+    const ofertas = Array.isArray(receivedData?.data)
+        ? receivedData.data
+        : receivedData?.data?.items || receivedData?.data?.data || [];
 
-    const { data: allOfertas = [] } = useQuery({
-        queryKey: ['allOfertas', user?.email],
-        queryFn: () =>
-            base44.entities.Oferta.filter({ comprador_id: user?.email }),
-        enabled: !!user?.email,
-    });
-
-    const { data: transacciones = [] } = useQuery({
-        queryKey: ['transacciones', user?.email],
-        queryFn: () =>
-            base44.entities.Transaccion.filter({
-                comprador_id: user?.email,
-                estado: 'Completada',
-            }),
-        enabled: !!user?.email,
-    });
+    const totalReceivedOffers = receivedData?.data?.total || receivedData?.total || ofertas.length;
 
     const stats = {
-        cotizacionesActivas: allSolicitudes.filter((s) => s.estado === 'Activo')
-            .length,
-        ofertasRecibidas: allOfertas.filter((o) => o.estado === 'Pendiente').length,
-        ventasGeneradas: transacciones.length,
-        proveedoresConectados: new Set(allOfertas.map((o) => o.proveedor_id)).size,
-        ahorroEstimado: transacciones.reduce(
-            (acc, t) => acc + t.monto_total * 0.15,
-            0,
-        ),
+        cotizacionesActivas: solicitudes.filter(
+            (s) => s.status === 'Active' || s.status === 'Expiring_Soon'
+        ).length,
+        ofertasRecibidas: totalReceivedOffers,
+        negociosCerrados: solicitudes.filter(
+            (s) => s.status === 'Completed' || s.status === 'Closed'
+        ).length,
+        proveedoresConectados: new Set(
+            ofertas.map((o) => o.supplier_id).filter(Boolean)
+        ).size,
     };
 
     return {

@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { motion } from 'framer-motion';
-import { Tag, ArrowRight, Eye } from 'lucide-react';
+import { Tag, ArrowRight, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -13,8 +13,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import RatingStars from '@/components/ui/RatingStars';
 import EmptyState from '@/components/ui/EmptyState';
+import { format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 export default function OffersOfInterestTable({ ofertas, isLoading }) {
     return (
@@ -24,10 +25,10 @@ export default function OffersOfInterestTable({ ofertas, isLoading }) {
             <Card className="border-0 shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-lg font-semibold text-[#1E293B]">
-                        Ofertas de Interés
+                        Ofertas para ti
                     </CardTitle>
                     <Link
-                        to={createPageUrl('Offers')}
+                        to={createPageUrl('Prospects')}
                         className="text-sm text-slate-500 hover:text-[#1E293B] flex items-center gap-1"
                     >
                         Ver todas <ArrowRight className="w-4 h-4" />
@@ -56,14 +57,14 @@ export default function OffersOfInterestTable({ ofertas, isLoading }) {
                                     <TableHead className="text-slate-500 font-medium">
                                         Proveedor
                                     </TableHead>
-                                    <TableHead className="text-slate-500 font-medium">
-                                        Producto
-                                    </TableHead>
                                     <TableHead className="text-slate-500 font-medium text-right">
                                         Precio
                                     </TableHead>
                                     <TableHead className="text-slate-500 font-medium text-right">
-                                        Acción
+                                        Fecha
+                                    </TableHead>
+                                    <TableHead className="text-slate-500 font-medium text-right">
+                                        Acciones
                                     </TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -72,40 +73,30 @@ export default function OffersOfInterestTable({ ofertas, isLoading }) {
                                     <TableRow key={oferta.id} className="hover:bg-slate-50/50">
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <div className="w-8 h-8 rounded-full bg-[#D2FC31] flex items-center justify-center text-sm font-medium text-[#1E293B]">
-                                                    {oferta.proveedor_nombre?.[0] || 'P'}
+                                                <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm font-medium text-purple-700">
+                                                    {oferta.supplier?.trade_name?.[0] || 'P'}
                                                 </div>
-                                                <div>
-                                                    <p className="font-medium text-[#1E293B] text-sm">
-                                                        {oferta.proveedor_nombre || 'Proveedor'}
-                                                    </p>
-                                                    <RatingStars
-                                                        rating={oferta.proveedor_calificacion || 0}
-                                                        size="sm"
-                                                        showValue={false}
-                                                    />
-                                                </div>
+                                                <p className="font-medium text-[#1E293B] text-sm">
+                                                    {oferta.supplier?.trade_name || 'Proveedor'}
+                                                </p>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-slate-600 text-sm">
-                                            {oferta.producto_nombre}
-                                        </TableCell>
                                         <TableCell className="text-right font-semibold text-[#1E293B]">
-                                            ${oferta.precio_unitario?.toLocaleString()}
+                                            ${Number(oferta.unit_price || 0).toLocaleString()}
+                                        </TableCell>
+                                        <TableCell className="text-right text-sm text-slate-500">
+                                            {oferta.created_at
+                                                ? format(new Date(oferta.created_at), 'dd MMM', { locale: es })
+                                                : '-'}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Link
-                                                to={createPageUrl('Offers') + `?id=${oferta.id}`}
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="text-slate-500 hover:text-[#1E293B]"
                                             >
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="text-slate-500 hover:text-[#1E293B]"
-                                                >
-                                                    <Eye className="w-4 h-4 mr-1" />
-                                                    Ver
-                                                </Button>
-                                            </Link>
+                                                <MessageCircle className="w-4 h-4" />
+                                            </Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
