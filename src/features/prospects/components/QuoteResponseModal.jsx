@@ -98,8 +98,8 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-lg flex flex-col max-h-[90vh] p-0 gap-0">
-        <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b bg-slate-50 rounded-t-lg">
-          <DialogTitle className="text-xl font-bold text-[#1E293B]">
+        <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b bg-muted/50 rounded-t-lg">
+          <DialogTitle className="text-xl font-bold text-foreground">
             Enviar Cotización
           </DialogTitle>
           <p className="text-sm text-slate-500 mt-1">
@@ -184,7 +184,7 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
           </form>
         </div>
 
-        <DialogFooter className="px-6 py-4 flex-shrink-0 border-t gap-2 bg-slate-50 rounded-b-lg">
+        <DialogFooter className="px-6 py-4 flex-shrink-0 border-t gap-2 bg-muted/50 rounded-b-lg">
           <Button
             type="button"
             variant="outline"
@@ -196,7 +196,7 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
             type="submit"
             form="quote-response-form"
             disabled={createMutation.isPending}
-            className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d] px-6 font-medium shadow-sm"
+            className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] px-6 font-medium shadow-sm"
           >
             {createMutation.isPending && (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />

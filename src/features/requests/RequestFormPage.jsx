@@ -45,7 +45,7 @@ export default function RequestFormPage() {
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1E293B]">
+                    <h1 className="text-2xl font-bold text-foreground">
                         {isEditing ? 'Editar Solicitud' : 'Solicitar Cotización'}
                     </h1>
                     {!isEditing && (
@@ -65,20 +65,20 @@ export default function RequestFormPage() {
 
                     {/* Step 2 — Specific form (shown only after type is selected) */}
                     {requestType === 'Producto' && (
-                        <div className="pt-2 border-t border-slate-100">
+                        <div className="pt-2 border-t border-border">
                             <ProductRequestForm form={productForm} setForm={setProductForm} />
                         </div>
                     )}
 
                     {requestType === 'Servicio' && (
-                        <div className="pt-2 border-t border-slate-100">
+                        <div className="pt-2 border-t border-border">
                             <ServiceRequestForm form={serviceForm} setForm={setServiceForm} />
                         </div>
                     )}
 
                     {/* Step 3 — File upload (only after type is chosen) */}
                     {requestType && (
-                        <div className="pt-2 border-t border-slate-100">
+                        <div className="pt-2 border-t border-border">
                             <FileUpload
                                 files={files}
                                 onAdd={handleFileChange}
@@ -88,7 +88,7 @@ export default function RequestFormPage() {
                     )}
 
                     {/* Actions */}
-                    <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+                    <div className="flex justify-end gap-3 pt-4 border-t border-border">
                         <Button
                             type="button"
                             variant="outline"
@@ -100,7 +100,7 @@ export default function RequestFormPage() {
                         <Button
                             onClick={handleSubmit}
                             disabled={isPending || !requestType}
-                            className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d] px-8 font-medium"
+                            className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] px-8 font-medium"
                         >
                             {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                             {isEditing ? 'Guardar Cambios' : 'Publicar Solicitud'}

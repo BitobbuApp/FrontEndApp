@@ -53,7 +53,7 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                         </div>
                         <CardContent className="p-4">
                             <div className="space-y-2">
-                                <h3 className="font-semibold text-[#1E293B] line-clamp-1">
+                                <h3 className="font-semibold text-foreground line-clamp-1">
                                     {product.nombre}
                                 </h3>
                                 <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -65,7 +65,7 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                                 <RatingStars rating={product.calificacion || 0} size="sm" />
                                 <div className="flex items-center justify-between pt-2">
                                     <div>
-                                        <p className="text-xl font-bold text-[#1E293B]">
+                                        <p className="text-xl font-bold text-foreground">
                                             ${product.precio?.toLocaleString()}
                                         </p>
                                         <p className="text-xs text-slate-500">

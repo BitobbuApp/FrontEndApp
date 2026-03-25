@@ -17,11 +17,11 @@ export default function NotificationsTab({ formData, setFormData }) {
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-4">
-                    <h4 className="font-medium text-[#1E293B]">Canales</h4>
+                    <h4 className="font-medium text-foreground">Canales</h4>
 
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
                         <div>
-                            <p className="font-medium text-[#1E293B]">Email</p>
+                            <p className="font-medium text-foreground">Email</p>
                             <p className="text-sm text-slate-500">Recibir notificaciones por correo</p>
                         </div>
                         <Switch
@@ -32,9 +32,9 @@ export default function NotificationsTab({ formData, setFormData }) {
                         />
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
                         <div>
-                            <p className="font-medium text-[#1E293B]">Notificaciones Web</p>
+                            <p className="font-medium text-foreground">Notificaciones Web</p>
                             <p className="text-sm text-slate-500">Alertas en el navegador</p>
                         </div>
                         <Switch
@@ -45,9 +45,9 @@ export default function NotificationsTab({ formData, setFormData }) {
                         />
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
                         <div>
-                            <p className="font-medium text-[#1E293B]">WhatsApp</p>
+                            <p className="font-medium text-foreground">WhatsApp</p>
                             <p className="text-sm text-slate-500">
                                 Recibir notificaciones por WhatsApp
                             </p>

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
     Building2,
     MapPin,
@@ -28,10 +29,15 @@ import CommercialTab from './components/CommercialTab';
 import SubscriptionTab from './components/SubscriptionTab';
 import VerificationTab from './components/VerificationTab';
 import NotificationsTab from './components/NotificationsTab';
+import SecurityTab from './components/SecurityTab';
 
 export default function SettingsPage() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const defaultTab = urlParams.get('tab') || 'empresa';
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'empresa';
+
+    const onTabChange = (value) => {
+        setSearchParams({ tab: value });
+    };
 
     const {
         company,
@@ -61,7 +67,7 @@ export default function SettingsPage() {
         <div className="space-y-6 max-w-4xl mx-auto">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-[#1E293B]">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
                         Configuración
                     </h1>
                     <p className="text-slate-500 mt-1">
@@ -71,7 +77,7 @@ export default function SettingsPage() {
                 <Button
                     onClick={handleSave}
                     disabled={saveMutation.isPending}
-                    className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]"
+                    className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]"
                 >
                     {saveMutation.isPending ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -82,7 +88,11 @@ export default function SettingsPage() {
                 </Button>
             </div>
 
-            <Tabs defaultValue={defaultTab} className="space-y-6">
+            <Tabs 
+                value={activeTab} 
+                onValueChange={onTabChange}
+                className="space-y-6"
+            >
                 <TabsList className="bg-slate-100 p-1 h-auto flex-wrap">
                     <TabsTrigger value="empresa" className="gap-2">
                         <Building2 className="w-4 h-4" />
@@ -111,6 +121,10 @@ export default function SettingsPage() {
                     <TabsTrigger value="notificaciones" className="gap-2">
                         <Bell className="w-4 h-4" />
                         Notificaciones
+                    </TabsTrigger>
+                    <TabsTrigger value="seguridad" className="gap-2">
+                        <Shield className="w-4 h-4" />
+                        Seguridad
                     </TabsTrigger>
                 </TabsList>
 
@@ -150,6 +164,10 @@ export default function SettingsPage() {
 
                 <TabsContent value="notificaciones">
                     <NotificationsTab formData={formData} setFormData={setFormData} />
+                </TabsContent>
+
+                <TabsContent value="seguridad">
+                    <SecurityTab />
                 </TabsContent>
             </Tabs>
         </div>

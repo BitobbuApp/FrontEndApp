@@ -24,7 +24,7 @@ export default function RequestMobileCard({ req, onTogglePause, onDelete }) {
         : format(new Date(new Date(req.created_at).getTime() + 30 * 24 * 60 * 60 * 1000), 'd MMM yyyy', { locale: es });
 
     return (
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden flex flex-col">
             {/* Product image / placeholder */}
             <div className="relative h-36 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
                 {imageUrl ? (
@@ -44,7 +44,7 @@ export default function RequestMobileCard({ req, onTogglePause, onDelete }) {
                 {/* Offers pill overlay */}
                 {(req.response_count > 0) && (
                     <div className="absolute bottom-2 left-2">
-                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#D2FC31] text-[#1E293B]">
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-[#D2FC31] text-slate-900">
                             {req.response_count} {req.response_count === 1 ? 'oferta' : 'ofertas'}
                         </span>
                     </div>
@@ -54,7 +54,7 @@ export default function RequestMobileCard({ req, onTogglePause, onDelete }) {
             {/* Body */}
             <div className="p-4 flex flex-col gap-2.5 flex-1">
                 <div>
-                    <p className="font-semibold text-[#1E293B] text-sm leading-tight">{req.product_service}</p>
+                    <p className="font-semibold text-foreground text-sm leading-tight">{req.product_service}</p>
                     {req.category && (
                         <Badge variant="secondary" className="text-[10px] mt-1">{req.category}</Badge>
                     )}
@@ -78,7 +78,7 @@ export default function RequestMobileCard({ req, onTogglePause, onDelete }) {
                 )}
 
                 {/* Actions */}
-                <div className="flex items-center gap-2 mt-auto pt-2 border-t border-slate-100">
+                <div className="flex items-center gap-2 mt-auto pt-2 border-t border-border">
                     <Button
                         size="sm"
                         variant="outline"

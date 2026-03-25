@@ -46,20 +46,20 @@ export default function RegisterForm({ onGoToLogin }) {
 
     if (success) {
         return (
-            <div className="flex-1 flex items-center justify-center bg-slate-50 p-6">
+            <div className="flex-1 flex items-center justify-center bg-muted/50 p-6">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     className="text-center max-w-sm"
                 >
                     <div className="w-16 h-16 bg-[#D2FC31] rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <span className="text-[#1E293B] font-bold text-3xl">✓</span>
+                        <span className="text-foreground font-bold text-3xl">✓</span>
                     </div>
-                    <h2 className="text-2xl font-bold text-[#1E293B] mb-2">¡Cuenta creada!</h2>
+                    <h2 className="text-2xl font-bold text-foreground mb-2">¡Cuenta creada!</h2>
                     <p className="text-slate-500 mb-8">Tu cuenta fue registrada exitosamente.</p>
                     <Button
                         onClick={onGoToLogin}
-                        className="w-full h-12 bg-[#D2FC31] hover:bg-[#c4ed2d] text-[#1E293B] font-semibold rounded-xl"
+                        className="w-full h-12 bg-[#D2FC31] hover:bg-[#c4ed2d] text-slate-900 font-semibold rounded-xl"
                     >
                         Ir al inicio de sesión
                     </Button>
@@ -69,7 +69,7 @@ export default function RegisterForm({ onGoToLogin }) {
     }
 
     return (
-        <div className="flex-1 flex items-center justify-center bg-slate-50 p-6">
+        <div className="flex-1 flex items-center justify-center bg-muted/50 p-6">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -79,13 +79,13 @@ export default function RegisterForm({ onGoToLogin }) {
                 {/* Logo mobile */}
                 <div className="flex items-center gap-2 mb-10 lg:hidden">
                     <div className="w-10 h-10 bg-[#D2FC31] rounded-xl flex items-center justify-center">
-                        <span className="text-[#1E293B] font-bold text-lg">B</span>
+                        <span className="text-foreground font-bold text-lg">B</span>
                     </div>
-                    <span className="text-2xl font-bold text-[#1E293B]">Bitobbu</span>
+                    <span className="text-2xl font-bold text-foreground">Bitobbu</span>
                 </div>
 
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-[#1E293B] mb-2">Crear cuenta</h1>
+                    <h1 className="text-3xl font-bold text-foreground mb-2">Crear cuenta</h1>
                     <p className="text-slate-500">Completa tus datos para comenzar</p>
                 </div>
 
@@ -102,7 +102,7 @@ export default function RegisterForm({ onGoToLogin }) {
                                 value={form.first_name}
                                 onChange={handleChange}
                                 placeholder="Carlos"
-                                className="h-12 bg-white border-slate-200"
+                                className="h-12 bg-background border-border"
                                 disabled={isLoading}
                             />
                         </div>
@@ -117,7 +117,7 @@ export default function RegisterForm({ onGoToLogin }) {
                                 value={form.last_name}
                                 onChange={handleChange}
                                 placeholder="Galeano"
-                                className="h-12 bg-white border-slate-200"
+                                className="h-12 bg-background border-border"
                                 disabled={isLoading}
                             />
                         </div>
@@ -134,7 +134,7 @@ export default function RegisterForm({ onGoToLogin }) {
                             value={form.email}
                             onChange={handleChange}
                             placeholder="tu@empresa.com"
-                            className="h-12 bg-white border-slate-200"
+                            className="h-12 bg-background border-border"
                             autoComplete="email"
                             disabled={isLoading}
                         />
@@ -152,7 +152,7 @@ export default function RegisterForm({ onGoToLogin }) {
                                 value={form.password}
                                 onChange={handleChange}
                                 placeholder="Mínimo 6 caracteres"
-                                className="h-12 bg-white border-slate-200 pr-12"
+                                className="h-12 bg-background border-border pr-12"
                                 autoComplete="new-password"
                                 disabled={isLoading}
                             />
@@ -179,7 +179,7 @@ export default function RegisterForm({ onGoToLogin }) {
                     <Button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full h-12 bg-[#D2FC31] hover:bg-[#c4ed2d] text-[#1E293B] font-semibold text-base rounded-xl shadow-lg shadow-[#D2FC31]/25 transition-all mt-2"
+                        className="w-full h-12 bg-[#D2FC31] hover:bg-[#c4ed2d] text-slate-900 font-semibold text-base rounded-xl shadow-lg shadow-[#D2FC31]/25 transition-all mt-2"
                     >
                         {isLoading ? (
                             <span className="flex items-center gap-2">
@@ -199,7 +199,7 @@ export default function RegisterForm({ onGoToLogin }) {
                     ¿Ya tienes cuenta?{' '}
                     <button
                         onClick={onGoToLogin}
-                        className="text-[#1E293B] font-semibold hover:underline"
+                        className="text-foreground font-semibold hover:underline"
                     >
                         Inicia sesión
                     </button>

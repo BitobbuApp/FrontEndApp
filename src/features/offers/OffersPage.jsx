@@ -52,7 +52,7 @@ export default function OffersPage() {
         <div className="space-y-6">
             {/* Header */}
             <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-[#1E293B]">
+                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
                     Ofertas
                 </h1>
                 <p className="text-slate-500 mt-1">

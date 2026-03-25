@@ -54,7 +54,7 @@ export default function CompanyTab({ formData, setFormData, handleLogoChange, up
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="flex items-center gap-6">
-                    <div className="w-24 h-24 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-slate-200">
+                    <div className="w-24 h-24 rounded-xl bg-slate-100 flex items-center justify-center overflow-hidden border-2 border-dashed border-border">
                         {formData.logo_url ? (
                             <img src={formData.logo_url} alt="Logo" className="w-full h-full object-cover" />
                         ) : (

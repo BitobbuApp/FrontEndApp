@@ -1,74 +1,52 @@
 // src/layouts/MainLayout/useLayoutData.js
 // Centralises every react-query call that the app shell needs.
+// Fully migrated from base44 to real backend APIs.
 
 import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import { requestsApi } from '@/features/requests/services/requestsApi';
+import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
+import { companyApi } from '@/features/settings/services/companyApi';
 
 export default function useLayoutData() {
-    const { data: user } = useQuery({
-        queryKey: ['currentUser'],
-        queryFn: () => base44.auth.me(),
+    const { user } = useAuth();
+
+    // Fetch company data if company_id is present
+    const { data: companyResponse } = useQuery({
+        queryKey: ['myCompany', user?.company_id],
+        queryFn: () => companyApi.getCompanyById(user.company_id),
+        enabled: !!user?.company_id,
+        staleTime: 300000, // 5 minutes
     });
 
-    const { data: company } = useQuery({
-        queryKey: ['myCompany', user?.email],
-        queryFn: () => base44.entities.Company.filter({ created_by: user?.email }),
-        enabled: !!user?.email,
+    const myCompany = companyResponse?.data || null;
+
+    // Count of active requests (for sidebar badge)
+    const { data: requestsData } = useQuery({
+        queryKey: ['layoutRequestsCount'],
+        queryFn: () => requestsApi.getCompanyRequests({ page: 1, limit: 1 }),
+        enabled: !!user,
+        staleTime: 30000,
     });
 
-    const { data: notifications = [] } = useQuery({
-        queryKey: ['notifications', user?.email],
-        queryFn: () =>
-            base44.entities.Notificacion.filter({ usuario_id: user?.email, leida: false }),
-        enabled: !!user?.email,
-        refetchInterval: 10000,
+    // Count of received offers (for sidebar badge)
+    const { data: receivedData } = useQuery({
+        queryKey: ['layoutReceivedCount'],
+        queryFn: () => quoteResponsesApi.getReceivedQuoteResponses({ page: 1, limit: 1 }),
+        enabled: !!user,
+        staleTime: 30000,
     });
 
-    const { data: solicitudesCount = 0 } = useQuery({
-        queryKey: ['solicitudesCount', user?.email],
-        queryFn: async () => {
-            const sols = await base44.entities.Solicitud.filter({
-                created_by: user?.email,
-                estado: 'Activo',
-            });
-            return sols.length;
-        },
-        enabled: !!user?.email,
-    });
+    const solicitudesCount = requestsData?.data?.total || requestsData?.total || 0;
+    const ofertasCount = receivedData?.data?.total || receivedData?.total || 0;
 
-    const { data: ofertasCount = 0 } = useQuery({
-        queryKey: ['ofertasCount', user?.email],
-        queryFn: async () => {
-            const offs = await base44.entities.Oferta.filter({
-                comprador_id: user?.email,
-                estado: 'Pendiente',
-            });
-            return offs.length;
-        },
-        enabled: !!user?.email,
-    });
-
-    const { data: mensajesCount = 0 } = useQuery({
-        queryKey: ['mensajesCount', user?.email],
-        queryFn: async () => {
-            const convs = await base44.entities.Conversacion.list();
-            const myConvs = convs.filter(
-                (c) =>
-                    c.participante_1_id === user?.email ||
-                    c.participante_2_id === user?.email,
-            );
-            return myConvs.reduce((acc, c) => {
-                if (c.participante_1_id === user?.email)
-                    return acc + (c.mensajes_no_leidos_1 || 0);
-                return acc + (c.mensajes_no_leidos_2 || 0);
-            }, 0);
-        },
-        enabled: !!user?.email,
-    });
+    // Notifications and messages — placeholders until modules are built
+    const notifications = [];
+    const mensajesCount = 0;
 
     return {
         user,
-        myCompany: company?.[0] ?? null,
+        myCompany,
         notifications,
         unreadCount: notifications.length,
         solicitudesCount,

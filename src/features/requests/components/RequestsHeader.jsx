@@ -22,7 +22,7 @@ export default function RequestsHeader({
         <>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-[#1E293B]">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
                         Mis Solicitudes
                     </h1>
                     <p className="text-slate-500 mt-1">
@@ -31,7 +31,7 @@ export default function RequestsHeader({
                 </div>
                 <Button
                     onClick={onNewSolicitud}
-                    className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d] font-semibold px-6 h-12 rounded-xl"
+                    className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] font-semibold px-6 h-12 rounded-xl"
                 >
                     <Plus className="w-5 h-5 mr-2" />
                     Nueva Solicitud

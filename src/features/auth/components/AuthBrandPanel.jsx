@@ -19,7 +19,7 @@ export default function AuthBrandPanel({ title, subtitle }) {
             <div>
                 <div className="flex items-center gap-3 mb-16">
                     <div className="w-12 h-12 bg-[#D2FC31] rounded-2xl flex items-center justify-center">
-                        <span className="text-[#1E293B] font-bold text-2xl">B</span>
+                        <span className="text-foreground font-bold text-2xl">B</span>
                     </div>
                     <span className="text-3xl font-bold text-white tracking-tight">Bitobbu</span>
                 </div>

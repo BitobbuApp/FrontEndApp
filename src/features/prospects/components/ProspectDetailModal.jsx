@@ -37,7 +37,7 @@ export default function ProspectDetailModal({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-lg flex flex-col max-h-[90vh] p-0 gap-0">
                 <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b">
-                    <DialogTitle className="text-xl font-bold text-[#1E293B]">
+                    <DialogTitle className="text-xl font-bold text-foreground">
                         Detalle de Solicitud
                     </DialogTitle>
                 </DialogHeader>
@@ -45,14 +45,14 @@ export default function ProspectDetailModal({
                 <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
                     {/* Title + Status */}
                     <div className="flex items-start justify-between gap-4">
-                        <h3 className="font-semibold text-xl text-[#1E293B]">
+                        <h3 className="font-semibold text-xl text-foreground">
                             {req.product_service}
                         </h3>
                         <StatusBadge status={req.status} />
                     </div>
 
                     {/* Company Info */}
-                    <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl">
+                    <div className="flex items-center gap-3 bg-muted/50 p-4 rounded-xl">
                         <div className="w-12 h-12 rounded-lg bg-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
                             {company.logo_url ? (
                                 <img
@@ -61,13 +61,13 @@ export default function ProspectDetailModal({
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <span className="text-lg font-bold text-[#1E293B]">
+                                <span className="text-lg font-bold text-foreground">
                                     {company.trade_name?.[0] || 'E'}
                                 </span>
                             )}
                         </div>
                         <div>
-                            <p className="font-semibold text-[#1E293B]">
+                            <p className="font-semibold text-foreground">
                                 {company.trade_name || 'Empresa'}
                             </p>
                             <div className="flex items-center gap-2 text-sm text-slate-500">
@@ -84,21 +84,21 @@ export default function ProspectDetailModal({
 
                     {/* Key Details */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-slate-50 p-4 rounded-xl">
+                        <div className="bg-muted/50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Cantidad</p>
-                            <p className="font-semibold text-[#1E293B]">
+                            <p className="font-semibold text-foreground">
                                 {req.quantity} {unitLabels[req.unit_of_measure] || req.unit_of_measure}
                             </p>
                         </div>
-                        <div className="bg-slate-50 p-4 rounded-xl">
+                        <div className="bg-muted/50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Categoría</p>
-                            <p className="font-semibold text-[#1E293B]">
+                            <p className="font-semibold text-foreground">
                                 {req.category || 'General'}
                             </p>
                         </div>
-                        <div className="bg-slate-50 p-4 rounded-xl">
+                        <div className="bg-muted/50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Fecha de Solicitud</p>
-                            <p className="font-semibold text-[#1E293B]">
+                            <p className="font-semibold text-foreground">
                                 {format(new Date(req.created_at), "d 'de' MMMM yyyy", {
                                     locale: es,
                                 })}
@@ -131,7 +131,7 @@ export default function ProspectDetailModal({
                     {req.description && (
                         <div>
                             <p className="text-sm text-slate-500 mb-2">Descripción</p>
-                            <p className="text-slate-700 bg-slate-50 p-4 rounded-xl text-sm leading-relaxed">
+                            <p className="text-slate-700 bg-muted/50 p-4 rounded-xl text-sm leading-relaxed">
                                 {req.description}
                             </p>
                         </div>
@@ -150,7 +150,7 @@ export default function ProspectDetailModal({
                                         href={file.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="flex items-center gap-3 bg-slate-50 hover:bg-blue-50 rounded-xl px-4 py-3 border border-slate-200 text-sm text-blue-600 transition-colors"
+                                        className="flex items-center gap-3 bg-muted/50 hover:bg-blue-50 rounded-xl px-4 py-3 border border-border text-sm text-blue-600 transition-colors"
                                     >
                                         <FileText className="w-5 h-5 flex-shrink-0" />
                                         <span className="truncate">{file.file_name}</span>
@@ -170,7 +170,7 @@ export default function ProspectDetailModal({
                             Cerrar
                         </Button>
                         <Button 
-                            className="flex-1 bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]"
+                            className="flex-1 bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]"
                             onClick={() => {
                                 onOpenChange(false);
                                 onQuoteRequest?.(req);

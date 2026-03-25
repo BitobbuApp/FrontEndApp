@@ -68,18 +68,18 @@ export default function ConversationList({
                                 <button
                                     key={conv.id}
                                     onClick={() => setSelectedConversation(conv)}
-                                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${isSelected ? 'bg-[#D2FC31]/20' : 'hover:bg-slate-50'
+                                    className={`w-full flex items-center gap-3 p-3 rounded-xl transition-colors ${isSelected ? 'bg-[#D2FC31]/20' : 'hover:bg-muted/50'
                                         }`}
                                 >
                                     <Avatar className="w-12 h-12">
                                         <AvatarImage src={other.logo} />
-                                        <AvatarFallback className="bg-[#D2FC31] text-[#1E293B] font-medium">
+                                        <AvatarFallback className="bg-[#D2FC31] text-slate-900 font-medium">
                                             {other.nombre?.[0] || 'U'}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 text-left min-w-0">
                                         <div className="flex items-center justify-between">
-                                            <p className="font-medium text-[#1E293B] truncate">
+                                            <p className="font-medium text-foreground truncate">
                                                 {other.nombre || 'Usuario'}
                                             </p>
                                             {conv.fecha_ultimo_mensaje && (
@@ -93,7 +93,7 @@ export default function ConversationList({
                                                 {conv.ultimo_mensaje || 'Sin mensajes'}
                                             </p>
                                             {unread > 0 && (
-                                                <Badge className="bg-[#D2FC31] text-[#1E293B] h-5 min-w-5 justify-center">
+                                                <Badge className="bg-[#D2FC31] text-slate-900 h-5 min-w-5 justify-center">
                                                     {unread}
                                                 </Badge>
                                             )}

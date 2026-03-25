@@ -9,16 +9,16 @@ export default function StatCard({
   trend, 
   trendValue,
   bgColor = 'bg-[#D2FC31]',
-  iconColor = 'text-[#1E293B]'
+  iconColor = 'text-foreground'
 }) {
   const isPositive = trend === 'up';
   
   return (
-    <Card className="relative overflow-hidden p-6 bg-white border-0 shadow-sm hover:shadow-md transition-shadow duration-300">
+    <Card className="relative overflow-hidden p-6 bg-background border-0 shadow-sm hover:shadow-md transition-shadow duration-300">
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-sm font-medium text-slate-500">{title}</p>
-          <p className="text-3xl font-bold text-[#1E293B]">{value}</p>
+          <p className="text-3xl font-bold text-foreground">{value}</p>
           {trendValue && (
             <div className={`flex items-center gap-1 text-sm ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
               {isPositive ? (

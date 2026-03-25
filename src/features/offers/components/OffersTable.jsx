@@ -70,7 +70,7 @@ export default function OffersTable({
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-slate-50 hover:bg-slate-50">
+                        <TableRow className="bg-muted/50 hover:bg-muted/50">
                             <TableHead className="text-slate-500 font-medium">Proveedor</TableHead>
                             <TableHead className="text-slate-500 font-medium">Producto</TableHead>
                             <TableHead className="text-slate-500 font-medium">Tipo</TableHead>
@@ -83,14 +83,14 @@ export default function OffersTable({
                     </TableHeader>
                     <TableBody>
                         {ofertas.map((oferta) => (
-                            <TableRow key={oferta.id} className="hover:bg-slate-50/50">
+                            <TableRow key={oferta.id} className="hover:bg-muted/50/50">
                                 <TableCell>
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-lg bg-[#D2FC31] flex items-center justify-center text-sm font-bold text-[#1E293B] flex-shrink-0">
+                                        <div className="w-10 h-10 rounded-lg bg-[#D2FC31] flex items-center justify-center text-sm font-bold text-slate-900 flex-shrink-0">
                                             {oferta.proveedor_nombre?.[0] || 'P'}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-[#1E293B]">
+                                            <p className="font-semibold text-foreground">
                                                 {oferta.proveedor_nombre || 'Proveedor'}
                                             </p>
                                             <RatingStars
@@ -102,7 +102,7 @@ export default function OffersTable({
                                 </TableCell>
                                 <TableCell>
                                     <div>
-                                        <p className="font-medium text-[#1E293B]">
+                                        <p className="font-medium text-foreground">
                                             {oferta.producto_nombre}
                                         </p>
                                         <p className="text-xs text-slate-500">
@@ -117,10 +117,10 @@ export default function OffersTable({
                                         <Badge variant="secondary">Solicitud</Badge>
                                     )}
                                 </TableCell>
-                                <TableCell className="font-semibold text-[#1E293B]">
+                                <TableCell className="font-semibold text-foreground">
                                     ${oferta.precio_unitario?.toLocaleString()}
                                 </TableCell>
-                                <TableCell className="font-bold text-[#1E293B]">
+                                <TableCell className="font-bold text-foreground">
                                     $
                                     {(
                                         oferta.precio_unitario * oferta.cantidad
@@ -168,7 +168,7 @@ export default function OffersTable({
                                                 </Link>
                                                 <Button
                                                     size="sm"
-                                                    className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]"
+                                                    className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]"
                                                     onClick={() => onAccept(oferta.id)}
                                                 >
                                                     <Check className="w-4 h-4 mr-1" />

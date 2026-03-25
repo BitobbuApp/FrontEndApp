@@ -1,18 +1,16 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSuppliersData } from './hooks/useSuppliersData';
 import SuppliersFilters from './components/SuppliersFilters';
 import SuppliersTable from './components/SuppliersTable';
-import SupplierProfileModal from './components/SupplierProfileModal';
 import ViewToggle from './components/ViewToggle';
 
 export default function SuppliersPage() {
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [sectorFilter, setSectorFilter] = useState('Todos');
     const [ratingFilter, setRatingFilter] = useState('Todos');
     const [viewMode, setViewMode] = useState('grid'); // 'grid' | 'list'
-
-    const [profileModalOpen, setProfileModalOpen] = useState(false);
-    const [selectedProveedor, setSelectedProveedor] = useState(null);
 
     const { filteredProveedores, isLoading, page, setPage, totalPages } = useSuppliersData(
         searchTerm,
@@ -21,8 +19,7 @@ export default function SuppliersPage() {
     );
 
     const handleViewProfile = (company) => {
-        setSelectedProveedor(company);
-        setProfileModalOpen(true);
+        navigate(`/Perfil/${company.id}`);
     };
 
     return (
@@ -30,7 +27,7 @@ export default function SuppliersPage() {
             {/* Header */}
             <div className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold text-[#1E293B]">
+                    <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
                         Directorio de Proveedores
                     </h1>
                     <p className="text-slate-500 mt-1">
@@ -63,13 +60,6 @@ export default function SuppliersPage() {
                 totalPages={totalPages}
                 onPageChange={setPage}
                 viewMode={viewMode}
-            />
-
-            {/* Profile Modal */}
-            <SupplierProfileModal
-                open={profileModalOpen}
-                onOpenChange={setProfileModalOpen}
-                selectedProveedor={selectedProveedor}
             />
         </div>
     );

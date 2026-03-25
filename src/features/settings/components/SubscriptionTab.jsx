@@ -10,7 +10,7 @@ export default function SubscriptionTab({ company }) {
             <Card
                 className={`border-2 ${company?.subscription_plan === 'Premium'
                     ? 'border-[#D2FC31]'
-                    : 'border-slate-200'
+                    : 'border-border'
                     }`}
             >
                 <CardContent className="p-6">
@@ -24,13 +24,13 @@ export default function SubscriptionTab({ company }) {
                             >
                                 <BadgeCheck
                                     className={`w-8 h-8 ${company?.subscription_plan === 'Premium'
-                                        ? 'text-[#1E293B]'
+                                        ? 'text-foreground'
                                         : 'text-slate-400'
                                         }`}
                                 />
                             </div>
                             <div>
-                                <h3 className="text-xl font-bold text-[#1E293B]">
+                                <h3 className="text-xl font-bold text-foreground">
                                     Plan {company?.subscription_plan || 'Gratuito'}
                                 </h3>
                                 {company?.founding_badge && (
@@ -41,7 +41,7 @@ export default function SubscriptionTab({ company }) {
                             </div>
                         </div>
                         {company?.subscription_plan !== 'Premium' && (
-                            <Button className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]">
+                            <Button className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]">
                                 Actualizar a Premium
                             </Button>
                         )}
@@ -52,7 +52,7 @@ export default function SubscriptionTab({ company }) {
             <div className="grid gap-4 md:grid-cols-2">
                 <Card className="border-0 shadow-sm">
                     <CardContent className="p-6">
-                        <h4 className="font-semibold text-[#1E293B] mb-4">Plan Gratuito</h4>
+                        <h4 className="font-semibold text-foreground mb-4">Plan Gratuito</h4>
                         <ul className="space-y-3 text-sm">
                             <li className="flex items-center gap-2 text-slate-600">
                                 <Check className="w-4 h-4 text-emerald-500" />
@@ -67,15 +67,15 @@ export default function SubscriptionTab({ company }) {
                                 3 solicitudes activas
                             </li>
                         </ul>
-                        <p className="mt-4 text-2xl font-bold text-[#1E293B]">$0/mes</p>
+                        <p className="mt-4 text-2xl font-bold text-foreground">$0/mes</p>
                     </CardContent>
                 </Card>
 
                 <Card className="border-2 border-[#D2FC31] shadow-sm">
                     <CardContent className="p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <h4 className="font-semibold text-[#1E293B]">Plan Premium</h4>
-                            <Badge className="bg-[#D2FC31] text-[#1E293B]">Recomendado</Badge>
+                            <h4 className="font-semibold text-foreground">Plan Premium</h4>
+                            <Badge className="bg-[#D2FC31] text-slate-900">Recomendado</Badge>
                         </div>
                         <ul className="space-y-3 text-sm">
                             <li className="flex items-center gap-2 text-slate-600">
@@ -100,7 +100,7 @@ export default function SubscriptionTab({ company }) {
                             </li>
                         </ul>
                         <div className="mt-4">
-                            <p className="text-2xl font-bold text-[#1E293B]">$25/mes</p>
+                            <p className="text-2xl font-bold text-foreground">$25/mes</p>
                             <p className="text-sm text-emerald-600">$240/año (20% descuento)</p>
                         </div>
                     </CardContent>

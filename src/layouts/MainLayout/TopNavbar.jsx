@@ -1,6 +1,5 @@
 import React from 'react';
 import { Bell, HelpCircle, Menu } from 'lucide-react';
-import { base44 } from '@/api/base44Client';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -9,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import UserMenu from './UserMenu';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { MENU_ITEMS } from './Sidebar';
 
 export default function TopNavbar({
@@ -20,7 +20,7 @@ export default function TopNavbar({
     onOpenSidebar,
 }) {
     return (
-        <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
+        <header className="sticky top-0 z-40 bg-background border-b border-border">
             <div className="flex items-center justify-between px-4 lg:px-8 h-16">
                 {/* Mobile Menu Button */}
                 <Button
@@ -33,7 +33,7 @@ export default function TopNavbar({
                 </Button>
 
                 {/* Page Title */}
-                <h1 className="text-lg font-semibold text-[#1E293B] hidden lg:block">
+                <h1 className="text-lg font-semibold text-foreground hidden lg:block">
                     {MENU_ITEMS.find((item) => item.page === currentPageName)?.name ||
                         currentPageName}
                 </h1>
@@ -65,18 +65,16 @@ export default function TopNavbar({
                                     <DropdownMenuItem
                                         key={notif.id}
                                         className="p-3 cursor-pointer"
-                                        onClick={async () => {
-                                            await base44.entities.Notificacion.update(notif.id, {
-                                                leida: true,
-                                            });
-                                            if (notif.enlace) {
-                                                window.location.href = notif.enlace;
+                                        onClick={() => {
+                                            // TODO: Mark as read when notifications API is ready
+                                            if (notif.link) {
+                                                window.location.href = notif.link;
                                             }
                                         }}
                                     >
                                         <div>
-                                            <p className="text-sm font-medium">{notif.titulo}</p>
-                                            <p className="text-xs text-slate-500">{notif.mensaje}</p>
+                                            <p className="text-sm font-medium">{notif.title}</p>
+                                            <p className="text-xs text-slate-500">{notif.message}</p>
                                         </div>
                                     </DropdownMenuItem>
                                 ))
@@ -86,8 +84,11 @@ export default function TopNavbar({
 
                     {/* Support */}
                     <Button variant="ghost" size="icon">
-                        <HelpCircle className="w-5 h-5 text-slate-600" />
+                        <HelpCircle className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                     </Button>
+
+                    {/* Theme Toggle */}
+                    <ThemeToggle />
 
                     {/* User Menu */}
                     <UserMenu user={user} myCompany={myCompany} />

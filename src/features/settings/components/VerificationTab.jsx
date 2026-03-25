@@ -50,10 +50,10 @@ export default function VerificationTab({ company }) {
                 </div>
 
                 <div className="space-y-4">
-                    <h4 className="font-medium text-[#1E293B]">Documentos Requeridos</h4>
+                    <h4 className="font-medium text-foreground">Documentos Requeridos</h4>
                     <div className="grid gap-4">
-                        <div className="p-4 border border-dashed border-slate-200 rounded-xl">
-                            <p className="font-medium text-[#1E293B]">RIF de la Empresa</p>
+                        <div className="p-4 border border-dashed border-border rounded-xl">
+                            <p className="font-medium text-foreground">RIF de la Empresa</p>
                             <p className="text-sm text-slate-500 mb-3">
                                 Copia del registro de información fiscal
                             </p>
@@ -62,8 +62,8 @@ export default function VerificationTab({ company }) {
                                 Cargar Documento
                             </Button>
                         </div>
-                        <div className="p-4 border border-dashed border-slate-200 rounded-xl">
-                            <p className="font-medium text-[#1E293B]">Cédula del Representante</p>
+                        <div className="p-4 border border-dashed border-border rounded-xl">
+                            <p className="font-medium text-foreground">Cédula del Representante</p>
                             <p className="text-sm text-slate-500 mb-3">
                                 Cédula de identidad del representante legal
                             </p>
@@ -72,8 +72,8 @@ export default function VerificationTab({ company }) {
                                 Cargar Documento
                             </Button>
                         </div>
-                        <div className="p-4 border border-dashed border-slate-200 rounded-xl">
-                            <p className="font-medium text-[#1E293B]">Fotos del Local</p>
+                        <div className="p-4 border border-dashed border-border rounded-xl">
+                            <p className="font-medium text-foreground">Fotos del Local</p>
                             <p className="text-sm text-slate-500 mb-3">
                                 Fotografías de tu establecimiento comercial
                             </p>

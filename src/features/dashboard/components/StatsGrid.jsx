@@ -14,7 +14,7 @@ export default function StatsGrid({ stats }) {
                 value={stats.cotizacionesActivas}
                 icon={FileText}
                 bgColor="bg-[#D2FC31]"
-                iconColor="text-[#1E293B]"
+                iconColor="text-foreground"
             />
             <StatCard
                 title="Ofertas Recibidas"

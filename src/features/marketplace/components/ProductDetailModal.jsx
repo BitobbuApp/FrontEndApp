@@ -64,7 +64,7 @@ export default function ProductDetailModal({
                     <div className="space-y-4">
                         <div className="flex items-start justify-between">
                             <div>
-                                <h2 className="text-xl font-bold text-[#1E293B]">
+                                <h2 className="text-xl font-bold text-foreground">
                                     {selectedProduct.nombre}
                                 </h2>
                                 <div className="flex items-center gap-2 mt-1">
@@ -77,19 +77,19 @@ export default function ProductDetailModal({
                                 </div>
                             </div>
                             <div className="text-right">
-                                <p className="text-2xl font-bold text-[#1E293B]">
+                                <p className="text-2xl font-bold text-foreground">
                                     ${selectedProduct.precio?.toLocaleString()}
                                 </p>
                                 <p className="text-sm text-slate-500">por unidad</p>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl">
-                            <div className="w-12 h-12 rounded-lg bg-[#D2FC31] flex items-center justify-center text-lg font-bold text-[#1E293B]">
+                        <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl">
+                            <div className="w-12 h-12 rounded-lg bg-[#D2FC31] flex items-center justify-center text-lg font-bold text-slate-900">
                                 {selectedProduct.proveedor_nombre?.[0] || 'P'}
                             </div>
                             <div className="flex-1">
-                                <p className="font-semibold text-[#1E293B]">
+                                <p className="font-semibold text-foreground">
                                     {selectedProduct.proveedor_nombre || 'Proveedor'}
                                 </p>
                                 <RatingStars rating={selectedProduct.calificacion || 0} size="sm" />
@@ -104,14 +104,14 @@ export default function ProductDetailModal({
 
                         {selectedProduct.descripcion && (
                             <div>
-                                <h4 className="font-semibold text-[#1E293B] mb-2">Descripción</h4>
+                                <h4 className="font-semibold text-foreground mb-2">Descripción</h4>
                                 <p className="text-slate-600">{selectedProduct.descripcion}</p>
                             </div>
                         )}
 
                         {selectedProduct.video_url && (
                             <div>
-                                <h4 className="font-semibold text-[#1E293B] mb-2">Video</h4>
+                                <h4 className="font-semibold text-foreground mb-2">Video</h4>
                                 <a
                                     href={selectedProduct.video_url}
                                     target="_blank"
@@ -138,7 +138,7 @@ export default function ProductDetailModal({
                             to={createPageUrl('Chat') + `?proveedor=${selectedProduct.proveedor_id}`}
                             className="flex-1"
                         >
-                            <Button className="w-full bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]">
+                            <Button className="w-full bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]">
                                 <MessageSquare className="w-4 h-4 mr-2" />
                                 Contactar Proveedor
                             </Button>

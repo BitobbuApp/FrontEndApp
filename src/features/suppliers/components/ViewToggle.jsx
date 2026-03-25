@@ -13,7 +13,7 @@ export default function ViewToggle({ mode, onChange }) {
                 onClick={() => onChange('grid')}
                 className={`p-1.5 rounded-md transition-colors ${
                     mode === 'grid'
-                        ? 'bg-white text-[#1E293B] shadow-sm'
+                        ? 'bg-background text-foreground shadow-sm'
                         : 'text-slate-400 hover:text-slate-600'
                 }`}
                 title="Vista en cuadrícula"
@@ -25,7 +25,7 @@ export default function ViewToggle({ mode, onChange }) {
                 onClick={() => onChange('list')}
                 className={`p-1.5 rounded-md transition-colors ${
                     mode === 'list'
-                        ? 'bg-white text-[#1E293B] shadow-sm'
+                        ? 'bg-background text-foreground shadow-sm'
                         : 'text-slate-400 hover:text-slate-600'
                 }`}
                 title="Vista en lista"

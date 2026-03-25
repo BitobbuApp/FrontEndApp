@@ -32,7 +32,7 @@ export default function LoginForm({ onGoToRegister }) {
     };
 
     return (
-        <div className="flex-1 flex items-center justify-center bg-slate-50 p-6">
+        <div className="flex-1 flex items-center justify-center bg-muted/50 p-6">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -42,13 +42,13 @@ export default function LoginForm({ onGoToRegister }) {
                 {/* Logo mobile */}
                 <div className="flex items-center gap-2 mb-10 lg:hidden">
                     <div className="w-10 h-10 bg-[#D2FC31] rounded-xl flex items-center justify-center">
-                        <span className="text-[#1E293B] font-bold text-lg">B</span>
+                        <span className="text-foreground font-bold text-lg">B</span>
                     </div>
-                    <span className="text-2xl font-bold text-[#1E293B]">Bitobbu</span>
+                    <span className="text-2xl font-bold text-foreground">Bitobbu</span>
                 </div>
 
                 <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-[#1E293B] mb-2">Bienvenido de vuelta</h1>
+                    <h1 className="text-3xl font-bold text-foreground mb-2">Bienvenido de vuelta</h1>
                     <p className="text-slate-500">Ingresa tus credenciales para continuar</p>
                 </div>
 
@@ -63,7 +63,7 @@ export default function LoginForm({ onGoToRegister }) {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="tu@empresa.com"
-                            className="h-12 bg-white border-slate-200"
+                            className="h-12 bg-background border-border"
                             autoComplete="email"
                             disabled={isLoading}
                         />
@@ -80,7 +80,7 @@ export default function LoginForm({ onGoToRegister }) {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 placeholder="••••••••"
-                                className="h-12 bg-white border-slate-200 pr-12"
+                                className="h-12 bg-background border-border pr-12"
                                 autoComplete="current-password"
                                 disabled={isLoading}
                             />
@@ -107,7 +107,7 @@ export default function LoginForm({ onGoToRegister }) {
                     <Button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full h-12 bg-[#D2FC31] hover:bg-[#c4ed2d] text-[#1E293B] font-semibold text-base rounded-xl shadow-lg shadow-[#D2FC31]/25 transition-all"
+                        className="w-full h-12 bg-[#D2FC31] hover:bg-[#c4ed2d] text-slate-900 font-semibold text-base rounded-xl shadow-lg shadow-[#D2FC31]/25 transition-all"
                     >
                         {isLoading ? (
                             <span className="flex items-center gap-2">
@@ -127,7 +127,7 @@ export default function LoginForm({ onGoToRegister }) {
                     ¿No tienes cuenta?{' '}
                     <button
                         onClick={onGoToRegister}
-                        className="text-[#1E293B] font-semibold hover:underline"
+                        className="text-foreground font-semibold hover:underline"
                     >
                         Regístrate gratis
                     </button>

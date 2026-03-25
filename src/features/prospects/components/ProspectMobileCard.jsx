@@ -28,7 +28,7 @@ export default function ProspectMobileCard({ req, onViewDetail }) {
         : null;
 
     return (
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden flex flex-col">
             {/* Product image / placeholder */}
             <div className="relative h-36 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
                 {imageUrl ? (
@@ -48,7 +48,7 @@ export default function ProspectMobileCard({ req, onViewDetail }) {
                 {/* Category pill */}
                 {req.category && (
                     <div className="absolute bottom-2 left-2">
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white/90 text-slate-700 shadow-sm">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-background/90 text-slate-700 shadow-sm">
                             {req.category}
                         </span>
                     </div>
@@ -58,7 +58,7 @@ export default function ProspectMobileCard({ req, onViewDetail }) {
             {/* Body */}
             <div className="p-4 flex flex-col gap-2.5 flex-1">
                 {/* Product name */}
-                <p className="font-semibold text-[#1E293B] text-sm leading-tight line-clamp-2">
+                <p className="font-semibold text-foreground text-sm leading-tight line-clamp-2">
                     {req.product_service}
                 </p>
 
@@ -107,7 +107,7 @@ export default function ProspectMobileCard({ req, onViewDetail }) {
                 {/* Action */}
                 <Button
                     size="sm"
-                    className="w-full mt-auto text-xs bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d] gap-1"
+                    className="w-full mt-auto text-xs bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] gap-1"
                     onClick={() => onViewDetail(req)}
                 >
                     <Eye className="w-3.5 h-3.5" />

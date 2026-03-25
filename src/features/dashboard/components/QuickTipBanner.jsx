@@ -16,7 +16,7 @@ export default function QuickTipBanner() {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div className="flex items-center gap-4">
                             <div className="w-12 h-12 bg-[#D2FC31] rounded-xl flex items-center justify-center">
-                                <TrendingUp className="w-6 h-6 text-[#1E293B]" />
+                                <TrendingUp className="w-6 h-6 text-foreground" />
                             </div>
                             <div>
                                 <h3 className="text-white font-semibold text-lg">
@@ -28,7 +28,7 @@ export default function QuickTipBanner() {
                             </div>
                         </div>
                         <Link to={createPageUrl('Configuracion') + '?tab=suscripcion'}>
-                            <Button className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d] font-semibold">
+                            <Button className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] font-semibold">
                                 Conocer más
                             </Button>
                         </Link>

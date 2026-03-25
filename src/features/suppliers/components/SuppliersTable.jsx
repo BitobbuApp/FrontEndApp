@@ -1,6 +1,6 @@
 import React from 'react';
-import { Store, ChevronLeft, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Store } from 'lucide-react';
+import Pagination from '@/components/atoms/Pagination';
 import { Card, CardContent } from '@/components/ui/card';
 import EmptyState from '@/components/ui/EmptyState';
 import SupplierCard from './SupplierCard';
@@ -59,37 +59,7 @@ export default function SuppliersTable({
         );
     }
 
-    // ── Pagination footer (shared) ──
-    const Pagination = () => (
-        <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 mt-2">
-            <span className="text-sm text-slate-500">
-                {filteredProveedores.length} proveedor{filteredProveedores.length !== 1 ? 'es' : ''}
-            </span>
-            <span className="text-sm text-slate-500">
-                Página {page || 1} de {totalPages || 1}
-            </span>
-            <div className="flex items-center gap-2">
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onPageChange(Math.max(1, page - 1))}
-                    disabled={!page || page <= 1}
-                >
-                    <ChevronLeft className="w-4 h-4 mr-1" />
-                    Anterior
-                </Button>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-                    disabled={!totalPages || page >= totalPages}
-                >
-                    Siguiente
-                    <ChevronRight className="w-4 h-4 ml-1" />
-                </Button>
-            </div>
-        </div>
-    );
+
 
     // ── Grid view ──
     if (viewMode === 'grid') {
@@ -104,7 +74,15 @@ export default function SuppliersTable({
                         />
                     ))}
                 </div>
-                <Pagination />
+                <Pagination
+                    totalItems={filteredProveedores.length}
+                    itemsLabel="proveedor"
+                    itemsLabelPlural="proveedores"
+                    currentPage={page || 1}
+                    totalPages={totalPages || 1}
+                    onPageChange={onPageChange}
+                    className="mt-2"
+                />
             </div>
         );
     }
@@ -134,7 +112,14 @@ export default function SuppliersTable({
                 ))}
             </Card>
 
-            <Pagination />
+            <Pagination
+                totalItems={filteredProveedores.length}
+                itemsLabel="proveedor"
+                itemsLabelPlural="proveedores"
+                currentPage={page || 1}
+                totalPages={totalPages || 1}
+                onPageChange={onPageChange}
+            />
         </div>
     );
 }

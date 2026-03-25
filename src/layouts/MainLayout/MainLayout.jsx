@@ -33,10 +33,10 @@ export default function MainLayout({ children, currentPageName }) {
     const contentPadding = collapsed ? 'lg:pl-[68px]' : 'lg:pl-64';
 
     return (
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-muted/50 dark:bg-slate-950">
             {/* Desktop Sidebar */}
             <aside
-                className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-white border-r border-slate-200 transition-all duration-300 overflow-visible ${sidebarWidth}`}
+                className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-background border-r border-border transition-all duration-300 overflow-visible ${sidebarWidth}`}
             >
                 <Sidebar
                     {...sidebarProps}

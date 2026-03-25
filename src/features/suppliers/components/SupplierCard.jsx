@@ -18,13 +18,13 @@ export default function SupplierCard({ company, onViewProfile }) {
     const isFounder = company.is_founder;
 
     return (
-        <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden flex flex-col">
             {/* Banner */}
             <div className="relative h-24 bg-gradient-to-br from-slate-800 to-slate-900">
                 {/* Badges */}
                 <div className="absolute top-2 right-2 flex gap-1">
                     {isPremium && (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D2FC31] text-[#1E293B]">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-[#D2FC31] text-slate-900">
                             ★ Premium
                         </span>
                     )}
@@ -37,11 +37,11 @@ export default function SupplierCard({ company, onViewProfile }) {
 
                 {/* Avatar */}
                 <div className="absolute -bottom-6 left-4">
-                    <div className="w-12 h-12 rounded-full bg-white border-2 border-white shadow-md flex items-center justify-center overflow-hidden">
+                    <div className="w-12 h-12 rounded-full bg-background border-2 border-white shadow-md flex items-center justify-center overflow-hidden">
                         {company.logo_url ? (
                             <img src={company.logo_url} alt={company.trade_name} className="w-full h-full object-cover" />
                         ) : (
-                            <span className="text-lg font-bold text-[#1E293B]">{initial}</span>
+                            <span className="text-lg font-bold text-foreground">{initial}</span>
                         )}
                     </div>
                 </div>
@@ -52,7 +52,7 @@ export default function SupplierCard({ company, onViewProfile }) {
                 {/* Name + rating */}
                 <div className="flex items-start justify-between gap-2">
                     <div>
-                        <p className="font-semibold text-[#1E293B] text-sm leading-tight">{company.trade_name}</p>
+                        <p className="font-semibold text-foreground text-sm leading-tight">{company.trade_name}</p>
                         <p className="text-xs text-slate-500">{company.company_type || 'Empresa'}</p>
                     </div>
                     <div className="flex items-center gap-0.5 flex-shrink-0">
@@ -84,7 +84,7 @@ export default function SupplierCard({ company, onViewProfile }) {
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-2 mt-auto pt-3">
+                <div className="flex gap-1 mt-auto pt-3">
                     <Button
                         variant="outline"
                         size="sm"
@@ -93,13 +93,6 @@ export default function SupplierCard({ company, onViewProfile }) {
                     >
                         <Eye className="w-3.5 h-3.5" />
                         Ver Perfil
-                    </Button>
-                    <Button
-                        size="sm"
-                        className="flex-1 text-xs bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d] gap-1"
-                    >
-                        <MessageSquare className="w-3.5 h-3.5" />
-                        Contactar
                     </Button>
                 </div>
             </div>

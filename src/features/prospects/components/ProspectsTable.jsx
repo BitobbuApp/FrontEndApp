@@ -2,7 +2,8 @@ import React from 'react';
 import ProspectMobileCard from './ProspectMobileCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Eye, Package, Clock, Users, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { Eye, Package, Clock, Users, Star } from 'lucide-react';
+import Pagination from '@/components/atoms/Pagination';
 import {
     Table,
     TableBody,
@@ -84,30 +85,16 @@ export default function ProspectsTable({
             </div>
 
             {/* Mobile pagination */}
-            <div className="flex items-center justify-between sm:hidden px-1 py-2">
-                <span className="text-sm text-slate-500">
-                    Página {page || 1} de {totalPages || 1}
-                </span>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onPageChange(Math.max(1, page - 1))}
-                        disabled={!page || page <= 1}
-                    >
-                        <ChevronLeft className="w-4 h-4 mr-1" />
-                        Ant.
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-                        disabled={!totalPages || page >= totalPages}
-                    >
-                        Sig.
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
-                </div>
+            <div className="sm:hidden">
+                <Pagination
+                    totalItems={filteredSolicitudes.length}
+                    itemsLabel="solicitud"
+                    itemsLabelPlural="solicitudes"
+                    currentPage={page || 1}
+                    totalPages={totalPages || 1}
+                    onPageChange={onPageChange}
+                    className="border-t-0 px-1 py-0"
+                />
             </div>
 
             {/* ── Desktop table (hidden on mobile) ── */}
@@ -115,7 +102,7 @@ export default function ProspectsTable({
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-slate-50 hover:bg-slate-50">
+                        <TableRow className="bg-muted/50 hover:bg-muted/50">
                             <TableHead className="text-slate-500 font-medium">
                                 Producto/Servicio
                             </TableHead>
@@ -131,9 +118,9 @@ export default function ProspectsTable({
                     </TableHeader>
                     <TableBody>
                         {filteredSolicitudes.map((req) => (
-                            <TableRow key={req.id} className="hover:bg-slate-50/50">
+                            <TableRow key={req.id} className="hover:bg-muted/50/50">
                                 <TableCell>
-                                    <p className="font-semibold text-[#1E293B]">
+                                    <p className="font-semibold text-foreground">
                                         {req.product_service}
                                     </p>
                                     {req.description && (
@@ -152,13 +139,13 @@ export default function ProspectsTable({
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
-                                                <span className="text-sm font-bold text-[#1E293B]">
+                                                <span className="text-sm font-bold text-foreground">
                                                     {req.company?.trade_name?.[0] || 'E'}
                                                 </span>
                                             )}
                                         </div>
                                         <div>
-                                            <p className="text-sm font-medium text-[#1E293B]">
+                                            <p className="text-sm font-medium text-foreground">
                                                 {req.company?.trade_name || 'Empresa'}
                                             </p>
                                             {req.company?.average_rating > 0 && (
@@ -204,10 +191,10 @@ export default function ProspectsTable({
                                     <Button
                                         variant="ghost"
                                         size="sm"
+                                        className="text-xs h-8 gap-1"
                                         onClick={() => handleViewDetail(req)}
                                     >
-                                        <Eye className="w-4 h-4 mr-1" />
-                                        Ver
+                                        <Eye className="w-4 h-4 text-slate-400" />
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -217,34 +204,14 @@ export default function ProspectsTable({
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
-                <span className="text-sm text-slate-500">
-                    {filteredSolicitudes.length} solicitud{filteredSolicitudes.length !== 1 ? 'es' : ''}
-                </span>
-                <span className="text-sm text-slate-500">
-                    Página {page || 1} de {totalPages || 1}
-                </span>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onPageChange(Math.max(1, page - 1))}
-                        disabled={!page || page <= 1}
-                    >
-                        <ChevronLeft className="w-4 h-4 mr-1" />
-                        Anterior
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-                        disabled={!totalPages || page >= totalPages}
-                    >
-                        Siguiente
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
-                </div>
-            </div>
+            <Pagination
+                totalItems={filteredSolicitudes.length}
+                itemsLabel="solicitud"
+                itemsLabelPlural="solicitudes"
+                currentPage={page || 1}
+                totalPages={totalPages || 1}
+                onPageChange={onPageChange}
+            />
             </Card>
         </div>
     );

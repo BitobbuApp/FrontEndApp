@@ -88,12 +88,12 @@ export default function ChatArea({
                 <div className="flex items-center gap-3">
                     <Avatar className="w-10 h-10">
                         <AvatarImage src={otherParticipant.logo} />
-                        <AvatarFallback className="bg-[#D2FC31] text-[#1E293B]">
+                        <AvatarFallback className="bg-[#D2FC31] text-slate-900">
                             {otherParticipant.nombre?.[0] || 'U'}
                         </AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="font-semibold text-[#1E293B]">
+                        <p className="font-semibold text-foreground">
                             {otherParticipant.nombre || 'Usuario'}
                         </p>
                         <p className="text-xs text-slate-500">En línea</p>
@@ -151,7 +151,7 @@ export default function ChatArea({
                                             <div
                                                 className={`rounded-2xl px-4 py-2.5 ${isOwn
                                                         ? 'bg-[#1E293B] text-white rounded-br-md'
-                                                        : 'bg-slate-100 text-[#1E293B] rounded-bl-md'
+                                                        : 'bg-slate-100 text-foreground rounded-bl-md'
                                                     }`}
                                             >
                                                 {msg.archivo_adjunto_url && (
@@ -193,7 +193,7 @@ export default function ChatArea({
             </ScrollArea>
 
             {/* Actions */}
-            <div className="px-4 py-3 border-t bg-slate-50 flex gap-2">
+            <div className="px-4 py-3 border-t bg-muted/50 flex gap-2">
                 <Button
                     variant="outline"
                     className="flex-1 text-green-600 border-green-200 hover:bg-green-50"
@@ -245,7 +245,7 @@ export default function ChatArea({
                     <Button
                         onClick={handleSend}
                         disabled={(!messageText.trim() && !attachedFile) || sendMutation.isPending}
-                        className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d] h-11 px-4"
+                        className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] h-11 px-4"
                     >
                         <Send className="w-5 h-5" />
                     </Button>

@@ -114,7 +114,7 @@ export default function RequestSummaryPage() {
                     <ArrowLeft className="w-5 h-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold text-[#1E293B]">Resumen de Solicitud</h1>
+                    <h1 className="text-2xl font-bold text-foreground">Resumen de Solicitud</h1>
                     <p className="text-sm text-slate-500">Detalle completo y comparativa de ofertas</p>
                 </div>
             </div>
@@ -125,7 +125,7 @@ export default function RequestSummaryPage() {
                     {/* Title + status */}
                     <div className="flex items-start justify-between gap-4">
                         <div>
-                            <h2 className="text-xl font-bold text-[#1E293B]">{req.product_service}</h2>
+                            <h2 className="text-xl font-bold text-foreground">{req.product_service}</h2>
                             {req.category && (
                                 <Badge variant="secondary" className="mt-1.5 text-xs">{req.category}</Badge>
                             )}
@@ -139,7 +139,7 @@ export default function RequestSummaryPage() {
                             <Package className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-slate-400">Cantidad</p>
-                                <p className="font-semibold text-[#1E293B]">
+                                <p className="font-semibold text-foreground">
                                     {req.quantity} {unitLabels[req.unit_of_measure] || req.unit_of_measure}
                                 </p>
                             </div>
@@ -148,21 +148,21 @@ export default function RequestSummaryPage() {
                             <MapPin className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-slate-400">Entrega</p>
-                                <p className="font-semibold text-[#1E293B]">{req.delivery_location || 'Por acordar'}</p>
+                                <p className="font-semibold text-foreground">{req.delivery_location || 'Por acordar'}</p>
                             </div>
                         </div>
                         <div className="flex items-start gap-2 text-sm">
                             <CreditCard className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-slate-400">Pago</p>
-                                <p className="font-semibold text-[#1E293B]">{req.payment_conditions || 'Por acordar'}</p>
+                                <p className="font-semibold text-foreground">{req.payment_conditions || 'Por acordar'}</p>
                             </div>
                         </div>
                         <div className="flex items-start gap-2 text-sm">
                             <Calendar className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-slate-400">Fecha Límite</p>
-                                <p className="font-semibold text-[#1E293B]">
+                                <p className="font-semibold text-foreground">
                                     {req.expiration_date
                                         ? format(new Date(req.expiration_date), 'd MMM yyyy', { locale: es })
                                         : 'Sin fecha'}
@@ -175,7 +175,7 @@ export default function RequestSummaryPage() {
                     {req.description && (
                         <div>
                             <p className="text-xs text-slate-400 mb-1">Descripción</p>
-                            <p className="text-sm text-slate-700 bg-slate-50 rounded-lg p-3">{req.description}</p>
+                            <p className="text-sm text-slate-700 bg-muted/50 rounded-lg p-3">{req.description}</p>
                         </div>
                     )}
                 </CardContent>
@@ -220,7 +220,7 @@ export default function RequestSummaryPage() {
             {/* All Offers Table */}
             <Card className="border-0 shadow-sm overflow-hidden">
                 <div className="px-6 pt-5 pb-3">
-                    <h3 className="font-semibold text-[#1E293B]">
+                    <h3 className="font-semibold text-foreground">
                         Todas las Ofertas ({offers.length})
                     </h3>
                 </div>
@@ -233,7 +233,7 @@ export default function RequestSummaryPage() {
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-slate-50 border-y border-slate-100">
+                                <tr className="bg-muted/50 border-y border-border">
                                     <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500">Proveedor</th>
                                     <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500">Precio Unit.</th>
                                     <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500">Total</th>
@@ -246,7 +246,7 @@ export default function RequestSummaryPage() {
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {offers.map((offer) => (
-                                    <tr key={offer.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={offer.id} className="hover:bg-muted/50/50 transition-colors">
                                         {/* Supplier */}
                                         <td className="px-6 py-4">
                                             <div className="flex items-center gap-3">
@@ -254,7 +254,7 @@ export default function RequestSummaryPage() {
                                                     {offer.supplier.initial}
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium text-[#1E293B]">{offer.supplier.name}</p>
+                                                    <p className="font-medium text-foreground">{offer.supplier.name}</p>
                                                     <div className="flex gap-1 mt-0.5">
                                                         {offer.is_cheapest && (
                                                             <span className="inline-flex items-center gap-0.5 text-[10px] font-medium bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">

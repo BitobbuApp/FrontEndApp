@@ -97,9 +97,9 @@ export default function LocationTab({ formData, setFormData }) {
                     </div>
                 </div>
 
-                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
+                <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
                     <div>
-                        <p className="font-medium text-[#1E293B]">Cobertura Nacional</p>
+                        <p className="font-medium text-foreground">Cobertura Nacional</p>
                         <p className="text-sm text-slate-500">¿Tu empresa opera en todo el país?</p>
                     </div>
                     <Switch

@@ -68,7 +68,7 @@ export default function RequestRowExpanded({ request }) {
     const stats = getStats(responses);
 
     return (
-        <div className="bg-slate-50 border-y border-slate-100 p-6 space-y-5">
+        <div className="bg-muted/50 border-y border-border p-6 space-y-5">
             {/* Highlight cards */}
             {stats && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -95,7 +95,7 @@ export default function RequestRowExpanded({ request }) {
 
             {/* Description */}
             {request.description && (
-                <div className="bg-white rounded-xl border border-slate-100 p-4">
+                <div className="bg-background rounded-xl border border-border p-4">
                     <p className="text-xs font-semibold text-slate-500 mb-1">Descripción</p>
                     <p className="text-sm text-slate-700">{request.description}</p>
                 </div>
@@ -124,19 +124,19 @@ export default function RequestRowExpanded({ request }) {
 
             {/* Quote responses table */}
             <div>
-                <p className="text-sm font-semibold text-[#1E293B] mb-3">
+                <p className="text-sm font-semibold text-foreground mb-3">
                     Últimas Ofertas ({responses.length})
                 </p>
                 {responses.length === 0 ? (
-                    <div className="bg-white rounded-xl border border-slate-100 p-6 text-center">
+                    <div className="bg-background rounded-xl border border-border p-6 text-center">
                         <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                         <p className="text-sm text-slate-400">Aún no hay ofertas para esta solicitud</p>
                     </div>
                 ) : (
-                    <div className="bg-white rounded-xl border border-slate-100 overflow-hidden">
+                    <div className="bg-background rounded-xl border border-border overflow-hidden">
                         <table className="w-full text-sm">
                             <thead>
-                                <tr className="bg-slate-50 border-b border-slate-100">
+                                <tr className="bg-muted/50 border-b border-border">
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Proveedor</th>
                                     <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Condiciones</th>
                                     <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500">Precio Unit.</th>
@@ -148,7 +148,7 @@ export default function RequestRowExpanded({ request }) {
                             </thead>
                             <tbody className="divide-y divide-slate-50">
                                 {responses.map((resp) => (
-                                    <tr key={resp.id} className="hover:bg-slate-50/50 transition-colors">
+                                    <tr key={resp.id} className="hover:bg-muted/50/50 transition-colors">
                                         {/* Supplier */}
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-2">
@@ -156,7 +156,7 @@ export default function RequestRowExpanded({ request }) {
                                                     {resp.supplier.initial}
                                                 </div>
                                                 <div>
-                                                    <p className="font-medium text-[#1E293B] flex items-center gap-1">
+                                                    <p className="font-medium text-foreground flex items-center gap-1">
                                                         {resp.supplier.name}
                                                         {resp.supplier.verified && (
                                                             <span className="text-blue-500">✓</span>

@@ -11,7 +11,7 @@ export default function FileUpload({ files, onAdd, onRemove }) {
         <div className="space-y-3">
             <Label>Archivos Adjuntos</Label>
 
-            <div className="border-2 border-dashed border-slate-200 rounded-xl bg-slate-50 hover:border-[#D2FC31] transition-colors">
+            <div className="border-2 border-dashed border-border rounded-xl bg-muted/50 hover:border-[#D2FC31] transition-colors">
                 <input
                     type="file"
                     multiple

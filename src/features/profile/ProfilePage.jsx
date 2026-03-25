@@ -58,7 +58,7 @@ export default function ProfilePage() {
 
                 {/* Avatar overlapping the banner */}
                 <div className="absolute -bottom-8 left-6">
-                    <div className="w-20 h-20 rounded-full bg-white border-4 border-white shadow flex items-center justify-center overflow-hidden">
+                    <div className="w-20 h-20 rounded-full bg-background border-4 border-white shadow flex items-center justify-center overflow-hidden">
                         {company?.logo_url ? (
                             <img src={company.logo_url} alt={tradeName} className="w-full h-full object-cover" />
                         ) : (
@@ -71,7 +71,7 @@ export default function ProfilePage() {
             {/* ── Company identity + actions ── */}
             <div className="pt-12 pb-5 px-1 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                 <div className="space-y-1.5">
-                    <h1 className="text-2xl font-bold text-[#1E293B]">{tradeName}</h1>
+                    <h1 className="text-2xl font-bold text-foreground">{tradeName}</h1>
                     <div className="flex flex-wrap items-center gap-2">
                         {companyType && (
                             <Badge variant="secondary" className="text-xs">{companyType}</Badge>
@@ -105,9 +105,9 @@ export default function ProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
                 {/* About / Bio card */}
-                <Card className="border border-slate-100 shadow-sm">
+                <Card className="border border-border shadow-sm">
                     <CardContent className="p-6 space-y-4">
-                        <h3 className="text-base font-semibold text-[#1E293B]">Sobre Nosotros</h3>
+                        <h3 className="text-base font-semibold text-foreground">Sobre Nosotros</h3>
 
                         {company?.bio ? (
                             <p className="text-sm text-slate-600 leading-relaxed">{company.bio}</p>
@@ -160,9 +160,9 @@ export default function ProfilePage() {
                 </Card>
 
                 {/* Social links card */}
-                <Card className="border border-slate-100 shadow-sm">
+                <Card className="border border-border shadow-sm">
                     <CardContent className="p-6 space-y-4">
-                        <h3 className="text-base font-semibold text-[#1E293B]">Redes Sociales</h3>
+                        <h3 className="text-base font-semibold text-foreground">Redes Sociales</h3>
 
                         {(() => {
                             const contact = company?.contacts?.[0] || {};
@@ -183,7 +183,7 @@ export default function ProfilePage() {
                                     label: 'Sitio Web',
                                     href: company.website,
                                     icon: Globe,
-                                    bg: 'bg-slate-50', border: 'border-slate-200', text: 'text-slate-700', iconColor: 'text-slate-500',
+                                    bg: 'bg-muted/50', border: 'border-border', text: 'text-slate-700', iconColor: 'text-slate-500',
                                 },
                                 company?.instagram && {
                                     label: 'Instagram',
@@ -244,10 +244,10 @@ export default function ProfilePage() {
                     { icon: FileText, label: 'Calificación', value: score.toFixed(1), color: 'text-amber-500' },
                     { icon: FileText, label: 'Reseñas', value: reviews, color: 'text-slate-400' },
                 ].map(({ icon: Icon, label, value, color }) => (
-                    <Card key={label} className="border border-slate-100 shadow-sm">
+                    <Card key={label} className="border border-border shadow-sm">
                         <CardContent className="p-5 flex flex-col items-center gap-2 text-center">
                             <Icon className={`w-7 h-7 ${color}`} />
-                            <p className="text-2xl font-bold text-[#1E293B]">{value}</p>
+                            <p className="text-2xl font-bold text-foreground">{value}</p>
                             <p className="text-xs text-slate-500">{label}</p>
                         </CardContent>
                     </Card>
@@ -263,10 +263,10 @@ export default function ProfilePage() {
 
                 <TabsContent value="vitrina" className="mt-4">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold text-[#1E293B]">Mis Productos y Servicios</h3>
+                        <h3 className="font-semibold text-foreground">Mis Productos y Servicios</h3>
                         <Button
                             size="sm"
-                            className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d] gap-1.5"
+                            className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] gap-1.5"
                             onClick={() => setShowAddProduct(true)}
                         >
                             <Plus className="w-4 h-4" />

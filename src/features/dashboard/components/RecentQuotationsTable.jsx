@@ -27,12 +27,12 @@ export default function RecentQuotationsTable({
         >
             <Card className="border-0 shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg font-semibold text-[#1E293B]">
+                    <CardTitle className="text-lg font-semibold text-foreground">
                         Cotizaciones Recientes
                     </CardTitle>
                     <Link
                         to={createPageUrl('Requests')}
-                        className="text-sm text-slate-500 hover:text-[#1E293B] flex items-center gap-1"
+                        className="text-sm text-slate-500 hover:text-foreground flex items-center gap-1"
                     >
                         Ver todas <ArrowRight className="w-4 h-4" />
                     </Link>
@@ -75,8 +75,8 @@ export default function RecentQuotationsTable({
                             </TableHeader>
                             <TableBody>
                                 {solicitudes.map((sol) => (
-                                    <TableRow key={sol.id} className="hover:bg-slate-50/50">
-                                        <TableCell className="font-medium text-[#1E293B]">
+                                    <TableRow key={sol.id} className="hover:bg-muted/50/50">
+                                        <TableCell className="font-medium text-foreground">
                                             {sol.product_service}
                                         </TableCell>
                                         <TableCell>
@@ -96,7 +96,7 @@ export default function RecentQuotationsTable({
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    className="text-slate-500 hover:text-[#1E293B]"
+                                                    className="text-slate-500 hover:text-foreground"
                                                 >
                                                     <Eye className="w-4 h-4" />
                                                 </Button>

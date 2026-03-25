@@ -21,7 +21,7 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-slate-50 hover:bg-slate-50">
+                        <TableRow className="bg-muted/50 hover:bg-muted/50">
                             <TableHead className="text-slate-500 font-medium">Producto</TableHead>
                             <TableHead className="text-slate-500 font-medium">Proveedor</TableHead>
                             <TableHead className="text-slate-500 font-medium">Categoría</TableHead>
@@ -35,7 +35,7 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                     </TableHeader>
                     <TableBody>
                         {filteredProducts.map((product) => (
-                            <TableRow key={product.id} className="hover:bg-slate-50/50">
+                            <TableRow key={product.id} className="hover:bg-muted/50/50">
                                 <TableCell>
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
@@ -52,7 +52,7 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                             )}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-[#1E293B]">{product.nombre}</p>
+                                            <p className="font-semibold text-foreground">{product.nombre}</p>
                                             {product.descripcion && (
                                                 <p className="text-xs text-slate-500 line-clamp-1">
                                                     {product.descripcion}
@@ -74,7 +74,7 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                         {product.categoria}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="font-bold text-[#1E293B]">
+                                <TableCell className="font-bold text-foreground">
                                     ${product.precio?.toLocaleString()}
                                 </TableCell>
                                 <TableCell className="text-slate-600">
@@ -101,7 +101,7 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                         >
                                             <Button
                                                 size="sm"
-                                                className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]"
+                                                className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]"
                                             >
                                                 <MessageSquare className="w-4 h-4 mr-1" />
                                                 Contactar

@@ -49,7 +49,7 @@ export default function Sidebar({
             {onToggleCollapse && (
                 <button
                     onClick={onToggleCollapse}
-                    className="hidden lg:flex absolute -right-3.5 top-7 z-20 w-7 h-7 bg-white border border-slate-200 rounded-full items-center justify-center shadow-sm hover:bg-slate-50 transition-colors"
+                    className="hidden lg:flex absolute -right-3.5 top-7 z-20 w-7 h-7 bg-background border border-border rounded-full items-center justify-center shadow-sm hover:bg-accent transition-colors"
                     title={collapsed ? 'Expandir menú' : 'Colapsar menú'}
                 >
                     {collapsed
@@ -60,13 +60,13 @@ export default function Sidebar({
             )}
 
             {/* Logo */}
-            <div className={`border-b border-slate-100 transition-all duration-300 ${collapsed ? 'p-4' : 'p-6'}`}>
+            <div className={`border-b border-border transition-all duration-300 ${collapsed ? 'p-4' : 'p-6'}`}>
                 <Link to={createPageUrl('Dashboard')} className="flex items-center gap-2 overflow-hidden">
                     <div className="w-10 h-10 bg-[#D2FC31] rounded-xl flex items-center justify-center flex-shrink-0">
-                        <span className="text-[#1E293B] font-bold text-lg">B</span>
+                        <span className="text-foreground font-bold text-lg">B</span>
                     </div>
                     {!collapsed && (
-                        <span className="text-xl font-bold text-[#1E293B] whitespace-nowrap">Bitobbu</span>
+                        <span className="text-xl font-bold text-foreground whitespace-nowrap">Bitobbu</span>
                     )}
                 </Link>
             </div>
@@ -85,8 +85,8 @@ export default function Sidebar({
                             className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all duration-200 relative ${
                                 collapsed ? 'justify-center' : ''
                             } ${isActive(item.page)
-                                ? 'bg-[#D2FC31] text-[#1E293B]'
-                                : 'text-slate-600 hover:bg-slate-100 hover:text-[#1E293B]'
+                                ? 'bg-[#D2FC31] text-slate-900'
+                                : 'text-slate-600 dark:text-slate-300 hover:bg-accent hover:text-accent-foreground'
                             }`}
                         >
                             <item.icon className="w-5 h-5 flex-shrink-0" />
@@ -109,7 +109,7 @@ export default function Sidebar({
             </nav>
 
             {/* Plan Badge */}
-            <div className={`border-t border-slate-100 transition-all duration-300 ${collapsed ? 'p-3' : 'p-4'}`}>
+            <div className={`border-t border-border transition-all duration-300 ${collapsed ? 'p-3' : 'p-4'}`}>
                 {collapsed ? (
                     /* Collapsed: just show the plan dot */
                     <div className="flex justify-center">
@@ -127,7 +127,7 @@ export default function Sidebar({
                 ) : (
                     <div className={`p-4 rounded-xl ${myCompany?.plan_suscripcion === 'Premium'
                         ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200'
-                        : 'bg-slate-50'
+                        : 'bg-muted/50 dark:bg-slate-800'
                         }`}
                     >
                         <div className="flex items-center gap-2 mb-2">
@@ -143,7 +143,7 @@ export default function Sidebar({
                         {myCompany?.plan_suscripcion !== 'Premium' && (
                             <Link
                                 to={createPageUrl('Configuracion') + '?tab=suscripcion'}
-                                className="text-xs text-[#1E293B] font-medium hover:underline"
+                                className="text-xs text-foreground font-medium hover:underline"
                             >
                                 Actualizar a Premium →
                             </Link>

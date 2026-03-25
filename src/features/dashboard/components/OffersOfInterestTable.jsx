@@ -24,12 +24,12 @@ export default function OffersOfInterestTable({ ofertas, isLoading }) {
         >
             <Card className="border-0 shadow-sm">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
-                    <CardTitle className="text-lg font-semibold text-[#1E293B]">
+                    <CardTitle className="text-lg font-semibold text-foreground">
                         Ofertas para ti
                     </CardTitle>
                     <Link
                         to={createPageUrl('Prospects')}
-                        className="text-sm text-slate-500 hover:text-[#1E293B] flex items-center gap-1"
+                        className="text-sm text-slate-500 hover:text-foreground flex items-center gap-1"
                     >
                         Ver todas <ArrowRight className="w-4 h-4" />
                     </Link>
@@ -70,18 +70,18 @@ export default function OffersOfInterestTable({ ofertas, isLoading }) {
                             </TableHeader>
                             <TableBody>
                                 {ofertas.map((oferta) => (
-                                    <TableRow key={oferta.id} className="hover:bg-slate-50/50">
+                                    <TableRow key={oferta.id} className="hover:bg-muted/50/50">
                                         <TableCell>
                                             <div className="flex items-center gap-2">
                                                 <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center text-sm font-medium text-purple-700">
                                                     {oferta.supplier?.trade_name?.[0] || 'P'}
                                                 </div>
-                                                <p className="font-medium text-[#1E293B] text-sm">
+                                                <p className="font-medium text-foreground text-sm">
                                                     {oferta.supplier?.trade_name || 'Proveedor'}
                                                 </p>
                                             </div>
                                         </TableCell>
-                                        <TableCell className="text-right font-semibold text-[#1E293B]">
+                                        <TableCell className="text-right font-semibold text-foreground">
                                             ${Number(oferta.unit_price || 0).toLocaleString()}
                                         </TableCell>
                                         <TableCell className="text-right text-sm text-slate-500">
@@ -93,7 +93,7 @@ export default function OffersOfInterestTable({ ofertas, isLoading }) {
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                className="text-slate-500 hover:text-[#1E293B]"
+                                                className="text-slate-500 hover:text-foreground"
                                             >
                                                 <MessageCircle className="w-4 h-4" />
                                             </Button>

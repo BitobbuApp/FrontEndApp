@@ -82,7 +82,7 @@ export default function AddProductModal({ open, onOpenChange }) {
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle className="text-lg font-bold text-[#1E293B]">
+                    <DialogTitle className="text-lg font-bold text-foreground">
                         Agregar Producto o Servicio
                     </DialogTitle>
                 </DialogHeader>
@@ -97,8 +97,8 @@ export default function AddProductModal({ open, onOpenChange }) {
                                 onClick={() => set('type', t)}
                                 className={`flex-1 py-2 text-sm font-medium rounded-lg border transition-colors ${
                                     form.type === t
-                                        ? 'bg-[#D2FC31] border-[#D2FC31] text-[#1E293B]'
-                                        : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+                                        ? 'bg-[#D2FC31] border-[#D2FC31] text-slate-900'
+                                        : 'border-border text-slate-500 hover:bg-muted/50'
                                 }`}
                             >
                                 {t}
@@ -109,7 +109,7 @@ export default function AddProductModal({ open, onOpenChange }) {
                     {/* Image upload */}
                     <div>
                         <Label className="mb-2 block">Imágenes del {form.type}</Label>
-                        <div className="w-28 h-28 rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-slate-100 transition-colors">
+                        <div className="w-28 h-28 rounded-xl border-2 border-dashed border-border bg-muted/50 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-slate-100 transition-colors">
                             <Upload className="w-6 h-6 text-slate-400" />
                             <span className="text-[10px] text-slate-400">Subir imagen</span>
                         </div>
@@ -214,7 +214,7 @@ export default function AddProductModal({ open, onOpenChange }) {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex justify-end gap-3 pt-2 border-t border-slate-100">
+                    <div className="flex justify-end gap-3 pt-2 border-t border-border">
                         <Button
                             variant="outline"
                             onClick={() => onOpenChange(false)}
@@ -223,7 +223,7 @@ export default function AddProductModal({ open, onOpenChange }) {
                             Cancelar
                         </Button>
                         <Button
-                            className="bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]"
+                            className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]"
                             onClick={handleSubmit}
                             disabled={mutation.isPending}
                         >

@@ -11,11 +11,10 @@ import {
     Play,
     ChevronDown,
     ChevronUp,
-    ChevronLeft,
-    ChevronRight,
     Trash2,
     FileText,
 } from 'lucide-react';
+import Pagination from '@/components/atoms/Pagination';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -115,30 +114,16 @@ export default function RequestsTable({
             </div>
 
             {/* Mobile pagination */}
-            <div className="flex items-center justify-between sm:hidden px-1 py-2">
-                <span className="text-sm text-slate-500">
-                    Página {page || 1} de {totalPages || 1}
-                </span>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onPageChange(Math.max(1, page - 1))}
-                        disabled={!page || page <= 1}
-                    >
-                        <ChevronLeft className="w-4 h-4 mr-1" />
-                        Ant.
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-                        disabled={!totalPages || page >= totalPages}
-                    >
-                        Sig.
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
-                </div>
+            <div className="sm:hidden">
+                <Pagination
+                    totalItems={requests.length}
+                    itemsLabel="solicitud"
+                    itemsLabelPlural="solicitudes"
+                    currentPage={page || 1}
+                    totalPages={totalPages || 1}
+                    onPageChange={onPageChange}
+                    className="border-t-0 px-1 py-0"
+                />
             </div>
 
             {/* ── Desktop table (hidden on mobile) ── */}
@@ -146,7 +131,7 @@ export default function RequestsTable({
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
-                        <TableRow className="bg-slate-50 hover:bg-slate-50">
+                        <TableRow className="bg-muted/50 hover:bg-muted/50">
                             <TableHead className="text-slate-500 font-medium">Producto</TableHead>
                             <TableHead className="text-slate-500 font-medium">Cantidad</TableHead>
                             <TableHead className="text-slate-500 font-medium">Estado</TableHead>
@@ -163,7 +148,7 @@ export default function RequestsTable({
                             return (
                                 <React.Fragment key={req.id}>
                                     <TableRow
-                                        className={`hover:bg-slate-50/50 cursor-pointer transition-colors ${isExpanded ? 'bg-slate-50' : ''}`}
+                                        className={`hover:bg-muted/50/50 cursor-pointer transition-colors ${isExpanded ? 'bg-muted/50' : ''}`}
                                         onClick={() => onExpandRow(isExpanded ? null : req.id)}
                                     >
                                         <TableCell>
@@ -174,7 +159,7 @@ export default function RequestsTable({
                                                     <ChevronDown className="w-4 h-4 text-slate-400" />
                                                 )}
                                                 <div>
-                                                    <p className="font-medium text-[#1E293B]">
+                                                    <p className="font-medium text-foreground">
                                                         {req.product_service}
                                                     </p>
                                                     {req.category && (
@@ -203,7 +188,7 @@ export default function RequestsTable({
                                                 )}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            <Badge variant="outline" className="bg-[#D2FC31]/20 text-[#1E293B] border-[#D2FC31]/40 font-semibold">
+                                            <Badge variant="outline" className="bg-[#D2FC31]/20 text-slate-900 border-[#D2FC31]/40 font-semibold">
                                                 {req.response_count || 0} {req.response_count === 1 ? 'oferta' : 'ofertas'}
                                             </Badge>
                                         </TableCell>
@@ -220,8 +205,9 @@ export default function RequestsTable({
                                             >
                                                 <Button
                                                     variant="ghost"
-                                                    size="icon"
+                                                    size="sm"
                                                     title="Ver detalle completo"
+                                                    className="text-xs h-8 gap-1"
                                                     onClick={() => navigate(`/Requests/${req.id}/summary`)}
                                                 >
                                                     <Eye className="w-4 h-4 text-slate-400" />
@@ -280,34 +266,14 @@ export default function RequestsTable({
             </div>
 
             {/* Pagination */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
-                <span className="text-sm text-slate-500">
-                    {requests.length} solicitud{requests.length !== 1 ? 'es' : ''}
-                </span>
-                <span className="text-sm text-slate-500">
-                    Página {page || 1} de {totalPages || 1}
-                </span>
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onPageChange(Math.max(1, page - 1))}
-                        disabled={!page || page <= 1}
-                    >
-                        <ChevronLeft className="w-4 h-4 mr-1" />
-                        Anterior
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-                        disabled={!totalPages || page >= totalPages}
-                    >
-                        Siguiente
-                        <ChevronRight className="w-4 h-4 ml-1" />
-                    </Button>
-                </div>
-            </div>
+            <Pagination
+                totalItems={requests.length}
+                itemsLabel="solicitud"
+                itemsLabelPlural="solicitudes"
+                currentPage={page || 1}
+                totalPages={totalPages || 1}
+                onPageChange={onPageChange}
+            />
         </Card>
         </div>
     );

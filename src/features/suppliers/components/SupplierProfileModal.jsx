@@ -26,7 +26,7 @@ export default function SupplierProfileModal({
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-lg flex flex-col max-h-[90vh] p-0 gap-0">
                 <DialogHeader className="px-6 pt-6 pb-4 flex-shrink-0 border-b">
-                    <DialogTitle className="text-xl font-bold text-[#1E293B]">Perfil del Proveedor</DialogTitle>
+                    <DialogTitle className="text-xl font-bold text-foreground">Perfil del Proveedor</DialogTitle>
                 </DialogHeader>
 
                 <div className="overflow-y-auto flex-1 px-6 py-5 space-y-6">
@@ -40,13 +40,13 @@ export default function SupplierProfileModal({
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <span className="text-3xl font-bold text-[#1E293B]">
+                                <span className="text-3xl font-bold text-foreground">
                                     {company.trade_name?.[0] || 'P'}
                                 </span>
                             )}
                         </div>
                         <div>
-                            <h3 className="font-bold text-xl text-[#1E293B]">
+                            <h3 className="font-bold text-xl text-foreground">
                                 {company.trade_name}
                             </h3>
                             <RatingStars rating={company.average_rating || 0} />
@@ -59,29 +59,29 @@ export default function SupplierProfileModal({
 
                     {/* Info Grid */}
                     <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-slate-50 p-4 rounded-xl">
+                        <div className="bg-muted/50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Sector</p>
-                            <p className="font-semibold text-[#1E293B]">
+                            <p className="font-semibold text-foreground">
                                 {company.sector || '-'}
                             </p>
                         </div>
-                        <div className="bg-slate-50 p-4 rounded-xl">
+                        <div className="bg-muted/50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Tipo</p>
-                            <p className="font-semibold text-[#1E293B]">
+                            <p className="font-semibold text-foreground">
                                 {company.company_type || 'Empresa'}
                             </p>
                         </div>
-                        <div className="bg-slate-50 p-4 rounded-xl">
+                        <div className="bg-muted/50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Ubicación</p>
-                            <p className="font-semibold text-[#1E293B]">
+                            <p className="font-semibold text-foreground">
                                 {[mainLocation.location_city, mainLocation.location_state]
                                     .filter(Boolean)
                                     .join(', ') || 'No especificada'}
                             </p>
                         </div>
-                        <div className="bg-slate-50 p-4 rounded-xl">
+                        <div className="bg-muted/50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Cobertura</p>
-                            <p className="font-semibold text-[#1E293B]">
+                            <p className="font-semibold text-foreground">
                                 {mainLocation.national_coverage ? 'Nacional' : 'Local'}
                             </p>
                         </div>
@@ -99,8 +99,8 @@ export default function SupplierProfileModal({
                     {primaryContact.contact_person && (
                         <div>
                             <p className="text-sm text-slate-500 mb-2">Contacto</p>
-                            <div className="bg-slate-50 p-4 rounded-xl space-y-1">
-                                <p className="font-semibold text-[#1E293B]">{primaryContact.contact_person}</p>
+                            <div className="bg-muted/50 p-4 rounded-xl space-y-1">
+                                <p className="font-semibold text-foreground">{primaryContact.contact_person}</p>
                                 {primaryContact.position && (
                                     <p className="text-sm text-slate-500">{primaryContact.position}</p>
                                 )}
@@ -162,7 +162,7 @@ export default function SupplierProfileModal({
                         >
                             Cerrar
                         </Button>
-                        <Button className="flex-1 bg-[#D2FC31] text-[#1E293B] hover:bg-[#c4ed2d]">
+                        <Button className="flex-1 bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]">
                             <MessageSquare className="w-4 h-4 mr-1" />
                             Contactar
                         </Button>

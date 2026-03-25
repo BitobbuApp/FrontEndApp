@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { useNavigate } from 'react-router-dom';
 import * as authApi from './services/authApi';
 
 const AuthContext = createContext();
@@ -21,18 +21,9 @@ export const AuthProvider = ({ children }) => {
             setIsLoadingAuth(true);
             setAuthError(null);
 
-            // Try to load session from Bitobbu API or localStorage
+            // Load session from localStorage (JWT-based)
             const currentUser = await authApi.loadSession();
-
-            // Also keep base44 in sync if still used
-            try {
-                const b44User = await base44.auth.me();
-                setUser({ ...currentUser, ...b44User });
-            } catch (e) {
-                // If base44 fails, we still have the Bitobbu user
-                setUser(currentUser);
-            }
-
+            setUser(currentUser);
             setIsAuthenticated(true);
         } catch (error) {
             const errorType = error.type ?? (error.message === 'auth_required' ? 'auth_required' : 'unknown');
@@ -58,7 +49,8 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setIsAuthenticated(false);
         authApi.clearSession();
-        base44.auth.logout();
+        // Redirect to login page
+        window.location.href = '/login';
     };
 
     const updateSession = (updates) => {
@@ -76,7 +68,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     const navigateToLogin = () => {
-        base44.auth.redirectToLogin(window.location.href);
+        window.location.href = '/login';
     };
 
     return (
