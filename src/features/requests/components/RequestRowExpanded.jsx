@@ -1,33 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Flame, Zap, TrendingUp, TrendingDown, ArrowUpDown, FileText, MessageSquare } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/ui/StatusBadge';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { quoteResponsesApi } from '../services/quoteResponsesApi';
+import { transactionsApi } from '../../transactions/services/transactionsApi';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
-// --- Mock data for the quote responses (endpoint not yet available) ---
-// Once GET /quote-responses?request_id=xxx is built, replace this with a useQuery call.
-const MOCK_RESPONSES = [
-    {
-        id: '1',
-        supplier: { name: 'Global Importaciones VE', initial: 'G', rating: 4.3, verified: true },
-        payment_conditions: 'Negociable',
-        unit_price: 12,
-        total_amount: 1800,
-        delivery_time: '2',
-        status: 'Pending',
-    },
-    {
-        id: '2',
-        supplier: { name: 'Capi Rosse', initial: 'C', rating: 6.0, verified: false },
-        payment_conditions: 'Negociable',
-        unit_price: 20,
-        total_amount: 4000,
-        delivery_time: '3',
-        status: 'Pending',
-    },
-];
-
-// Derive stats from mock responses
+// Derive stats from responses
 function getStats(responses) {
     if (!responses.length) return null;
     const amounts = responses.map((r) => r.total_amount);
@@ -58,19 +50,97 @@ const statusLabels = {
 };
 
 export default function RequestRowExpanded({ request }) {
-    // TODO: Replace MOCK_RESPONSES with actual API data when endpoint is available:
-    // const { data: responses = [] } = useQuery({
-    //     queryKey: ['quote-responses', request.id],
-    //     queryFn: () => quoteResponsesApi.getQuoteResponsesByRequestId(request.id, { limit: 5 }),
-    //     enabled: !!request.id,
-    // });
-    const responses = MOCK_RESPONSES;
+    const queryClient = useQueryClient();
+    const navigate = useNavigate();
+    const [confirmQuote, setConfirmQuote] = useState(null);
+
+    const acceptQuoteMutation = useMutation({
+        mutationFn: async (resp) => {
+            // 1. Update quote status to Accepted
+            await quoteResponsesApi.updateQuoteResponse(resp.id, { status: 'Accepted' });
+
+            // 2. Create the transaction
+            const transactionData = {
+                quote_response_id: resp.id,
+                buyer_id: request.company_id,
+                supplier_id: resp.supplier_id || resp.supplier?.id || "mock-supplier", // support mock or real data
+                product_description: request.product_service || request.description || "Producto/Servicio",
+                unit_price: resp.unit_price,
+                quantity: resp.quantity || 1,
+                total_amount: resp.total_amount,
+                status: 'In Process',
+                buyer_confirmed: true,
+            };
+            
+            return await transactionsApi.createTransaction(transactionData);
+        },
+        onSuccess: (responseCode, variables) => {
+            toast.success('Cotización aceptada', {
+                description: 'Se ha creado la transacción y la sala de chat.',
+            });
+            queryClient.invalidateQueries({ queryKey: ['quote-responses', request.id] });
+            
+            // The result structure uses ApiResponse format
+            const txId = responseCode?.data?.id || responseCode?.id;
+            // Redirect to Chat passing the transactionId context
+            navigate('/Chat', { state: { transactionId: txId } });
+        },
+        onError: (error) => {
+            console.error('Error accepting quote:', error);
+            toast.error('Error al aceptar la cotización', {
+                description: error.response?.data?.message || 'Ocurrió un problema de comunicación.',
+            });
+        }
+    });
+
+    const handleAccept = (resp) => {
+        setConfirmQuote(resp);
+    };
+
+    const confirmAcceptance = () => {
+        if (confirmQuote) {
+            acceptQuoteMutation.mutate(confirmQuote);
+            setConfirmQuote(null);
+        }
+    };
+    
+    // Fetch actual data from backend
+    const { data: responseData, isLoading } = useQuery({
+         queryKey: ['quote-responses', request.id],
+         queryFn: () => quoteResponsesApi.getQuoteResponsesByRequestId(request.id, { limit: 10 }),
+         enabled: !!request.id,
+    });
+    
+    const responses = responseData?.data?.items || [];
     const stats = getStats(responses);
 
     return (
         <div className="bg-muted/50 border-y border-border p-6 space-y-5">
+            {/* Confirmation Dialog */}
+            <AlertDialog open={!!confirmQuote} onOpenChange={(open) => !open && setConfirmQuote(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Confirmar Aceptación?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Estás a punto de iniciar una transacción aceptando la oferta de <strong className="text-foreground">{confirmQuote?.supplier?.name || confirmQuote?.supplier?.trade_name || 'este proveedor'}</strong> por un total de <strong className="text-emerald-600">${confirmQuote?.total_amount?.toLocaleString()}</strong>.
+                            <br /><br />
+                            Esto creará un espacio de chat seguro y se le notificará al proveedor.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmAcceptance} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+                            Aceptar Oferta
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {isLoading && (
+                 <div className="text-center p-4">Cargando cotizaciones...</div>
+            )}
             {/* Highlight cards */}
-            {stats && (
+            {!isLoading && stats && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Best Price */}
                     <div className="bg-green-50 border border-green-200 rounded-xl p-4">
@@ -127,12 +197,12 @@ export default function RequestRowExpanded({ request }) {
                 <p className="text-sm font-semibold text-foreground mb-3">
                     Últimas Ofertas ({responses.length})
                 </p>
-                {responses.length === 0 ? (
+                {responses.length === 0 && !isLoading ? (
                     <div className="bg-background rounded-xl border border-border p-6 text-center">
                         <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
                         <p className="text-sm text-slate-400">Aún no hay ofertas para esta solicitud</p>
                     </div>
-                ) : (
+                ) : !isLoading && (
                     <div className="bg-background rounded-xl border border-border overflow-hidden">
                         <table className="w-full text-sm">
                             <thead>
@@ -190,9 +260,10 @@ export default function RequestRowExpanded({ request }) {
                                                 <Button
                                                     size="sm"
                                                     className="h-7 px-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs"
-                                                    disabled={resp.status !== 'Pending'}
+                                                    disabled={resp.status !== 'Pending' || acceptQuoteMutation.isPending}
+                                                    onClick={() => handleAccept(resp)}
                                                 >
-                                                    Aceptar
+                                                    {acceptQuoteMutation.isPending && acceptQuoteMutation.variables?.id === resp.id ? 'Cargando...' : 'Aceptar'}
                                                 </Button>
                                                 <Button
                                                     variant="ghost"

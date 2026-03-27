@@ -26,6 +26,14 @@ export const quoteResponsesApi = {
     },
 
     /**
+     * GET /quote-responses/request/:requestId
+     * Fetch all quote responses for a specific request
+     */
+    async getQuoteResponsesByRequestId(requestId, { page = 1, limit = 10 } = {}) {
+        return await apiClient.get(`/quote-responses/request/${requestId}`, { params: { page, limit } });
+    },
+
+    /**
      * GET /quote-responses/:id
      * Fetch the details of a specific quote response
      */

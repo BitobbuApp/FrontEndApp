@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as authApi from './services/authApi';
+import { connectSocket, disconnectSocket } from '@/api/socketClient';
 
 const AuthContext = createContext();
 
@@ -25,11 +26,13 @@ export const AuthProvider = ({ children }) => {
             const currentUser = await authApi.loadSession();
             setUser(currentUser);
             setIsAuthenticated(true);
+            connectSocket(); // Conectar socket tras verificar sesión existosa
         } catch (error) {
             const errorType = error.type ?? (error.message === 'auth_required' ? 'auth_required' : 'unknown');
             setAuthError({ type: errorType, message: error.message });
             setIsAuthenticated(false);
             setUser(null);
+            disconnectSocket(); // Desconectar si la sesión es inválida
         } finally {
             setIsLoadingAuth(false);
         }
@@ -42,6 +45,7 @@ export const AuthProvider = ({ children }) => {
         setUser(loggedUser);
         setIsAuthenticated(true);
         setAuthError(null);
+        connectSocket(); // Conectar socket inmediatamente después del login
         return loggedUser;
     };
 
@@ -49,6 +53,7 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
         setIsAuthenticated(false);
         authApi.clearSession();
+        disconnectSocket(); // Asegurar desconexión local e impedir memory leaks en sockets inactivos
         // Redirect to login page
         window.location.href = '/login';
     };
