@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Bitobbu</string>
+    <string name="title_activity_main">Bitobbu</string>
+    <string name="package_name">com.bitobbu.app</string>
+    <string name="custom_url_scheme">com.bitobbu.app</string>
+</resources>
