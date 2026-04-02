@@ -1,29 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { Upload } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { productsApi } from '../services/productsApi';
 import { toast } from 'sonner';
-import { Upload, Package } from 'lucide-react';
+import { useAuth } from '@/features/auth/hooks/useAuth';
+import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 import {
-    Dialog, DialogContent, DialogHeader, DialogTitle,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
-
-const CATEGORIAS = [
-    'Alimentos', 'Ferreteria', 'Salud', 'IT', 'Automotriz', 'Embalaje',
-    'Quimicos', 'Oficina', 'Textil', 'Logistica', 'Mantenimiento',
-    'Seguridad', 'Marketing', 'Legal', 'RRHH',
-];
-
-const UNIDADES = [
-    'Units', 'Kg', 'Liters', 'Meters', 'Boxes', 'Pallets', 'Tons', 'Gallons',
-];
+import { Textarea } from '@/components/ui/textarea';
+import { productsApi } from '../services/productsApi';
 
 const TIPOS = ['Producto', 'Servicio'];
 const DISPONIBILIDAD = ['Disponible', 'Bajo Pedido', 'Agotado'];
@@ -31,10 +29,10 @@ const DISPONIBILIDAD = ['Disponible', 'Bajo Pedido', 'Agotado'];
 const DEFAULT_FORM = {
     type: 'Producto',
     name: '',
-    category: '',
+    category_id: '',
     brand: '',
     base_price: '',
-    unit_of_measure: 'Units',
+    unit_id: '',
     moq: '1',
     availability: 'Disponible',
     description: '',
@@ -45,6 +43,23 @@ export default function AddProductModal({ open, onOpenChange }) {
     const { user } = useAuth();
     const queryClient = useQueryClient();
     const [form, setForm] = useState(DEFAULT_FORM);
+    const {
+        categoryOptions,
+        unitOptions,
+        defaultUnitOption,
+    } = useAppMetadata();
+
+    useEffect(() => {
+        if (!defaultUnitOption?.value) {
+            return;
+        }
+
+        setForm((prev) => (
+            prev.unit_id
+                ? prev
+                : { ...prev, unit_id: defaultUnitOption.value }
+        ));
+    }, [defaultUnitOption?.value]);
 
     const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
@@ -53,7 +68,10 @@ export default function AddProductModal({ open, onOpenChange }) {
         onSuccess: () => {
             toast.success('Producto/Servicio agregado exitosamente');
             queryClient.invalidateQueries({ queryKey: ['companyProducts'] });
-            setForm(DEFAULT_FORM);
+            setForm({
+                ...DEFAULT_FORM,
+                unit_id: defaultUnitOption?.value || '',
+            });
             onOpenChange(false);
         },
         onError: (err) => {
@@ -62,25 +80,32 @@ export default function AddProductModal({ open, onOpenChange }) {
     });
 
     const handleSubmit = () => {
-        if (!form.name.trim()) { toast.error('El nombre es requerido'); return; }
-        if (!form.base_price || Number(form.base_price) < 0) { toast.error('Ingresa un precio válido'); return; }
+        if (!form.name.trim()) {
+            toast.error('El nombre es requerido');
+            return;
+        }
+
+        if (!form.base_price || Number(form.base_price) < 0) {
+            toast.error('Ingresa un precio valido');
+            return;
+        }
 
         mutation.mutate({
-            name: form.name,
-            description: form.description,
-            category: form.category || null,
+            name: form.name.trim(),
+            description: form.description?.trim() || null,
+            category_id: form.category_id ? Number(form.category_id) : null,
             base_price: Number(form.base_price),
-            unit_of_measure: form.unit_of_measure,
+            unit_id: form.unit_id ? Number(form.unit_id) : Number(defaultUnitOption?.id) || null,
             moq: Number(form.moq) || 1,
-            is_active: form.availability === 'Disponible',
+            is_active: form.availability !== 'Agotado',
             company_id: user?.company_id,
-            photos: form.image_url ? [{ url: form.image_url, sort_order: 0 }] : []
+            photos: form.image_url ? [{ url: form.image_url, sort_order: 0 }] : [],
         });
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-lg font-bold text-foreground">
                         Agregar Producto o Servicio
@@ -88,52 +113,52 @@ export default function AddProductModal({ open, onOpenChange }) {
                 </DialogHeader>
 
                 <div className="space-y-5 pt-2">
-                    {/* Type toggle */}
                     <div className="flex gap-2">
-                        {TIPOS.map((t) => (
+                        {TIPOS.map((type) => (
                             <button
-                                key={t}
+                                key={type}
                                 type="button"
-                                onClick={() => set('type', t)}
-                                className={`flex-1 py-2 text-sm font-medium rounded-lg border transition-colors ${
-                                    form.type === t
-                                        ? 'bg-[#D2FC31] border-[#D2FC31] text-slate-900'
+                                onClick={() => set('type', type)}
+                                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
+                                    form.type === type
+                                        ? 'border-[#D2FC31] bg-[#D2FC31] text-slate-900'
                                         : 'border-border text-slate-500 hover:bg-muted/50'
                                 }`}
                             >
-                                {t}
+                                {type}
                             </button>
                         ))}
                     </div>
 
-                    {/* Image upload */}
                     <div>
-                        <Label className="mb-2 block">Imágenes del {form.type}</Label>
-                        <div className="w-28 h-28 rounded-xl border-2 border-dashed border-border bg-muted/50 flex flex-col items-center justify-center gap-1 cursor-pointer hover:bg-slate-100 transition-colors">
-                            <Upload className="w-6 h-6 text-slate-400" />
+                        <Label className="mb-2 block">Imagenes del {form.type}</Label>
+                        <div className="flex h-28 w-28 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border bg-muted/50 transition-colors hover:bg-slate-100">
+                            <Upload className="h-6 w-6 text-slate-400" />
                             <span className="text-[10px] text-slate-400">Subir imagen</span>
                         </div>
                     </div>
 
-                    {/* Name */}
                     <div className="space-y-2">
                         <Label>Nombre del {form.type} *</Label>
                         <Input
                             value={form.name}
                             onChange={(e) => set('name', e.target.value)}
-                            placeholder={form.type === 'Servicio' ? 'Ej: Diseño de Logo' : 'Ej: Aceite de Motor 5W30'}
+                            placeholder={form.type === 'Servicio' ? 'Ej: Diseno de Logo' : 'Ej: Aceite de Motor 5W30'}
                         />
                     </div>
 
-                    {/* Category + Brand */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label>Categoría</Label>
-                            <Select value={form.category} onValueChange={(v) => set('category', v)}>
-                                <SelectTrigger><SelectValue placeholder="Seleccionar" /></SelectTrigger>
+                            <Label>Categoria</Label>
+                            <Select value={form.category_id} onValueChange={(value) => set('category_id', value)}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Seleccionar" />
+                                </SelectTrigger>
                                 <SelectContent>
-                                    {CATEGORIAS.map((c) => (
-                                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                                    {categoryOptions.map((category) => (
+                                        <SelectItem key={category.id} value={category.value}>
+                                            {category.label}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -150,7 +175,6 @@ export default function AddProductModal({ open, onOpenChange }) {
                         )}
                     </div>
 
-                    {/* Price + Unit */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Precio Unitario ($) *</Label>
@@ -165,22 +189,25 @@ export default function AddProductModal({ open, onOpenChange }) {
                         </div>
                         <div className="space-y-2">
                             <Label>Unidad de Medida</Label>
-                            <Select value={form.unit_of_measure} onValueChange={(v) => set('unit_of_measure', v)}>
-                                <SelectTrigger><SelectValue /></SelectTrigger>
+                            <Select value={form.unit_id} onValueChange={(value) => set('unit_id', value)}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
                                 <SelectContent>
-                                    {UNIDADES.map((u) => (
-                                        <SelectItem key={u} value={u}>{u}</SelectItem>
+                                    {unitOptions.map((unit) => (
+                                        <SelectItem key={unit.id} value={unit.value}>
+                                            {unit.label}
+                                        </SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
 
-                    {/* MOQ + Availability (Producto only) */}
                     {form.type === 'Producto' && (
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label>Cantidad Mínima (MOQ) *</Label>
+                                <Label>Cantidad Minima (MOQ) *</Label>
                                 <Input
                                     type="number"
                                     min="1"
@@ -191,11 +218,15 @@ export default function AddProductModal({ open, onOpenChange }) {
                             </div>
                             <div className="space-y-2">
                                 <Label>Disponibilidad</Label>
-                                <Select value={form.availability} onValueChange={(v) => set('availability', v)}>
-                                    <SelectTrigger><SelectValue /></SelectTrigger>
+                                <Select value={form.availability} onValueChange={(value) => set('availability', value)}>
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
                                     <SelectContent>
-                                        {DISPONIBILIDAD.map((d) => (
-                                            <SelectItem key={d} value={d}>{d}</SelectItem>
+                                        {DISPONIBILIDAD.map((availability) => (
+                                            <SelectItem key={availability} value={availability}>
+                                                {availability}
+                                            </SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -204,17 +235,16 @@ export default function AddProductModal({ open, onOpenChange }) {
                     )}
 
                     <div className="space-y-2">
-                        <Label>Descripción</Label>
+                        <Label>Descripcion</Label>
                         <Textarea
                             value={form.description}
                             onChange={(e) => set('description', e.target.value)}
-                            placeholder="Descripción detallada del producto o servicio..."
+                            placeholder="Descripcion detallada del producto o servicio..."
                             className="min-h-[120px]"
                         />
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex justify-end gap-3 pt-2 border-t border-border">
+                    <div className="flex justify-end gap-3 border-t border-border pt-2">
                         <Button
                             variant="outline"
                             onClick={() => onOpenChange(false)}

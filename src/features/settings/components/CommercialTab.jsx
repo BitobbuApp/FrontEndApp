@@ -17,31 +17,27 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { SECTORES } from './CompanyTab';
 
-export const METODOS_PAGO = [
-    'Transferencia',
-    'Efectivo',
-    'Tarjeta de Crédito',
-    'Tarjeta de Débito',
-    'Criptomoneda',
-    'Pago Móvil',
-    'Zelle',
-];
-
-export default function CommercialTab({ formData, setFormData, toggleCategoria, toggleMetodoPago }) {
+export default function CommercialTab({
+    formData,
+    setFormData,
+    toggleCategoria,
+    toggleMetodoPago,
+    categoryOptions = [],
+    paymentMethodOptions = [],
+}) {
     return (
         <Card className="border-0 shadow-sm">
             <CardHeader>
                 <CardTitle>Perfil Comercial</CardTitle>
-                <CardDescription>Información sobre tu actividad comercial</CardDescription>
+                <CardDescription>Informacion sobre tu actividad comercial</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-3">
-                    <Label>Interés Principal *</Label>
+                    <Label>Interes Principal *</Label>
                     <RadioGroup
                         value={formData.interest}
-                        onValueChange={(v) => setFormData((prev) => ({ ...prev, interest: v }))}
+                        onValueChange={(value) => setFormData((prev) => ({ ...prev, interest: value }))}
                         className="flex gap-4"
                     >
                         <div className="flex items-center space-x-2">
@@ -60,21 +56,20 @@ export default function CommercialTab({ formData, setFormData, toggleCategoria, 
                 </div>
 
                 <div className="space-y-3">
-                    <Label>Categorías de Interés</Label>
+                    <Label>Categorias de Interes</Label>
                     <div className="flex flex-wrap gap-2">
-                        {SECTORES.map((cat) => (
+                        {categoryOptions.map((category) => (
                             <Badge
-                                key={cat}
-                                variant={
-                                    formData.interest_categories?.includes(cat) ? 'default' : 'outline'
-                                }
-                                className={`cursor-pointer transition-colors ${formData.interest_categories?.includes(cat)
+                                key={category.id}
+                                variant={formData.interest_category_ids?.includes(category.value) ? 'default' : 'outline'}
+                                className={`cursor-pointer transition-colors ${
+                                    formData.interest_category_ids?.includes(category.value)
                                         ? 'bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]'
                                         : 'hover:bg-slate-100'
-                                    }`}
-                                onClick={() => toggleCategoria(cat)}
+                                }`}
+                                onClick={() => toggleCategoria(category.value)}
                             >
-                                {cat}
+                                {category.label}
                             </Badge>
                         ))}
                     </div>
@@ -84,72 +79,69 @@ export default function CommercialTab({ formData, setFormData, toggleCategoria, 
                     <Label>Volumen Aproximado</Label>
                     <Select
                         value={formData.approximate_volume}
-                        onValueChange={(v) =>
-                            setFormData((prev) => ({ ...prev, approximate_volume: v }))
+                        onValueChange={(value) =>
+                            setFormData((prev) => ({ ...prev, approximate_volume: value }))
                         }
                     >
                         <SelectTrigger className="w-48">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Pequeño">Pequeño</SelectItem>
+                            <SelectItem value="Pequeno">Pequeno</SelectItem>
                             <SelectItem value="Medio">Medio</SelectItem>
                             <SelectItem value="Grande">Grande</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
 
-                <div className="space-y-4 pt-4 border-t">
+                <div className="space-y-4 border-t pt-4">
                     <h4 className="font-medium text-foreground">Confianza y Pagos</h4>
 
-                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
+                    <div className="flex items-center justify-between rounded-xl bg-muted/50 p-4">
                         <div>
-                            <p className="font-medium text-foreground">¿Agente de Retención?</p>
+                            <p className="font-medium text-foreground">Agente de Retencion</p>
                             <p className="text-sm text-slate-500">
-                                ¿Tu empresa es agente de retención de IVA?
+                                Tu empresa es agente de retencion de IVA?
                             </p>
                         </div>
                         <Switch
                             checked={formData.retention_agent}
-                            onCheckedChange={(v) =>
-                                setFormData((prev) => ({ ...prev, retention_agent: v }))
+                            onCheckedChange={(value) =>
+                                setFormData((prev) => ({ ...prev, retention_agent: value }))
                             }
                         />
                     </div>
 
-                    <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
+                    <div className="flex items-center justify-between rounded-xl bg-muted/50 p-4">
                         <div>
-                            <p className="font-medium text-foreground">¿Trabajas con Crédito?</p>
+                            <p className="font-medium text-foreground">Trabajas con Credito</p>
                             <p className="text-sm text-slate-500">
-                                ¿Ofreces o aceptas pagos a crédito?
+                                Ofreces o aceptas pagos a credito?
                             </p>
                         </div>
                         <Switch
                             checked={formData.works_with_credit}
-                            onCheckedChange={(v) =>
-                                setFormData((prev) => ({ ...prev, works_with_credit: v }))
+                            onCheckedChange={(value) =>
+                                setFormData((prev) => ({ ...prev, works_with_credit: value }))
                             }
                         />
                     </div>
 
                     <div className="space-y-3">
-                        <Label>Métodos de Pago Aceptados</Label>
+                        <Label>Metodos de Pago Aceptados</Label>
                         <div className="flex flex-wrap gap-2">
-                            {METODOS_PAGO.map((metodo) => (
+                            {paymentMethodOptions.map((paymentMethod) => (
                                 <Badge
-                                    key={metodo}
-                                    variant={
-                                        formData.payment_methods?.includes(metodo)
-                                            ? 'default'
-                                            : 'outline'
-                                    }
-                                    className={`cursor-pointer transition-colors ${formData.payment_methods?.includes(metodo)
+                                    key={paymentMethod.id}
+                                    variant={formData.payment_method_ids?.includes(paymentMethod.value) ? 'default' : 'outline'}
+                                    className={`cursor-pointer transition-colors ${
+                                        formData.payment_method_ids?.includes(paymentMethod.value)
                                             ? 'bg-[#1E293B] text-white hover:bg-slate-700'
                                             : 'hover:bg-slate-100'
-                                        }`}
-                                    onClick={() => toggleMetodoPago(metodo)}
+                                    }`}
+                                    onClick={() => toggleMetodoPago(paymentMethod.value)}
                                 >
-                                    {metodo}
+                                    {paymentMethod.label}
                                 </Badge>
                             ))}
                         </div>

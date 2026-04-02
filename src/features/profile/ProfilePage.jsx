@@ -16,6 +16,30 @@ import useCompanyProducts from './hooks/useCompanyProducts';
 import ProductSmallCard from './components/ProductSmallCard';
 import AddProductModal from './components/AddProductModal';
 
+function getMetadataLabel(value) {
+    if (typeof value === 'string') {
+        return value;
+    }
+
+    if (!value || typeof value !== 'object') {
+        return '';
+    }
+
+    if (typeof value.name === 'string') {
+        return value.name;
+    }
+
+    if (typeof value.method === 'string') {
+        return value.method;
+    }
+
+    if (value.method && typeof value.method === 'object') {
+        return value.method.name || value.method.name_es || value.method.name_en || '';
+    }
+
+    return value.name_es || value.name_en || '';
+}
+
 export default function ProfilePage() {
     const navigate = useNavigate();
     const [showAddProduct, setShowAddProduct] = useState(false);
@@ -147,10 +171,10 @@ export default function ProfilePage() {
                                 <div className="flex flex-wrap gap-1.5">
                                     {company.payment_methods.map((pm) => (
                                         <span
-                                            key={typeof pm === 'string' ? pm : pm.method}
+                                            key={getMetadataLabel(pm) || JSON.stringify(pm)}
                                             className="inline-block text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full"
                                         >
-                                            {typeof pm === 'string' ? pm : pm.method}
+                                            {getMetadataLabel(pm)}
                                         </span>
                                     ))}
                                 </div>
