@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { appMetadataApi } from '../services/appMetadataApi';
 
@@ -85,36 +86,61 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
 
     const metadata = query.data || {};
 
-    const categories = normalizeList(metadata.categories);
-    const companyTypes = normalizeList(metadata.company_types);
-    const notificationTypes = normalizeList(metadata.notification_types);
-    const paymentMethods = normalizeList(metadata.payment_methods);
-    const unitsOfMeasure = normalizeList(metadata.units_of_measure);
-    const verificationDocumentTypes = normalizeList(metadata.verif_doc_types);
+    const {
+        categories,
+        companyTypes,
+        notificationTypes,
+        paymentMethods,
+        unitsOfMeasure,
+        verificationDocumentTypes,
+    } = useMemo(() => {
+        return {
+            categories: normalizeList(metadata.categories),
+            companyTypes: normalizeList(metadata.company_types),
+            notificationTypes: normalizeList(metadata.notification_types),
+            paymentMethods: normalizeList(metadata.payment_methods),
+            unitsOfMeasure: normalizeList(metadata.units_of_measure),
+            verificationDocumentTypes: normalizeList(metadata.verif_doc_types),
+        };
+    }, [metadata]);
 
-    const categoryOptions = categories
-        .filter((item) => item?.is_active !== false)
-        .map((item) => toSelectOption(item, getLocalizedLabel(item, language)));
-
-    const companyTypeOptions = companyTypes.map((item) =>
-        toSelectOption(item, getLocalizedLabel(item, language))
-    );
-
-    const paymentMethodOptions = paymentMethods
-        .filter((item) => item?.is_active !== false)
-        .map((item) => toSelectOption(item, getLocalizedLabel(item, language)));
-
-    const unitOptions = unitsOfMeasure.map((item) =>
-        toSelectOption(item, normalizeText(item.abbreviation) || normalizeText(item.name))
-    );
-
-    const verificationDocumentTypeOptions = verificationDocumentTypes.map((item) =>
-        toSelectOption(item, normalizeText(item.name))
-    );
-
-    const notificationTypeOptions = notificationTypes.map((item) =>
-        toSelectOption(item, normalizeText(item.name))
-    );
+    const {
+        categoryOptions,
+        companyTypeOptions,
+        paymentMethodOptions,
+        unitOptions,
+        verificationDocumentTypeOptions,
+        notificationTypeOptions,
+    } = useMemo(() => {
+        return {
+            categoryOptions: categories
+                .filter((item) => item?.is_active !== false)
+                .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
+            companyTypeOptions: companyTypes.map((item) =>
+                toSelectOption(item, getLocalizedLabel(item, language))
+            ),
+            paymentMethodOptions: paymentMethods
+                .filter((item) => item?.is_active !== false)
+                .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
+            unitOptions: unitsOfMeasure.map((item) =>
+                toSelectOption(item, normalizeText(item.abbreviation) || normalizeText(item.name))
+            ),
+            verificationDocumentTypeOptions: verificationDocumentTypes.map((item) =>
+                toSelectOption(item, normalizeText(item.name))
+            ),
+            notificationTypeOptions: notificationTypes.map((item) =>
+                toSelectOption(item, normalizeText(item.name))
+            ),
+        };
+    }, [
+        categories,
+        companyTypes,
+        paymentMethods,
+        unitsOfMeasure,
+        verificationDocumentTypes,
+        notificationTypes,
+        language
+    ]);
 
     return {
         ...query,

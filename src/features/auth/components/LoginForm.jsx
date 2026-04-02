@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../AuthContext';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -136,3 +136,4 @@ export default function LoginForm({ onGoToRegister }) {
         </div>
     );
 }
+

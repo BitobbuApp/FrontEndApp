@@ -23,12 +23,25 @@ export async function loginUser(email, password) {
  * POST /api/v1/users/register
  * Returns: { id, first_name, last_name, email }
  */
-export async function registerUser({ first_name, last_name, email, password }) {
+export async function registerUser({
+    first_name,
+    last_name,
+    email,
+    password,
+    trade_name,
+    founding_year,
+    country_id,
+    state_id
+}) {
     const responseBody = await apiClient.post('/users/register', {
         first_name,
         last_name,
         email,
-        password
+        password,
+        trade_name,
+        founding_year,
+        country_id,
+        state_id
     });
     return responseBody.data;
 }

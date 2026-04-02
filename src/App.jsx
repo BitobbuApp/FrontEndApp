@@ -5,7 +5,7 @@ import { queryClientInstance } from '@/lib/query-client'
 import NavigationTracker from '@/lib/NavigationTracker'
 import { pagesConfig } from './pages.config'
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from '@/features/auth/hooks/useAuth';
+import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';

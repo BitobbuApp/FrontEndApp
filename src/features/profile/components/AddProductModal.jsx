@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Upload } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth/AuthContext';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 import {
     Dialog,
@@ -265,3 +265,4 @@ export default function AddProductModal({ open, onOpenChange }) {
         </Dialog>
     );
 }
+

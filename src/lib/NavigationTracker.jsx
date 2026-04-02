@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth/AuthContext';
 import { pagesConfig } from '@/pages.config';
 
 export default function NavigationTracker() {

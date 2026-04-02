@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { LogOut, User, Lock, Settings, ChevronDown } from 'lucide-react';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth/AuthContext';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -83,3 +83,4 @@ export default function UserMenu({ user, myCompany }) {
         </DropdownMenu>
     );
 }
+
