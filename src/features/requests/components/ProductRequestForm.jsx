@@ -1,52 +1,34 @@
 import React from 'react';
+import { CalendarIcon } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from '@/components/ui/select';
-import { CalendarIcon } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import useGeographicData from '../../geographic/hooks/useGeographicData';
 
-const CATEGORIAS = [
-    'Alimentos', 'Ferretería', 'Salud', 'IT', 'Automotriz', 'Embalaje',
-    'Químicos', 'Oficina', 'Textil', 'Logística', 'Mantenimiento',
-    'Seguridad', 'Marketing', 'Legal', 'RRHH', 'Otro',
-];
+const CONDICIONES_PAGO = ['Negociable', 'Contado', 'Credito 30 dias', 'Credito 60 dias', 'Anticipo 50%'];
 
-const UNIDADES = [
-    { value: 'Units', label: 'Unidades' },
-    { value: 'Kg', label: 'Kg' },
-    { value: 'Liters', label: 'Litros' },
-    { value: 'Meters', label: 'Metros' },
-    { value: 'Boxes', label: 'Cajas' },
-    { value: 'Pallets', label: 'Paletas' },
-    { value: 'Tons', label: 'Toneladas' },
-    { value: 'Gallons', label: 'Galones' },
-];
+export default function ProductRequestForm({
+    form,
+    setForm,
+    categoryOptions = [],
+    unitOptions = [],
+}) {
+    // Default country to Venezuela (ID: 1) if not set
+    const currentCountryId = form.delivery_country_id || '1';
+    const { countries, states, isLoadingCountries, isLoadingStates } = useGeographicData(currentCountryId, null);
 
-const ESTADOS_VE = [
-    'Amazonas', 'Anzoátegui', 'Apure', 'Aragua', 'Barinas', 'Bolívar',
-    'Carabobo', 'Cojedes', 'Delta Amacuro', 'Falcón', 'Guárico', 'Lara',
-    'Mérida', 'Miranda', 'Monagas', 'Nueva Esparta', 'Portuguesa',
-    'Sucre', 'Táchira', 'Trujillo', 'Vargas', 'Yaracuy', 'Zulia',
-    'Distrito Capital',
-];
-
-const CONDICIONES_PAGO = ['Negociable', 'Contado', 'Crédito 30 días', 'Crédito 60 días', 'Anticipo 50%'];
-
-const field = (form, setForm) => (key) => (e) =>
-    setForm((prev) => ({ ...prev, [key]: e.target.value ?? e }));
-
-/**
- * Atomic form for requesting a Product (Bien físico).
- */
-export default function ProductRequestForm({ form, setForm }) {
     const set = (key) => (e) =>
         setForm((prev) => ({ ...prev, [key]: typeof e === 'string' ? e : e.target.value }));
 
     return (
         <div className="space-y-5">
-            {/* Name */}
             <div className="space-y-2">
                 <Label>
                     Nombre del Producto <span className="text-red-500">*</span>
@@ -59,22 +41,22 @@ export default function ProductRequestForm({ form, setForm }) {
                 />
             </div>
 
-            {/* Category */}
             <div className="space-y-2">
-                <Label>Categoría / Rubro</Label>
-                <Select value={form.category} onValueChange={set('category')}>
+                <Label>Categoria / Rubro</Label>
+                <Select value={form.category_id} onValueChange={set('category_id')}>
                     <SelectTrigger className="h-11">
-                        <SelectValue placeholder="Seleccionar categoría" />
+                        <SelectValue placeholder="Seleccionar categoria" />
                     </SelectTrigger>
                     <SelectContent>
-                        {CATEGORIAS.map((c) => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                        {categoryOptions.map((category) => (
+                            <SelectItem key={category.id} value={category.value}>
+                                {category.label}
+                            </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
             </div>
 
-            {/* Quantity + Unit */}
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label>
@@ -91,49 +73,76 @@ export default function ProductRequestForm({ form, setForm }) {
                 </div>
                 <div className="space-y-2">
                     <Label className="text-[#D2FC31] font-semibold">Unidad de Medida</Label>
-                    <Select value={form.unit_of_measure} onValueChange={set('unit_of_measure')}>
+                    <Select value={form.unit_id} onValueChange={set('unit_id')}>
                         <SelectTrigger className="h-11">
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                            {UNIDADES.map((u) => (
-                                <SelectItem key={u.value} value={u.value}>{u.label}</SelectItem>
+                            {unitOptions.map((unit) => (
+                                <SelectItem key={unit.id} value={unit.value}>
+                                    {unit.label}
+                                </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </div>
             </div>
 
-            {/* Delivery — State + City */}
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
+                    <Label>País de Entrega</Label>
+                    <Select 
+                        disabled={isLoadingCountries} 
+                        value={currentCountryId} 
+                        onValueChange={(value) => {
+                            setForm((prev) => ({ 
+                                ...prev, 
+                                delivery_country_id: value, 
+                                delivery_state_id: '', 
+                                delivery_state: '' 
+                            }));
+                        }}
+                    >
+                        <SelectTrigger className="h-11">
+                            <SelectValue placeholder="Seleccionar país" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {countries.map((pais) => (
+                                <SelectItem key={pais.id} value={pais.id.toString()}>
+                                    {pais.name_es}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="space-y-2">
                     <Label>Estado de Entrega</Label>
-                    <Select value={form.delivery_state} onValueChange={(v) => {
-                        setForm((prev) => ({ ...prev, delivery_state: v, delivery_city: '' }));
-                    }}>
+                    <Select 
+                        disabled={isLoadingStates || !currentCountryId}
+                        value={form.delivery_state_id?.toString()} 
+                        onValueChange={(value) => {
+                            const selectedState = states.find(s => s.id.toString() === value);
+                            setForm((prev) => ({ 
+                                ...prev, 
+                                delivery_state_id: value, 
+                                delivery_state: selectedState?.name || '' 
+                            }));
+                        }}
+                    >
                         <SelectTrigger className="h-11">
                             <SelectValue placeholder="Seleccionar estado" />
                         </SelectTrigger>
                         <SelectContent>
-                            {ESTADOS_VE.map((e) => (
-                                <SelectItem key={e} value={e}>{e}</SelectItem>
+                            {states.map((estado) => (
+                                <SelectItem key={estado.id} value={estado.id.toString()}>
+                                    {estado.name}
+                                </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </div>
-                <div className="space-y-2">
-                    <Label>Ciudad</Label>
-                    <Input
-                        value={form.delivery_city}
-                        onChange={set('delivery_city')}
-                        disabled={!form.delivery_state}
-                        placeholder={form.delivery_state ? 'Ej: Valencia' : 'Primero un estado'}
-                        className="h-11"
-                    />
-                </div>
             </div>
 
-            {/* Payment terms */}
             <div className="space-y-2">
                 <Label>Condiciones de Pago</Label>
                 <Select value={form.payment_terms} onValueChange={set('payment_terms')}>
@@ -141,18 +150,19 @@ export default function ProductRequestForm({ form, setForm }) {
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        {CONDICIONES_PAGO.map((c) => (
-                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                        {CONDICIONES_PAGO.map((condicion) => (
+                            <SelectItem key={condicion} value={condicion}>
+                                {condicion}
+                            </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
             </div>
 
-            {/* Expiry date */}
             <div className="space-y-2">
-                <Label>Fecha Límite</Label>
+                <Label>Fecha Limite</Label>
                 <div className="relative">
-                    <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-slate-400" />
                     <Input
                         type="date"
                         value={form.expiration_date}
@@ -163,13 +173,12 @@ export default function ProductRequestForm({ form, setForm }) {
                 </div>
             </div>
 
-            {/* Additional description */}
             <div className="space-y-2">
-                <Label>Descripción adicional</Label>
+                <Label>Descripcion adicional</Label>
                 <Textarea
                     value={form.description}
                     onChange={set('description')}
-                    placeholder="Marca, especificaciones técnicas, presentación preferida..."
+                    placeholder="Marca, especificaciones tecnicas, presentacion preferida..."
                     className="min-h-[100px]"
                 />
             </div>

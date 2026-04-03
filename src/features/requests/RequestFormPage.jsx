@@ -26,6 +26,8 @@ export default function RequestFormPage() {
         removeFile,
         handleSubmit,
         isPending,
+        categoryOptions,
+        unitOptions,
     } = useRequestForm();
 
     if (isEditing && isLoadingRequest) {
@@ -66,13 +68,22 @@ export default function RequestFormPage() {
                     {/* Step 2 — Specific form (shown only after type is selected) */}
                     {requestType === 'Producto' && (
                         <div className="pt-2 border-t border-border">
-                            <ProductRequestForm form={productForm} setForm={setProductForm} />
+                            <ProductRequestForm
+                                form={productForm}
+                                setForm={setProductForm}
+                                categoryOptions={categoryOptions}
+                                unitOptions={unitOptions}
+                            />
                         </div>
                     )}
 
                     {requestType === 'Servicio' && (
                         <div className="pt-2 border-t border-border">
-                            <ServiceRequestForm form={serviceForm} setForm={setServiceForm} />
+                            <ServiceRequestForm
+                                form={serviceForm}
+                                setForm={setServiceForm}
+                                categoryOptions={categoryOptions}
+                            />
                         </div>
                     )}
 

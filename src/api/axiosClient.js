@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 
 // Usa la variable de entorno o un fallback local
-const API_BASE = 'https://backendapp-k6x2.onrender.com/api/v1';
+const API_BASE = import.meta.env.VITE_API_BASE;
 
 // Importante: No importamos clearSession directamente si este archivo es usado por él
 // para evitar dependencias circulares. En lugar de eso, lo disparamos con un evento o

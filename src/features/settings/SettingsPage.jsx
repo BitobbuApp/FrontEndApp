@@ -50,6 +50,9 @@ export default function SettingsPage() {
         handleLogoChange,
         toggleCategoria,
         toggleMetodoPago,
+        categoryOptions,
+        companyTypeOptions,
+        paymentMethodOptions,
     } = useSettingsForm();
 
     const { user } = useAuth();
@@ -134,6 +137,8 @@ export default function SettingsPage() {
                         setFormData={setFormData}
                         handleLogoChange={handleLogoChange}
                         uploadLogoPending={uploadLogoMutation.isPending}
+                        sectorOptions={categoryOptions}
+                        companyTypeOptions={companyTypeOptions}
                     />
                 </TabsContent>
 
@@ -151,6 +156,8 @@ export default function SettingsPage() {
                         setFormData={setFormData}
                         toggleCategoria={toggleCategoria}
                         toggleMetodoPago={toggleMetodoPago}
+                        categoryOptions={categoryOptions}
+                        paymentMethodOptions={paymentMethodOptions}
                     />
                 </TabsContent>
 

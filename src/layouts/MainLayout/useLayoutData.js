@@ -3,7 +3,7 @@
 // Fully migrated from base44 to real backend APIs.
 
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth/AuthContext';
 import { requestsApi } from '@/features/requests/services/requestsApi';
 import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
 import { companyApi } from '@/features/settings/services/companyApi';
@@ -54,3 +54,4 @@ export default function useLayoutData() {
         mensajesCount,
     };
 }
+

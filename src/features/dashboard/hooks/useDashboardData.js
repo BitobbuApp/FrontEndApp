@@ -2,7 +2,7 @@
 // Centralises every react-query call the Dashboard page needs.
 
 import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth/AuthContext';
 import { requestsApi } from '@/features/requests/services/requestsApi';
 import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
 
@@ -57,3 +57,4 @@ export default function useDashboardData() {
         stats,
     };
 }
+

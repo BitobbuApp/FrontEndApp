@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, UserPlus } from 'lucide-react';
+import { Eye, EyeOff, UserPlus, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { registerUser } from '../services/authApi';
+import useGeographicData from '../../geographic/hooks/useGeographicData';
 
 export default function RegisterForm({ onGoToLogin }) {
     const [form, setForm] = useState({
@@ -12,7 +14,16 @@ export default function RegisterForm({ onGoToLogin }) {
         last_name: '',
         email: '',
         password: '',
+        trade_name: '',
+        founding_year: '',
+        country_id: '',
+        state_id: '',
+        // city_id: '', // Hidden as per request
     });
+    
+    // Geographic data cascading hook
+    const { countries, states, isLoadingCountries, isLoadingStates } = useGeographicData(form.country_id, form.state_id);
+
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -22,10 +33,24 @@ export default function RegisterForm({ onGoToLogin }) {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
+    const handleSelectChange = (name, value) => {
+        setForm((prev) => {
+            const newForm = { ...prev, [name]: value };
+            // Cascading reset
+            if (name === 'country_id') {
+                newForm.state_id = '';
+                // newForm.city_id = '';
+            // } else if (name === 'state_id') {
+                // newForm.city_id = '';
+            }
+            return newForm;
+        });
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        if (!form.first_name || !form.last_name || !form.email || !form.password) {
+        if (!form.first_name || !form.last_name || !form.email || !form.password || !form.trade_name || !form.founding_year || !form.country_id || !form.state_id) {
             setError('Por favor completa todos los campos.');
             return;
         }
@@ -163,6 +188,98 @@ export default function RegisterForm({ onGoToLogin }) {
                             >
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
+                        </div>
+                    </div>
+                    
+                    <div className="space-y-4 pt-2 border-t border-border mt-4">
+                        <h3 className="text-sm font-semibold flex items-center gap-2 text-slate-800">
+                            🏢 Datos de la Empresa
+                        </h3>
+                        
+                        <div className="space-y-2">
+                            <Label htmlFor="trade_name" className="text-sm font-medium text-slate-700">
+                                Nombre de la Empresa
+                            </Label>
+                            <Input
+                                id="trade_name"
+                                name="trade_name"
+                                type="text"
+                                value={form.trade_name}
+                                onChange={handleChange}
+                                placeholder="Ej. Distribuidora Pérez C.A."
+                                className="h-12 bg-background border-border"
+                                disabled={isLoading}
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="founding_year" className="text-sm font-medium text-slate-700">
+                                Año de Fundación
+                            </Label>
+                            <Input
+                                id="founding_year"
+                                name="founding_year"
+                                type="number"
+                                min="1900"
+                                max={new Date().getFullYear()}
+                                value={form.founding_year}
+                                onChange={(e) => setForm(prev => ({ ...prev, founding_year: parseInt(e.target.value) || '' }))}
+                                placeholder="Ej. 2015"
+                                className="h-12 bg-background border-border"
+                                disabled={isLoading}
+                            />
+                        </div>
+                    </div>
+                    
+                    {/* Geographic Cascading Selectors */}
+                    <div className="space-y-4 pt-2 border-t border-border">
+                        <h3 className="text-sm font-semibold flex items-center gap-2 text-slate-800">
+                            <MapPin className="w-4 h-4" /> Ubicación
+                        </h3>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium text-slate-700">País</Label>
+                                <Select disabled={isLoading || isLoadingCountries} value={form.country_id?.toString()} onValueChange={(val) => handleSelectChange('country_id', val)}>
+                                    <SelectTrigger className="w-full h-12 bg-background border-border">
+                                        <SelectValue placeholder="Selecciona el país" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {countries.map((c) => (
+                                            <SelectItem key={c.id} value={c.id.toString()}>{c.name_es}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium text-slate-700">Estado / Provincia</Label>
+                                <Select disabled={!form.country_id || isLoading || isLoadingStates} value={form.state_id?.toString()} onValueChange={(val) => handleSelectChange('state_id', val)}>
+                                    <SelectTrigger className="w-full h-12 bg-background border-border">
+                                        <SelectValue placeholder="Selecciona el estado" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {states.map((s) => (
+                                            <SelectItem key={s.id} value={s.id.toString()}>{s.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {/*
+                            <div className="space-y-2">
+                                <Label className="text-sm font-medium text-slate-700">Ciudad</Label>
+                                <Select disabled={!form.state_id || isLoading || isLoadingCities} value={form.city_id?.toString()} onValueChange={(val) => handleSelectChange('city_id', val)}>
+                                    <SelectTrigger className="w-full h-12 bg-background border-border">
+                                        <SelectValue placeholder="Selecciona la ciudad" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {cities.map((city) => (
+                                            <SelectItem key={city.id} value={city.id.toString()}>{city.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            */}
                         </div>
                     </div>
 

@@ -10,6 +10,38 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import RatingStars from '@/components/ui/RatingStars';
 
+function getMetadataLabel(value) {
+    if (typeof value === 'string') {
+        return value;
+    }
+
+    if (!value || typeof value !== 'object') {
+        return '';
+    }
+
+    if (typeof value.name === 'string') {
+        return value.name;
+    }
+
+    if (typeof value.method === 'string') {
+        return value.method;
+    }
+
+    if (value.method && typeof value.method === 'object') {
+        return value.method.name || value.method.name_es || value.method.name_en || '';
+    }
+
+    if (typeof value.category === 'string') {
+        return value.category;
+    }
+
+    if (value.category && typeof value.category === 'object') {
+        return value.category.name || value.category.name_es || value.category.name_en || '';
+    }
+
+    return value.name_es || value.name_en || '';
+}
+
 export default function SupplierProfileModal({
     open,
     onOpenChange,
@@ -132,7 +164,7 @@ export default function SupplierProfileModal({
                             <div className="flex flex-wrap gap-2">
                                 {company.payment_methods.map((method, i) => (
                                     <Badge key={i} variant="secondary" className="text-xs">
-                                        {typeof method === 'string' ? method : method.method}
+                                        {getMetadataLabel(method)}
                                     </Badge>
                                 ))}
                             </div>
@@ -146,7 +178,7 @@ export default function SupplierProfileModal({
                             <div className="flex flex-wrap gap-2">
                                 {company.categories_of_interest.map((cat, i) => (
                                     <Badge key={i} variant="outline" className="text-xs">
-                                        {typeof cat === 'string' ? cat : cat.category}
+                                        {getMetadataLabel(cat)}
                                     </Badge>
                                 ))}
                             </div>

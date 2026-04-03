@@ -1,4 +1,3 @@
-import React from 'react';
 import { Bell, HelpCircle, Menu } from 'lucide-react';
 import {
     DropdownMenu,

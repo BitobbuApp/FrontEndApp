@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { useAuth } from '@/features/auth/AuthContext';
 import { chatApi } from '../services/chatApi';
 import { toast } from 'sonner';
 import { socket } from '@/api/socketClient';
@@ -174,3 +174,4 @@ export function useChatData(selectedConversationId) {
         getUnreadCount,
     };
 }
+
