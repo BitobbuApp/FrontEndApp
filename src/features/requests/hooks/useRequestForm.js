@@ -196,6 +196,7 @@ export default function useRequestForm() {
         if (requestType === 'Producto') {
             mutation.mutate({
                 ...commonPayload,
+                type: 1,
                 quantity: Number(productForm.quantity),
                 unit_id: productForm.unit_id ? Number(productForm.unit_id) : Number(defaultUnitOption?.id) || 1,
                 description: productForm.description?.trim() || null,
@@ -215,6 +216,7 @@ export default function useRequestForm() {
 
         mutation.mutate({
             ...commonPayload,
+            type: 2,
             quantity: 1,
             unit_id: Number(defaultUnitOption?.id) || 1,
             description: details.join('\n\n') || null,

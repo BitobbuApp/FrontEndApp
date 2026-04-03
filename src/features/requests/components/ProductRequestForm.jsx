@@ -10,14 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-
-const ESTADOS_VE = [
-    'Amazonas', 'Anzoategui', 'Apure', 'Aragua', 'Barinas', 'Bolivar',
-    'Carabobo', 'Cojedes', 'Delta Amacuro', 'Falcon', 'Guarico', 'Lara',
-    'Merida', 'Miranda', 'Monagas', 'Nueva Esparta', 'Portuguesa',
-    'Sucre', 'Tachira', 'Trujillo', 'Vargas', 'Yaracuy', 'Zulia',
-    'Distrito Capital',
-];
+import useGeographicData from '../../geographic/hooks/useGeographicData';
 
 const CONDICIONES_PAGO = ['Negociable', 'Contado', 'Credito 30 dias', 'Credito 60 dias', 'Anticipo 50%'];
 
@@ -27,6 +20,10 @@ export default function ProductRequestForm({
     categoryOptions = [],
     unitOptions = [],
 }) {
+    // Default country to Venezuela (ID: 1) if not set
+    const currentCountryId = form.delivery_country_id || '1';
+    const { countries, states, isLoadingCountries, isLoadingStates } = useGeographicData(currentCountryId, null);
+
     const set = (key) => (e) =>
         setForm((prev) => ({ ...prev, [key]: typeof e === 'string' ? e : e.target.value }));
 
@@ -93,31 +90,56 @@ export default function ProductRequestForm({
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label>Estado de Entrega</Label>
-                    <Select value={form.delivery_state} onValueChange={(value) => {
-                        setForm((prev) => ({ ...prev, delivery_state: value, delivery_city: '' }));
-                    }}>
+                    <Label>País de Entrega</Label>
+                    <Select 
+                        disabled={isLoadingCountries} 
+                        value={currentCountryId} 
+                        onValueChange={(value) => {
+                            setForm((prev) => ({ 
+                                ...prev, 
+                                delivery_country_id: value, 
+                                delivery_state_id: '', 
+                                delivery_state: '' 
+                            }));
+                        }}
+                    >
                         <SelectTrigger className="h-11">
-                            <SelectValue placeholder="Seleccionar estado" />
+                            <SelectValue placeholder="Seleccionar país" />
                         </SelectTrigger>
                         <SelectContent>
-                            {ESTADOS_VE.map((estado) => (
-                                <SelectItem key={estado} value={estado}>
-                                    {estado}
+                            {countries.map((pais) => (
+                                <SelectItem key={pais.id} value={pais.id.toString()}>
+                                    {pais.name_es}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label>Ciudad</Label>
-                    <Input
-                        value={form.delivery_city}
-                        onChange={set('delivery_city')}
-                        disabled={!form.delivery_state}
-                        placeholder={form.delivery_state ? 'Ej: Valencia' : 'Primero un estado'}
-                        className="h-11"
-                    />
+                    <Label>Estado de Entrega</Label>
+                    <Select 
+                        disabled={isLoadingStates || !currentCountryId}
+                        value={form.delivery_state_id?.toString()} 
+                        onValueChange={(value) => {
+                            const selectedState = states.find(s => s.id.toString() === value);
+                            setForm((prev) => ({ 
+                                ...prev, 
+                                delivery_state_id: value, 
+                                delivery_state: selectedState?.name || '' 
+                            }));
+                        }}
+                    >
+                        <SelectTrigger className="h-11">
+                            <SelectValue placeholder="Seleccionar estado" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {states.map((estado) => (
+                                <SelectItem key={estado.id} value={estado.id.toString()}>
+                                    {estado.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
                 </div>
             </div>
 
