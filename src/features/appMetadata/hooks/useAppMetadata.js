@@ -23,7 +23,9 @@ function getLocalizedLabel(item, language = DEFAULT_LANGUAGE) {
         ? [item.name_en, item.name_es]
         : [item.name_es, item.name_en];
 
-    return preferred.find((value) => normalizeText(value)) || normalizeText(item.name) || normalizeText(item.abbreviation);
+    return preferred.find((value) => normalizeText(value))
+        || normalizeText(item.name)
+        || normalizeText(item.abbreviation);
 }
 
 function toSelectOption(item, label) {
@@ -39,7 +41,6 @@ export function findOptionValueById(options, id) {
     if (id == null || id === '') {
         return '';
     }
-
     return options.find((option) => option.id === Number(id))?.value || '';
 }
 
@@ -50,19 +51,14 @@ export function findOptionValueByLabel(options, label) {
     }
 
     return options.find((option) => {
-        const optionLabel = normalizeText(option.label).toLowerCase();
-        const optionName = normalizeText(option.raw?.name).toLowerCase();
-        const optionAbbreviation = normalizeText(option.raw?.abbreviation).toLowerCase();
-        const optionEnglish = normalizeText(option.raw?.name_en).toLowerCase();
-        const optionSpanish = normalizeText(option.raw?.name_es).toLowerCase();
+        const optionLabel      = normalizeText(option.label).toLowerCase();
+        const optionName       = normalizeText(option.raw?.name).toLowerCase();
+        const optionAbbr       = normalizeText(option.raw?.abbreviation).toLowerCase();
+        const optionEnglish    = normalizeText(option.raw?.name_en).toLowerCase();
+        const optionSpanish    = normalizeText(option.raw?.name_es).toLowerCase();
 
-        return [
-            optionLabel,
-            optionName,
-            optionAbbreviation,
-            optionEnglish,
-            optionSpanish,
-        ].includes(normalizedLabel);
+        return [optionLabel, optionName, optionAbbr, optionEnglish, optionSpanish]
+            .includes(normalizedLabel);
     })?.value || '';
 }
 
@@ -86,6 +82,7 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
 
     const metadata = query.data || {};
 
+    // ── Raw lists ────────────────────────────────────────────────────────────
     const {
         categories,
         companyTypes,
@@ -93,17 +90,26 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
         paymentMethods,
         unitsOfMeasure,
         verificationDocumentTypes,
+        // New in V6
+        paymentConditions,
+        estimatedMonthlyTransactions,
+        companySizes,
     } = useMemo(() => {
         return {
-            categories: normalizeList(metadata.categories),
-            companyTypes: normalizeList(metadata.company_types),
-            notificationTypes: normalizeList(metadata.notification_types),
-            paymentMethods: normalizeList(metadata.payment_methods),
-            unitsOfMeasure: normalizeList(metadata.units_of_measure),
-            verificationDocumentTypes: normalizeList(metadata.verif_doc_types),
+            categories:                   normalizeList(metadata.categories),
+            companyTypes:                 normalizeList(metadata.company_types),
+            notificationTypes:            normalizeList(metadata.notification_types),
+            paymentMethods:               normalizeList(metadata.payment_methods),
+            unitsOfMeasure:               normalizeList(metadata.units_of_measure),
+            verificationDocumentTypes:    normalizeList(metadata.verif_doc_types),
+            // V6 additions
+            paymentConditions:            normalizeList(metadata.payment_conditions),
+            estimatedMonthlyTransactions: normalizeList(metadata.estimated_monthly_transactions),
+            companySizes:                 normalizeList(metadata.company_sizes),
         };
     }, [metadata]);
 
+    // ── Select options ───────────────────────────────────────────────────────
     const {
         categoryOptions,
         companyTypeOptions,
@@ -111,26 +117,55 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
         unitOptions,
         verificationDocumentTypeOptions,
         notificationTypeOptions,
+        // New in V6
+        paymentConditionOptions,
+        estimatedMonthlyTransactionOptions,
+        companySizeOptions,
     } = useMemo(() => {
         return {
             categoryOptions: categories
                 .filter((item) => item?.is_active !== false)
                 .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
-            companyTypeOptions: companyTypes.map((item) =>
-                toSelectOption(item, getLocalizedLabel(item, language))
-            ),
+
+            companyTypeOptions: companyTypes
+                .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
+
             paymentMethodOptions: paymentMethods
                 .filter((item) => item?.is_active !== false)
                 .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
-            unitOptions: unitsOfMeasure.map((item) =>
-                toSelectOption(item, normalizeText(item.abbreviation) || normalizeText(item.name))
-            ),
-            verificationDocumentTypeOptions: verificationDocumentTypes.map((item) =>
-                toSelectOption(item, normalizeText(item.name))
-            ),
-            notificationTypeOptions: notificationTypes.map((item) =>
-                toSelectOption(item, normalizeText(item.name))
-            ),
+
+            unitOptions: unitsOfMeasure
+                .map((item) => toSelectOption(item, normalizeText(item.name))),
+
+            verificationDocumentTypeOptions: verificationDocumentTypes
+                .map((item) => toSelectOption(item, normalizeText(item.name))),
+
+            notificationTypeOptions: notificationTypes
+                .map((item) => toSelectOption(item, normalizeText(item.name))),
+
+            // payment_conditions: bilingual name_en / name_es
+            paymentConditionOptions: paymentConditions
+                .filter((item) => item?.is_active !== false)
+                .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
+
+            // estimated_monthly_transactions: description / description_es
+            estimatedMonthlyTransactionOptions: estimatedMonthlyTransactions
+                .map((item) => {
+                    const label = language === 'en'
+                        ? normalizeText(item.description) || normalizeText(item.description_es)
+                        : normalizeText(item.description_es) || normalizeText(item.description);
+                    return toSelectOption(item, label || normalizeText(item.range_name));
+                }),
+
+            // company_sizes: display_label / display_label_es
+            companySizeOptions: companySizes
+                .filter((item) => item?.is_active !== false)
+                .map((item) => {
+                    const label = language === 'en'
+                        ? normalizeText(item.display_label) || normalizeText(item.display_label_es)
+                        : normalizeText(item.display_label_es) || normalizeText(item.display_label);
+                    return toSelectOption(item, label || normalizeText(item.size_name));
+                }),
         };
     }, [
         categories,
@@ -139,24 +174,39 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
         unitsOfMeasure,
         verificationDocumentTypes,
         notificationTypes,
-        language
+        paymentConditions,
+        estimatedMonthlyTransactions,
+        companySizes,
+        language,
     ]);
 
     return {
         ...query,
         metadata,
+
+        // Raw lists
         categories,
         companyTypes,
         notificationTypes,
         paymentMethods,
         unitsOfMeasure,
         verificationDocumentTypes,
+        paymentConditions,
+        estimatedMonthlyTransactions,
+        companySizes,
+
+        // Select options
         categoryOptions,
         companyTypeOptions,
         paymentMethodOptions,
         unitOptions,
         verificationDocumentTypeOptions,
         notificationTypeOptions,
+        paymentConditionOptions,
+        estimatedMonthlyTransactionOptions,
+        companySizeOptions,
+
+        // Convenience
         defaultUnitOption: unitOptions[0] || null,
         toNumberIdList,
     };

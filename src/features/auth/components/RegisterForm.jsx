@@ -16,13 +16,13 @@ export default function RegisterForm({ onGoToLogin }) {
         password: '',
         trade_name: '',
         founding_year: '',
-        country_id: '',
+        country_id: '1', // Venezuela is the only default
         state_id: '',
         // city_id: '', // Hidden as per request
     });
     
     // Geographic data cascading hook
-    const { countries, states, isLoadingCountries, isLoadingStates } = useGeographicData(form.country_id, form.state_id);
+    const { states, isLoadingStates } = useGeographicData('1', form.state_id);
 
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -36,13 +36,6 @@ export default function RegisterForm({ onGoToLogin }) {
     const handleSelectChange = (name, value) => {
         setForm((prev) => {
             const newForm = { ...prev, [name]: value };
-            // Cascading reset
-            if (name === 'country_id') {
-                newForm.state_id = '';
-                // newForm.city_id = '';
-            // } else if (name === 'state_id') {
-                // newForm.city_id = '';
-            }
             return newForm;
         });
     };
@@ -239,21 +232,19 @@ export default function RegisterForm({ onGoToLogin }) {
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <Label className="text-sm font-medium text-slate-700">País</Label>
-                                <Select disabled={isLoading || isLoadingCountries} value={form.country_id?.toString()} onValueChange={(val) => handleSelectChange('country_id', val)}>
-                                    <SelectTrigger className="w-full h-12 bg-background border-border">
-                                        <SelectValue placeholder="Selecciona el país" />
+                                <Select disabled value="1">
+                                    <SelectTrigger className="w-full h-12 bg-slate-50 border-border text-slate-500">
+                                        <SelectValue placeholder="Venezuela" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {countries.map((c) => (
-                                            <SelectItem key={c.id} value={c.id.toString()}>{c.name_es}</SelectItem>
-                                        ))}
+                                        <SelectItem value="1">Venezuela</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-2">
                                 <Label className="text-sm font-medium text-slate-700">Estado / Provincia</Label>
-                                <Select disabled={!form.country_id || isLoading || isLoadingStates} value={form.state_id?.toString()} onValueChange={(val) => handleSelectChange('state_id', val)}>
+                                <Select disabled={isLoading || isLoadingStates} value={form.state_id?.toString()} onValueChange={(val) => handleSelectChange('state_id', val)}>
                                     <SelectTrigger className="w-full h-12 bg-background border-border">
                                         <SelectValue placeholder="Selecciona el estado" />
                                     </SelectTrigger>

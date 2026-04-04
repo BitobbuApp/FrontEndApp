@@ -28,6 +28,7 @@ export default function RequestFormPage() {
         isPending,
         categoryOptions,
         unitOptions,
+        paymentConditionOptions,
     } = useRequestForm();
 
     if (isEditing && isLoadingRequest) {
@@ -73,6 +74,7 @@ export default function RequestFormPage() {
                                 setForm={setProductForm}
                                 categoryOptions={categoryOptions}
                                 unitOptions={unitOptions}
+                                paymentConditionOptions={paymentConditionOptions}
                             />
                         </div>
                     )}
@@ -83,6 +85,7 @@ export default function RequestFormPage() {
                                 form={serviceForm}
                                 setForm={setServiceForm}
                                 categoryOptions={categoryOptions}
+                                paymentConditionOptions={paymentConditionOptions}
                             />
                         </div>
                     )}

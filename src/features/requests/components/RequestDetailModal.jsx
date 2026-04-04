@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import StatusBadge from '@/components/ui/StatusBadge';
-import { FileText, Calendar, Package, Layers, Tag, Loader2 } from 'lucide-react';
+import { FileText, Calendar, Package, Layers, Tag, Loader2, CreditCard } from 'lucide-react';
+import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 
 const unitLabels = {
     Units: 'Unidades',
@@ -34,7 +35,12 @@ export default function RequestDetailModal({ open, onOpenChange, requestId }) {
         enabled: !!requestId && open,
     });
 
-    const req = requestData;
+    const { paymentConditionOptions } = useAppMetadata();
+
+    const resolvePaymentCondition = (id) => {
+        if (!id) return null;
+        return paymentConditionOptions.find((o) => o.id === id || o.value === id)?.label || null;
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -107,6 +113,17 @@ export default function RequestDetailModal({ open, onOpenChange, requestId }) {
                                             : 'Sin fecha límite'}
                                     </p>
                                 </div>
+                                {resolvePaymentCondition(req.payment_condition_id) && (
+                                    <div className="bg-muted/50 rounded-xl p-4 col-span-2">
+                                        <div className="flex items-center gap-2 text-slate-500 text-sm mb-1">
+                                            <CreditCard className="w-4 h-4" />
+                                            Condición de Pago
+                                        </div>
+                                        <p className="font-semibold text-foreground">
+                                            {resolvePaymentCondition(req.payment_condition_id)}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Description */}

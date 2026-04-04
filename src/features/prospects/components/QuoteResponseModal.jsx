@@ -14,14 +14,24 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from 'lucide-react';
 import { toast } from "sonner";
+import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function QuoteResponseModal({ open, onOpenChange, request }) {
   const queryClient = useQueryClient();
 
+  const { paymentConditionOptions } = useAppMetadata();
+
   const [formData, setFormData] = useState({
     unit_price: '',
     quantity: '',
-    payment_conditions: '',
+    payment_condition_id: '',
     delivery_time: '',
     notes: '',
   });
@@ -44,7 +54,7 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
         quantity: Number(data.quantity),
       };
 
-      if (data.payment_conditions) payload.payment_conditions = data.payment_conditions;
+      if (data.payment_condition_id) payload.payment_condition_id = data.payment_condition_id;
       if (data.delivery_time) payload.delivery_time = data.delivery_time;
       if (data.notes) payload.notes = data.notes;
 
@@ -71,7 +81,7 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
     setFormData({
       unit_price: '',
       quantity: '',
-      payment_conditions: '',
+      payment_condition_id: '',
       delivery_time: '',
       notes: '',
     });
@@ -142,17 +152,24 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="payment_conditions" className="text-sm font-medium">
-                Condiciones de Pago
+              <Label htmlFor="payment_condition_id" className="text-sm font-medium">
+                Condición de Pago
               </Label>
-              <Input
-                id="payment_conditions"
-                placeholder="Ej: 30 días, Contado, 50% anticipo"
-                value={formData.payment_conditions}
-                onChange={(e) => setFormData({ ...formData, payment_conditions: e.target.value })}
-                className="h-11"
-                maxLength={200}
-              />
+              <Select
+                value={formData.payment_condition_id || ''}
+                onValueChange={(value) => setFormData({ ...formData, payment_condition_id: value })}
+              >
+                <SelectTrigger id="payment_condition_id" className="h-11">
+                  <SelectValue placeholder="Seleccionar condición" />
+                </SelectTrigger>
+                <SelectContent>
+                  {paymentConditionOptions.map((option) => (
+                    <SelectItem key={option.id} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">

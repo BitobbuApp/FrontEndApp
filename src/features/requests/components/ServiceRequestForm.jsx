@@ -12,12 +12,15 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import useGeographicData from '../../geographic/hooks/useGeographicData';
 
-const CONDICIONES_PAGO = ['Negociable', 'Contado', 'Credito 30 dias', 'Credito 60 dias', 'Anticipo 50%'];
-
-export default function ServiceRequestForm({ form, setForm, categoryOptions = [] }) {
-    // Default country to Venezuela (ID: 1) if not set
-    const currentCountryId = form.execution_country_id || '1';
-    const { countries, states, isLoadingCountries, isLoadingStates } = useGeographicData(currentCountryId, null);
+export default function ServiceRequestForm({
+    form,
+    setForm,
+    categoryOptions = [],
+    paymentConditionOptions = [],
+}) {
+    // Venezuela is the only active country — always fixed to ID 1
+    const VENEZUELA_ID = '1';
+    const { states, isLoadingStates } = useGeographicData(VENEZUELA_ID, null);
 
     const set = (key) => (e) =>
         setForm((prev) => ({ ...prev, [key]: typeof e === 'string' ? e : e.target.value }));
@@ -91,46 +94,32 @@ export default function ServiceRequestForm({ form, setForm, categoryOptions = []
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                     <Label>País donde se ejecuta</Label>
-                    <Select 
-                        disabled={isLoadingCountries} 
-                        value={currentCountryId} 
-                        onValueChange={(value) => {
-                            setForm((prev) => ({ 
-                                ...prev, 
-                                execution_country_id: value, 
-                                execution_state_id: '', 
-                                execution_state: '' 
-                            }));
-                        }}
-                    >
-                        <SelectTrigger className="h-11">
-                            <SelectValue placeholder="Seleccionar país" />
+                    <Select disabled value="1">
+                        <SelectTrigger className="h-11 bg-slate-50 text-slate-500">
+                            <SelectValue placeholder="Venezuela" />
                         </SelectTrigger>
                         <SelectContent>
-                            {countries.map((pais) => (
-                                <SelectItem key={pais.id} value={pais.id.toString()}>
-                                    {pais.name_es}
-                                </SelectItem>
-                            ))}
+                            <SelectItem value="1">Venezuela</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
                 <div className="space-y-2">
                     <Label>Estado donde se ejecuta</Label>
-                    <Select 
-                        disabled={isLoadingStates || !currentCountryId}
-                        value={form.execution_state_id?.toString()} 
+                    <Select
+                        disabled={isLoadingStates}
+                        value={form.execution_state_id?.toString()}
                         onValueChange={(value) => {
                             const selectedState = states.find(s => s.id.toString() === value);
-                            setForm((prev) => ({ 
-                                ...prev, 
-                                execution_state_id: value, 
-                                execution_state: selectedState?.name || '' 
+                            setForm((prev) => ({
+                                ...prev,
+                                execution_country_id: VENEZUELA_ID,
+                                execution_state_id: value,
+                                execution_state: selectedState?.name || ''
                             }));
                         }}
                     >
                         <SelectTrigger className="h-11">
-                            <SelectValue placeholder="Seleccionar estado" />
+                            <SelectValue placeholder="Seleccionar estado (Venezuela)" />
                         </SelectTrigger>
                         <SelectContent>
                             {states.map((estado) => (
@@ -144,15 +133,15 @@ export default function ServiceRequestForm({ form, setForm, categoryOptions = []
             </div>
 
             <div className="space-y-2">
-                <Label>Condiciones de Pago</Label>
-                <Select value={form.payment_terms} onValueChange={set('payment_terms')}>
+                <Label>Condición de Pago</Label>
+                <Select value={form.payment_condition_id || ''} onValueChange={set('payment_condition_id')}>
                     <SelectTrigger className="h-11">
-                        <SelectValue />
+                        <SelectValue placeholder="Seleccionar condición" />
                     </SelectTrigger>
                     <SelectContent>
-                        {CONDICIONES_PAGO.map((condicion) => (
-                            <SelectItem key={condicion} value={condicion}>
-                                {condicion}
+                        {paymentConditionOptions.map((option) => (
+                            <SelectItem key={option.id} value={option.value}>
+                                {option.label}
                             </SelectItem>
                         ))}
                     </SelectContent>

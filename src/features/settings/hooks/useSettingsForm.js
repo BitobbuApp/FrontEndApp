@@ -17,19 +17,6 @@ const INTEREST_TO_FLAGS = {
     Ambos: { can_buy: true, can_sell: true },
 };
 
-const VOLUME_UI_TO_API = {
-    Pequeno: 'Small',
-    Mediano: 'Medium',
-    Medio: 'Medium',
-    Grande: 'Large',
-};
-
-const VOLUME_API_TO_UI = {
-    Small: 'Pequeno',
-    Medium: 'Medio',
-    Large: 'Grande',
-};
-
 const INITIAL_FORM_DATA = {
     trade_name: '',
     logo_url: '',
@@ -52,13 +39,14 @@ const INITIAL_FORM_DATA = {
     corporate_email: '',
     interest: 'Ambos',
     interest_category_ids: [],
-    approximate_volume: 'Medio',
     retention_agent: false,
     works_with_credit: false,
     payment_method_ids: [],
     email_notifications: true,
     web_notifications: true,
     whatsapp_notifications: false,
+    company_size_id: '',
+    monthly_transactions_id: '',
 };
 
 function getInterestFromCompany(company) {
@@ -87,6 +75,8 @@ export function useSettingsForm() {
         categoryOptions,
         companyTypeOptions,
         paymentMethodOptions,
+        companySizeOptions,
+        estimatedMonthlyTransactionOptions,
     } = useAppMetadata();
 
     const { data: companyData, isLoading } = useQuery({
@@ -130,7 +120,6 @@ export function useSettingsForm() {
             tax_id: company.tax_id || company.rif || '',
             founding_year: company.founding_year || company.ano_fundacion || '',
             interest: getInterestFromCompany(company),
-            approximate_volume: VOLUME_API_TO_UI[company.approximate_volume] || company.volumen_aproximado || 'Medio',
             location_country_id: mainLocation.country_id ? String(mainLocation.country_id) : '',
             location_state_id: mainLocation.state_id ? String(mainLocation.state_id) : '',
             location_city_id: mainLocation.city_id ? String(mainLocation.city_id) : '',
@@ -147,6 +136,8 @@ export function useSettingsForm() {
             email_notifications: settings.email_notifications ?? company.notificaciones_email ?? true,
             web_notifications: settings.web_notifications ?? company.notificaciones_web ?? true,
             whatsapp_notifications: settings.whatsapp_notifications ?? company.notificaciones_whatsapp ?? false,
+            company_size_id: company.company_size_id ? String(company.company_size_id) : '',
+            monthly_transactions_id: company.monthly_transactions_id ? String(company.monthly_transactions_id) : '',
             payment_method_ids: (company.payment_methods || [])
                 .map((paymentMethod) => {
                     if (typeof paymentMethod === 'string') {
@@ -189,7 +180,6 @@ export function useSettingsForm() {
                 company_type_id: data.company_type_id ? Number(data.company_type_id) : null,
                 can_buy: interestFlags.can_buy,
                 can_sell: interestFlags.can_sell,
-                approximate_volume: VOLUME_UI_TO_API[data.approximate_volume] || 'Medium',
                 country_id: data.location_country_id ? Number(data.location_country_id) : null,
                 state_id: data.location_state_id ? Number(data.location_state_id) : null,
                 city_id: data.location_city_id ? Number(data.location_city_id) : null,
@@ -204,6 +194,8 @@ export function useSettingsForm() {
                 email_notifications: !!data.email_notifications,
                 web_notifications: !!data.web_notifications,
                 whatsapp_notifications: !!data.whatsapp_notifications,
+                company_size_id: data.company_size_id || null,
+                monthly_transactions_id: data.monthly_transactions_id || null,
                 payment_method_ids: toNumberIdList(data.payment_method_ids),
                 interest_category_ids: toNumberIdList(data.interest_category_ids),
             };
@@ -304,5 +296,7 @@ export function useSettingsForm() {
         categoryOptions,
         companyTypeOptions,
         paymentMethodOptions,
+        companySizeOptions,
+        estimatedMonthlyTransactionOptions,
     };
 }

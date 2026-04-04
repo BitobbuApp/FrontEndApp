@@ -15,7 +15,7 @@ const DEFAULT_PRODUCT_FORM = {
     unit_id: '',
     delivery_state: '',
     delivery_city: '',
-    payment_terms: 'Negociable',
+    payment_condition_id: '',
     expiration_date: '',
     description: '',
 };
@@ -28,7 +28,7 @@ const DEFAULT_SERVICE_FORM = {
     scope: '',
     execution_state: '',
     execution_city: '',
-    payment_terms: 'Negociable',
+    payment_condition_id: '',
     expiration_date: '',
 };
 
@@ -46,6 +46,7 @@ export default function useRequestForm() {
         categoryOptions,
         unitOptions,
         defaultUnitOption,
+        paymentConditionOptions,
         isLoading: isLoadingMetadata,
     } = useAppMetadata();
 
@@ -90,7 +91,7 @@ export default function useRequestForm() {
                 scope: requestData.scope || '',
                 execution_state: requestData.delivery_state || '',
                 execution_city: requestData.delivery_city || '',
-                payment_terms: requestData.payment_terms || 'Negociable',
+                payment_condition_id: requestData.payment_condition_id || '',
                 expiration_date: requestData.expiration_date
                     ? new Date(requestData.expiration_date).toISOString().split('T')[0]
                     : '',
@@ -110,7 +111,7 @@ export default function useRequestForm() {
                 || '',
             delivery_state: requestData.delivery_state || '',
             delivery_city: requestData.delivery_city || '',
-            payment_terms: requestData.payment_terms || 'Negociable',
+            payment_condition_id: requestData.payment_condition_id || '',
             expiration_date: requestData.expiration_date
                 ? new Date(requestData.expiration_date).toISOString().split('T')[0]
                 : '',
@@ -200,6 +201,7 @@ export default function useRequestForm() {
                 quantity: Number(productForm.quantity),
                 unit_id: productForm.unit_id ? Number(productForm.unit_id) : Number(defaultUnitOption?.id) || 1,
                 description: productForm.description?.trim() || null,
+                payment_condition_id: productForm.payment_condition_id || null,
             });
             return;
         }
@@ -210,7 +212,6 @@ export default function useRequestForm() {
             serviceForm.execution_state?.trim()
                 ? `Ubicación: ${serviceForm.execution_state.trim()}${serviceForm.execution_city?.trim() ? `, ${serviceForm.execution_city.trim()}` : ''}`
                 : '',
-            serviceForm.payment_terms?.trim() ? `Condiciones de pago: ${serviceForm.payment_terms.trim()}` : '',
             serviceForm.execution_date?.trim() ? `Fecha de ejecución: ${serviceForm.execution_date.trim()}` : '',
         ].filter(Boolean);
 
@@ -220,6 +221,7 @@ export default function useRequestForm() {
             quantity: 1,
             unit_id: Number(defaultUnitOption?.id) || 1,
             description: details.join('\n\n') || null,
+            payment_condition_id: serviceForm.payment_condition_id || null,
         });
     };
 
@@ -240,5 +242,6 @@ export default function useRequestForm() {
         isLoadingMetadata,
         categoryOptions,
         unitOptions,
+        paymentConditionOptions,
     };
 }

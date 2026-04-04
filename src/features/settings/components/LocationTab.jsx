@@ -17,35 +17,11 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-
-export const ESTADOS_VENEZUELA = [
-    'Amazonas',
-    'Anzoátegui',
-    'Apure',
-    'Aragua',
-    'Barinas',
-    'Bolívar',
-    'Carabobo',
-    'Cojedes',
-    'Delta Amacuro',
-    'Distrito Capital',
-    'Falcón',
-    'Guárico',
-    'Lara',
-    'Mérida',
-    'Miranda',
-    'Monagas',
-    'Nueva Esparta',
-    'Portuguesa',
-    'Sucre',
-    'Táchira',
-    'Trujillo',
-    'Vargas',
-    'Yaracuy',
-    'Zulia',
-];
+import useGeographicData from '../../geographic/hooks/useGeographicData';
 
 export default function LocationTab({ formData, setFormData }) {
+    const { states, isLoadingStates } = useGeographicData('1', formData.location_state_id);
+    
     return (
         <Card className="border-0 shadow-sm">
             <CardHeader>
@@ -68,25 +44,30 @@ export default function LocationTab({ formData, setFormData }) {
                     <div className="space-y-2">
                         <Label>Estado *</Label>
                         <Select
-                            value={formData.location_state}
-                            onValueChange={(v) =>
-                                setFormData((prev) => ({ ...prev, location_state: v }))
-                            }
+                            value={formData.location_state_id?.toString()}
+                            onValueChange={(v) => {
+                                const selectedState = states.find(s => s.id.toString() === v);
+                                setFormData((prev) => ({ 
+                                    ...prev, 
+                                    location_state_id: v,
+                                    location_state: selectedState?.name || ''
+                                }));
+                            }}
                         >
                             <SelectTrigger>
                                 <SelectValue placeholder="Selecciona un estado" />
                             </SelectTrigger>
                             <SelectContent>
-                                {ESTADOS_VENEZUELA.map((e) => (
-                                    <SelectItem key={e} value={e}>
-                                        {e}
+                                {states.map((e) => (
+                                    <SelectItem key={e.id} value={e.id.toString()}>
+                                        {e.name}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label>Ciudad *</Label>
+                        <Label>Ciudad</Label>
                         <Input
                             value={formData.location_city}
                             onChange={(e) =>
