@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'react-router-dom';
 import { companyApi } from '@/features/settings/services/companyApi';
+import { useAuth } from '@/features/auth/AuthContext';
+import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
 
 /**
  * Fetches a company's public profile by ID (from route param).
@@ -9,14 +11,24 @@ import { companyApi } from '@/features/settings/services/companyApi';
 export default function usePublicProfileData() {
     const { id } = useParams();
 
-    const { data: company, isLoading } = useQuery({
+    const { user } = useAuth();
+    const { data: myCompany, isLoading: isLoadingMyCompany } = useMyCompany();
+    const isMyProfile = Boolean(
+        myCompany?.id && (myCompany.id === id || !id)
+    ) || Boolean(user?.has_company && !id);
+
+    const { data: publicCompany, isLoading: isLoadingPublic } = useQuery({
         queryKey: ['companyPublic', id],
         queryFn: async () => {
+            if (isMyProfile) return null; // Avoid fetch if it's my own profile
             const res = await companyApi.getCompanyById(id);
             return res.data;
         },
-        enabled: !!id,
+        enabled: !!id && !isMyProfile, // Only fetch if ID is present and it is NOT me
     });
+
+    const company = isMyProfile ? myCompany : publicCompany;
+    const isLoading = isMyProfile ? isLoadingMyCompany : isLoadingPublic;
 
     const initial = company?.trade_name?.[0] || company?.nombre_comercial?.[0] || '?';
     const tradeName = company?.trade_name || company?.nombre_comercial || 'Empresa';

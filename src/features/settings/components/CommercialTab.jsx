@@ -25,6 +25,8 @@ export default function CommercialTab({
     toggleMetodoPago,
     categoryOptions = [],
     paymentMethodOptions = [],
+    companySizeOptions = [],
+    estimatedMonthlyTransactionOptions = [],
 }) {
     return (
         <Card className="border-0 shadow-sm">
@@ -74,24 +76,47 @@ export default function CommercialTab({
                         ))}
                     </div>
                 </div>
-
-                <div className="space-y-2">
-                    <Label>Volumen Aproximado</Label>
-                    <Select
-                        value={formData.approximate_volume}
-                        onValueChange={(value) =>
-                            setFormData((prev) => ({ ...prev, approximate_volume: value }))
-                        }
-                    >
-                        <SelectTrigger className="w-48">
-                            <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="Pequeno">Pequeno</SelectItem>
-                            <SelectItem value="Medio">Medio</SelectItem>
-                            <SelectItem value="Grande">Grande</SelectItem>
-                        </SelectContent>
-                    </Select>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label>Tamaño de la Empresa</Label>
+                        <Select
+                            value={formData.company_size_id || ''}
+                            onValueChange={(value) =>
+                                setFormData((prev) => ({ ...prev, company_size_id: value }))
+                            }
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar tamaño" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {companySizeOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.value}>
+                                        {option.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Volumen Mensual Estimado</Label>
+                        <Select
+                            value={formData.monthly_transactions_id || ''}
+                            onValueChange={(value) =>
+                                setFormData((prev) => ({ ...prev, monthly_transactions_id: value }))
+                            }
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder="Seleccionar volumen" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {estimatedMonthlyTransactionOptions.map((option) => (
+                                    <SelectItem key={option.id} value={option.value}>
+                                        {option.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
                 </div>
 
                 <div className="space-y-4 border-t pt-4">

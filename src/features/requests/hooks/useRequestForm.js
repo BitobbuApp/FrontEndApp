@@ -13,9 +13,10 @@ const DEFAULT_PRODUCT_FORM = {
     category_id: '',
     quantity: '',
     unit_id: '',
-    delivery_state: '',
-    delivery_city: '',
-    payment_terms: 'Negociable',
+    country_id: '',
+    state_id: '',
+    city_id: '',
+    payment_condition_id: '',
     expiration_date: '',
     description: '',
 };
@@ -23,12 +24,13 @@ const DEFAULT_PRODUCT_FORM = {
 const DEFAULT_SERVICE_FORM = {
     product_service: '',
     category_id: '',
-    project_description: '',
+    description: '',
     execution_date: '',
-    scope: '',
-    execution_state: '',
-    execution_city: '',
-    payment_terms: 'Negociable',
+    reach_service: '',
+    country_id: '',
+    state_id: '',
+    city_id: '',
+    payment_condition_id: '',
     expiration_date: '',
 };
 
@@ -46,6 +48,7 @@ export default function useRequestForm() {
         categoryOptions,
         unitOptions,
         defaultUnitOption,
+        paymentConditionOptions,
         isLoading: isLoadingMetadata,
     } = useAppMetadata();
 
@@ -83,14 +86,15 @@ export default function useRequestForm() {
                 category_id: findOptionValueById(categoryOptions, requestData.category_id)
                     || findOptionValueByLabel(categoryOptions, requestData.category)
                     || '',
-                project_description: requestData.description || '',
+                description: requestData.description || '',
                 execution_date: requestData.expiration_date
                     ? new Date(requestData.expiration_date).toISOString().split('T')[0]
                     : '',
-                scope: requestData.scope || '',
-                execution_state: requestData.delivery_state || '',
-                execution_city: requestData.delivery_city || '',
-                payment_terms: requestData.payment_terms || 'Negociable',
+                reach_service: requestData.reach_service || '',
+                country_id: requestData.country_id || '',
+                state_id: requestData.state_id || '',
+                city_id: requestData.city_id || '',
+                payment_condition_id: requestData.payment_condition_id || '',
                 expiration_date: requestData.expiration_date
                     ? new Date(requestData.expiration_date).toISOString().split('T')[0]
                     : '',
@@ -108,9 +112,10 @@ export default function useRequestForm() {
                 || findOptionValueByLabel(unitOptions, requestData.unit_of_measure)
                 || defaultUnitOption?.value
                 || '',
-            delivery_state: requestData.delivery_state || '',
-            delivery_city: requestData.delivery_city || '',
-            payment_terms: requestData.payment_terms || 'Negociable',
+            country_id: requestData.country_id || '',
+            state_id: requestData.state_id || '',
+            city_id: requestData.city_id || '',
+            payment_condition_id: requestData.payment_condition_id || '',
             expiration_date: requestData.expiration_date
                 ? new Date(requestData.expiration_date).toISOString().split('T')[0]
                 : '',
@@ -182,7 +187,7 @@ export default function useRequestForm() {
             return;
         }
 
-        if (requestType === 'Servicio' && !serviceForm.project_description?.trim()) {
+        if (requestType === 'Servicio' && !serviceForm.description?.trim()) {
             toast.error('La descripción del proyecto es requerida');
             return;
         }
@@ -191,6 +196,7 @@ export default function useRequestForm() {
             product_service: form.product_service.trim(),
             category_id: form.category_id ? Number(form.category_id) : null,
             expiration_date: form.expiration_date || null,
+            description: form.description?.trim() || null,
         };
 
         if (requestType === 'Producto') {
@@ -199,27 +205,24 @@ export default function useRequestForm() {
                 type: 1,
                 quantity: Number(productForm.quantity),
                 unit_id: productForm.unit_id ? Number(productForm.unit_id) : Number(defaultUnitOption?.id) || 1,
-                description: productForm.description?.trim() || null,
+                payment_condition_id: productForm.payment_condition_id || null,
+                country_id: productForm.country_id ? Number(productForm.country_id) : 1, // Defaulting to VENEZUELA_ID if tracking allows
+                state_id: productForm.state_id ? Number(productForm.state_id) : null,
+                city_id: productForm.city_id ? Number(productForm.city_id) : null,
             });
             return;
         }
-
-        const details = [
-            serviceForm.project_description?.trim(),
-            serviceForm.scope?.trim() ? `Alcance: ${serviceForm.scope.trim()}` : '',
-            serviceForm.execution_state?.trim()
-                ? `Ubicación: ${serviceForm.execution_state.trim()}${serviceForm.execution_city?.trim() ? `, ${serviceForm.execution_city.trim()}` : ''}`
-                : '',
-            serviceForm.payment_terms?.trim() ? `Condiciones de pago: ${serviceForm.payment_terms.trim()}` : '',
-            serviceForm.execution_date?.trim() ? `Fecha de ejecución: ${serviceForm.execution_date.trim()}` : '',
-        ].filter(Boolean);
 
         mutation.mutate({
             ...commonPayload,
             type: 2,
             quantity: 1,
             unit_id: Number(defaultUnitOption?.id) || 1,
-            description: details.join('\n\n') || null,
+            reach_service: serviceForm.reach_service?.trim() || null,
+            payment_condition_id: serviceForm.payment_condition_id || null,
+            country_id: serviceForm.country_id ? Number(serviceForm.country_id) : 1,
+            state_id: serviceForm.state_id ? Number(serviceForm.state_id) : null,
+            city_id: serviceForm.city_id ? Number(serviceForm.city_id) : null,
         });
     };
 
@@ -240,5 +243,6 @@ export default function useRequestForm() {
         isLoadingMetadata,
         categoryOptions,
         unitOptions,
+        paymentConditionOptions,
     };
 }

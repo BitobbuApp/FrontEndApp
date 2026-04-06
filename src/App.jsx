@@ -12,6 +12,7 @@ import RegisterPage from '@/features/auth/RegisterPage';
 import { useState } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 import AppMetadataBootstrap from '@/features/appMetadata/AppMetadataBootstrap';
+import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -24,15 +25,16 @@ const LayoutWrapper = ({ children, currentPageName }) => Layout ?
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
+  const { isLoading: isLoadingCompany } = useMyCompany();
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if (isLoadingPublicSettings || isLoadingAuth || (isAuthenticated && isLoadingCompany)) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-muted/50">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-[#D2FC31] rounded-2xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-[#D2FC31] rounded-2xl flex items-center justify-center shadow-lg">
             <span className="text-foreground font-bold text-2xl">B</span>
           </div>
-          <div className="w-6 h-6 border-3 border-border border-t-[#1E293B] rounded-full animate-spin"></div>
+          <div className="w-6 h-6 border-3 border-border border-t-[black] rounded-full animate-spin"></div>
         </div>
       </div>
     );
@@ -85,8 +87,8 @@ function App() {
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem disableTransitionOnChange>
       <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
-        <AppMetadataBootstrap />
         <Router>
+          <AppMetadataBootstrap />
           <NavigationTracker />
           <AuthenticatedApp />
         </Router>

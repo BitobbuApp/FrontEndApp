@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Package, Clock, Star, Eye, ImageOff } from 'lucide-react';
@@ -57,10 +58,23 @@ export default function ProspectMobileCard({ req, onViewDetail }) {
 
             {/* Body */}
             <div className="p-4 flex flex-col gap-2.5 flex-1">
-                {/* Product name */}
-                <p className="font-semibold text-foreground text-sm leading-tight line-clamp-2">
-                    {req.product_service}
-                </p>
+                {/* Product name & Type */}
+                <div className="flex items-start justify-between gap-2">
+                    <p className="font-semibold text-foreground text-sm leading-tight line-clamp-2 flex-1">
+                        {req.product_service}
+                    </p>
+                    <Badge 
+                        variant="outline" 
+                        className={cn(
+                            "text-[9px] px-1.5 py-0 h-4 leading-none uppercase tracking-wider font-bold whitespace-nowrap flex-shrink-0",
+                            req.type === 'service' 
+                                ? "border-purple-200 bg-purple-50 text-purple-600" 
+                                : "border-blue-200 bg-blue-50 text-blue-600"
+                        )}
+                    >
+                        {req.type === 'service' ? 'Servicio' : 'Producto'}
+                    </Badge>
+                </div>
 
                 {/* Company row */}
                 {req.company && (
@@ -101,7 +115,11 @@ export default function ProspectMobileCard({ req, onViewDetail }) {
 
                 {/* Description excerpt */}
                 {req.description && (
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{req.description}</p>
+                    <p className="text-xs text-slate-400 line-clamp-1 leading-relaxed">
+                        {req.description.length > 30 
+                            ? req.description.substring(0, 30) + '...' 
+                            : req.description}
+                    </p>
                 )}
 
                 {/* Action */}

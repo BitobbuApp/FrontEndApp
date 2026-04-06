@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { MessageSquare, Star, FileText } from 'lucide-react';
@@ -45,9 +46,22 @@ export default function ProspectDetailModal({
                 <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
                     {/* Title + Status */}
                     <div className="flex items-start justify-between gap-4">
-                        <h3 className="font-semibold text-xl text-foreground">
-                            {req.product_service}
-                        </h3>
+                        <div className="flex flex-col gap-1">
+                            <h3 className="font-semibold text-xl text-foreground">
+                                {req.product_service}
+                            </h3>
+                            <Badge 
+                                variant="outline" 
+                                className={cn(
+                                    "w-fit text-[10px] px-1.5 py-0 h-4 leading-none uppercase tracking-wider font-bold",
+                                    req.type === 'service' 
+                                        ? "border-purple-200 bg-purple-50 text-purple-600" 
+                                        : "border-blue-200 bg-blue-50 text-blue-600"
+                                )}
+                            >
+                                {req.type === 'service' ? 'Servicio' : 'Producto'}
+                            </Badge>
+                        </div>
                         <StatusBadge status={req.status} />
                     </div>
 
@@ -130,9 +144,22 @@ export default function ProspectDetailModal({
                     {/* Description */}
                     {req.description && (
                         <div>
-                            <p className="text-sm text-slate-500 mb-2">Descripción</p>
-                            <p className="text-slate-700 bg-muted/50 p-4 rounded-xl text-sm leading-relaxed">
+                            <p className="text-sm text-slate-500 mb-2 font-medium">Descripción del Requerimiento</p>
+                            <p className="text-slate-700 bg-muted/50 p-4 rounded-xl text-sm leading-relaxed border border-transparent hover:border-slate-200 transition-colors">
                                 {req.description}
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Service Reach */}
+                    {req.type === 'service' && req.reach_service && (
+                        <div className="bg-purple-50/50 border border-purple-100 p-4 rounded-xl">
+                            <p className="text-sm text-purple-700 mb-2 font-semibold flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-purple-400" />
+                                Alcance del Servicio
+                            </p>
+                            <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
+                                {req.reach_service}
                             </p>
                         </div>
                     )}

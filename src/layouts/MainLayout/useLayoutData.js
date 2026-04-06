@@ -6,20 +6,15 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthContext';
 import { requestsApi } from '@/features/requests/services/requestsApi';
 import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
-import { companyApi } from '@/features/settings/services/companyApi';
+import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
 
 export default function useLayoutData() {
     const { user } = useAuth();
 
-    // Fetch company data if company_id is present
-    const { data: companyResponse } = useQuery({
-        queryKey: ['myCompany', user?.company_id],
-        queryFn: () => companyApi.getCompanyById(user.company_id),
-        enabled: !!user?.company_id,
-        staleTime: 300000, // 5 minutes
-    });
+    // Fetch company data globally from cache
+    const { data: companyResponse } = useMyCompany();
 
-    const myCompany = companyResponse?.data || null;
+    const myCompany = companyResponse || null;
 
     // Count of active requests (for sidebar badge)
     const { data: requestsData } = useQuery({

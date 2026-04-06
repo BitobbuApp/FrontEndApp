@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { registerUser } from '../services/authApi';
-import useGeographicData from '../../geographic/hooks/useGeographicData';
+import useAppMetadata from '../../appMetadata/hooks/useAppMetadata';
 
 export default function RegisterForm({ onGoToLogin }) {
     const [form, setForm] = useState({
@@ -15,14 +15,14 @@ export default function RegisterForm({ onGoToLogin }) {
         email: '',
         password: '',
         trade_name: '',
-        founding_year: '',
-        country_id: '',
+        country_id: '1', // Venezuela is the only default
         state_id: '',
+        sector_id: '',
         // city_id: '', // Hidden as per request
     });
     
     // Geographic data cascading hook
-    const { countries, states, isLoadingCountries, isLoadingStates } = useGeographicData(form.country_id, form.state_id);
+    const { states, categoryOptions, isLoading: isLoadingMetadata } = useAppMetadata();
 
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -36,13 +36,6 @@ export default function RegisterForm({ onGoToLogin }) {
     const handleSelectChange = (name, value) => {
         setForm((prev) => {
             const newForm = { ...prev, [name]: value };
-            // Cascading reset
-            if (name === 'country_id') {
-                newForm.state_id = '';
-                // newForm.city_id = '';
-            // } else if (name === 'state_id') {
-                // newForm.city_id = '';
-            }
             return newForm;
         });
     };
@@ -50,7 +43,7 @@ export default function RegisterForm({ onGoToLogin }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        if (!form.first_name || !form.last_name || !form.email || !form.password || !form.trade_name || !form.founding_year || !form.country_id || !form.state_id) {
+        if (!form.first_name || !form.last_name || !form.email || !form.password || !form.trade_name || !form.country_id || !form.state_id || !form.sector_id) {
             setError('Por favor completa todos los campos.');
             return;
         }
@@ -211,49 +204,50 @@ export default function RegisterForm({ onGoToLogin }) {
                                 disabled={isLoading}
                             />
                         </div>
-
+                        
                         <div className="space-y-2">
-                            <Label htmlFor="founding_year" className="text-sm font-medium text-slate-700">
-                                Año de Fundación
+                            <Label htmlFor="sector_id" className="text-sm font-medium text-slate-700">
+                                Sector / Categoría
                             </Label>
-                            <Input
-                                id="founding_year"
-                                name="founding_year"
-                                type="number"
-                                min="1900"
-                                max={new Date().getFullYear()}
-                                value={form.founding_year}
-                                onChange={(e) => setForm(prev => ({ ...prev, founding_year: parseInt(e.target.value) || '' }))}
-                                placeholder="Ej. 2015"
-                                className="h-12 bg-background border-border"
-                                disabled={isLoading}
-                            />
+                            <Select 
+                                disabled={isLoading || isLoadingMetadata} 
+                                value={form.sector_id?.toString()} 
+                                onValueChange={(val) => handleSelectChange('sector_id', val)}
+                            >
+                                <SelectTrigger className="w-full h-12 bg-background border-border">
+                                    <SelectValue placeholder="Selecciona el sector" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {categoryOptions && categoryOptions.map((cat) => (
+                                        <SelectItem key={cat.id} value={cat.id.toString()}>{cat.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                     
-                    {/* Geographic Cascading Selectors */}
+                    {/* Geographic Section */}
                     <div className="space-y-4 pt-2 border-t border-border">
                         <h3 className="text-sm font-semibold flex items-center gap-2 text-slate-800">
                             <MapPin className="w-4 h-4" /> Ubicación
                         </h3>
+                        
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <Label className="text-sm font-medium text-slate-700">País</Label>
-                                <Select disabled={isLoading || isLoadingCountries} value={form.country_id?.toString()} onValueChange={(val) => handleSelectChange('country_id', val)}>
-                                    <SelectTrigger className="w-full h-12 bg-background border-border">
-                                        <SelectValue placeholder="Selecciona el país" />
+                                <Select disabled value="1">
+                                    <SelectTrigger className="w-full h-12 bg-slate-50 border-border text-slate-500">
+                                        <SelectValue placeholder="Venezuela" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {countries.map((c) => (
-                                            <SelectItem key={c.id} value={c.id.toString()}>{c.name_es}</SelectItem>
-                                        ))}
+                                        <SelectItem value="1">Venezuela</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
 
                             <div className="space-y-2">
                                 <Label className="text-sm font-medium text-slate-700">Estado / Provincia</Label>
-                                <Select disabled={!form.country_id || isLoading || isLoadingStates} value={form.state_id?.toString()} onValueChange={(val) => handleSelectChange('state_id', val)}>
+                                <Select disabled={isLoading || isLoadingMetadata} value={form.state_id?.toString()} onValueChange={(val) => handleSelectChange('state_id', val)}>
                                     <SelectTrigger className="w-full h-12 bg-background border-border">
                                         <SelectValue placeholder="Selecciona el estado" />
                                     </SelectTrigger>

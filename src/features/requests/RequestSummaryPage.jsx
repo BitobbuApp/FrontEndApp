@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { requestsApi } from '@/features/requests/services/requestsApi';
@@ -13,6 +13,9 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { toast } from 'sonner';
+import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
+import RequestOffersTable from './components/RequestOffersTable';
 
 // Unit labels map
 const unitLabels = {
@@ -20,27 +23,13 @@ const unitLabels = {
     Boxes: 'Cajas', Pallets: 'Paletas', Tons: 'Toneladas', Gallons: 'Galones',
 };
 
-// --- Mock offers data (replace with API call once endpoint is available) ---
-// TODO: Replace with useQuery calling quoteResponsesApi.getQuoteResponsesByRequestId(id)
-const MOCK_OFFERS = [
-    {
-        id: '1',
-        supplier: { name: 'Capi Rosse', initial: 'C', rating: 4.5, verified: false },
-        unit_price: 20,
-        total_amount: 4000,
-        delivery_time: '3',
-        payment_conditions: 'Negociable',
-        status: 'Accepted',
-        notes: '[Envio: Negociable]',
-        is_cheapest: true,
-        is_fastest: true,
-    },
-];
+
 
 function getStats(offers) {
-    if (!offers.length) return null;
-    const amounts = offers.map((o) => o.total_amount);
-    const deliveries = offers.map((o) => Number(o.delivery_time)).filter(Boolean);
+    if (!offers || !offers.length) return null;
+    const amounts = offers.filter(o => o.status !== 'Rejected').map((o) => Number(o.total_amount));
+    const deliveries = offers.filter(o => o.status !== 'Rejected').map((o) => Number(o.delivery_time)).filter(Boolean);
+    if (!amounts.length) return null;
     return {
         min: Math.min(...amounts),
         avg: Math.round(amounts.reduce((a, b) => a + b, 0) / amounts.length),
@@ -65,6 +54,8 @@ export default function RequestSummaryPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [page, setPage] = useState(1);
+    const { paymentConditionOptions, resolveLocation } = useAppMetadata();
 
     const { data: req, isLoading } = useQuery({
         queryKey: ['requestDetail', id],
@@ -75,19 +66,17 @@ export default function RequestSummaryPage() {
         enabled: !!id,
     });
 
-    // TODO: wire up real mutation to quoteResponsesApi when endpoint is ready
-    const updateOfferMutation = useMutation({
-        mutationFn: async ({ offerId, status }) => {
-            // quoteResponsesApi.updateQuoteResponse(offerId, { status });
-            return { offerId, status };
-        },
-        onSuccess: (_, { status }) => {
-            queryClient.invalidateQueries({ queryKey: ['quote-responses', id] });
-            toast.success(status === 'Accepted' ? 'Oferta aceptada' : 'Oferta rechazada');
-        },
+    const { data: offersResponse, isLoading: isLoadingOffers } = useQuery({
+        queryKey: ['quote-responses', id, page],
+        queryFn: () => quoteResponsesApi.getQuoteResponsesByRequestId(id, { page, limit: 10 }),
+        enabled: !!id,
     });
 
-    const offers = MOCK_OFFERS;
+    const offers = offersResponse?.data?.items || offersResponse?.data || [];
+    const pagination = offersResponse?.data?.pagination || {
+        totalItems: offersResponse?.data?.total || 0,
+        totalPages: offersResponse?.data?.totalPages || 1,
+    };
     const stats = getStats(offers);
 
     if (isLoading) {
@@ -148,14 +137,14 @@ export default function RequestSummaryPage() {
                             <MapPin className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-slate-400">Entrega</p>
-                                <p className="font-semibold text-foreground">{req.delivery_location || 'Por acordar'}</p>
+                                <p className="font-semibold text-foreground">{resolveLocation(req.country_id, req.state_id)}</p>
                             </div>
                         </div>
                         <div className="flex items-start gap-2 text-sm">
                             <CreditCard className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
                             <div>
                                 <p className="text-xs text-slate-400">Pago</p>
-                                <p className="font-semibold text-foreground">{req.payment_conditions || 'Por acordar'}</p>
+                                <p className="font-semibold text-foreground">{paymentConditionOptions.find(opt => opt.id === req.payment_condition_id )?.label || 'Por acordar'}</p>
                             </div>
                         </div>
                         <div className="flex items-start gap-2 text-sm">
@@ -176,6 +165,13 @@ export default function RequestSummaryPage() {
                         <div>
                             <p className="text-xs text-slate-400 mb-1">Descripción</p>
                             <p className="text-sm text-slate-700 bg-muted/50 rounded-lg p-3">{req.description}</p>
+                        </div>
+                    )}
+                    {/* Description */}
+                    {req.reach_service && req.type === 'service' && (
+                        <div>
+                            <p className="text-xs text-slate-400 mb-1">Alcance del Servicio</p>
+                            <p className="text-sm text-slate-700 bg-muted/50 rounded-lg p-3">{req.reach_service}</p>
                         </div>
                     )}
                 </CardContent>
@@ -218,116 +214,20 @@ export default function RequestSummaryPage() {
             )}
 
             {/* All Offers Table */}
-            <Card className="border-0 shadow-sm overflow-hidden">
-                <div className="px-6 pt-5 pb-3">
-                    <h3 className="font-semibold text-foreground">
-                        Todas las Ofertas ({offers.length})
-                    </h3>
+            {isLoadingOffers ? (
+                <div className="flex justify-center items-center py-12">
+                    <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
                 </div>
-                {offers.length === 0 ? (
-                    <CardContent className="pb-8 text-center text-sm text-slate-400">
-                        <Flame className="w-8 h-8 mx-auto mb-2 text-slate-200" />
-                        Aún no hay ofertas para esta solicitud
-                    </CardContent>
-                ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr className="bg-muted/50 border-y border-border">
-                                    <th className="text-left px-6 py-3 text-xs font-semibold text-slate-500">Proveedor</th>
-                                    <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500">Precio Unit.</th>
-                                    <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500">Total</th>
-                                    <th className="text-center px-4 py-3 text-xs font-semibold text-slate-500">Entrega</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Pago</th>
-                                    <th className="text-center px-4 py-3 text-xs font-semibold text-slate-500">Estado</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500">Notas</th>
-                                    <th className="text-right px-6 py-3 text-xs font-semibold text-slate-500">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50">
-                                {offers.map((offer) => (
-                                    <tr key={offer.id} className="hover:bg-muted/50/50 transition-colors">
-                                        {/* Supplier */}
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600 flex-shrink-0">
-                                                    {offer.supplier.initial}
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-foreground">{offer.supplier.name}</p>
-                                                    <div className="flex gap-1 mt-0.5">
-                                                        {offer.is_cheapest && (
-                                                            <span className="inline-flex items-center gap-0.5 text-[10px] font-medium bg-green-100 text-green-700 px-1.5 py-0.5 rounded-full">
-                                                                <Flame className="w-2.5 h-2.5" /> Más barato
-                                                            </span>
-                                                        )}
-                                                        {offer.is_fastest && (
-                                                            <span className="inline-flex items-center gap-0.5 text-[10px] font-medium bg-yellow-100 text-yellow-700 px-1.5 py-0.5 rounded-full">
-                                                                <Zap className="w-2.5 h-2.5" /> Más rápido
-                                                            </span>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        {/* Unit price */}
-                                        <td className="px-4 py-4 text-right font-medium text-slate-700">${offer.unit_price}</td>
-                                        {/* Total */}
-                                        <td className="px-4 py-4 text-right font-bold text-emerald-600">
-                                            ${offer.total_amount.toLocaleString()}
-                                        </td>
-                                        {/* Delivery */}
-                                        <td className="px-4 py-4 text-center text-slate-600">{offer.delivery_time}</td>
-                                        {/* Payment */}
-                                        <td className="px-4 py-4 text-slate-600">{offer.payment_conditions || '—'}</td>
-                                        {/* Status */}
-                                        <td className="px-4 py-4 text-center">
-                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[offer.status] || 'bg-slate-100 text-slate-500'}`}>
-                                                • {statusLabels[offer.status] || offer.status}
-                                            </span>
-                                        </td>
-                                        {/* Notes */}
-                                        <td className="px-4 py-4 text-slate-500 text-xs max-w-[140px] truncate">
-                                            {offer.notes || '—'}
-                                        </td>
-                                        {/* Actions */}
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-end gap-2">
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    className="h-7 px-3 text-xs"
-                                                    disabled={offer.status !== 'Pending'}
-                                                    onClick={() => updateOfferMutation.mutate({ offerId: offer.id, status: 'Negotiating' })}
-                                                >
-                                                    Negociar
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    className="h-7 px-3 bg-emerald-500 hover:bg-emerald-600 text-white text-xs"
-                                                    disabled={offer.status !== 'Pending'}
-                                                    onClick={() => updateOfferMutation.mutate({ offerId: offer.id, status: 'Accepted' })}
-                                                >
-                                                    Aceptar
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    className="h-7 w-7 p-0 text-slate-400 hover:text-red-500"
-                                                    disabled={offer.status !== 'Pending'}
-                                                    onClick={() => updateOfferMutation.mutate({ offerId: offer.id, status: 'Rejected' })}
-                                                >
-                                                    ✕
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </Card>
+            ) : (
+                <RequestOffersTable 
+                    offers={offers} 
+                    requestId={id} 
+                    currentPage={page}
+                    totalPages={pagination.totalPages}
+                    totalItems={pagination.totalItems}
+                    onPageChange={setPage}
+                />
+            )}
         </div>
     );
 }

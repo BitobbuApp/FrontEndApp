@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthContext';
-import { companyApi } from '@/features/settings/services/companyApi';
+import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
 
 /**
  * Fetches the authenticated company's own profile data.
@@ -9,21 +9,7 @@ import { companyApi } from '@/features/settings/services/companyApi';
 export default function useProfileData() {
     const { user } = useAuth();
 
-    const { data: company, isLoading } = useQuery({
-        queryKey: ['myCompany', user?.company_id || user?.id],
-        queryFn: async () => {
-            if (user?.company_id) {
-                const res = await companyApi.getCompanyById(user.company_id);
-                return res.data;
-            }
-            if (user?.has_company) {
-                const res = await companyApi.getMyCompany();
-                return res.data;
-            }
-            return null;
-        },
-        enabled: !!user,
-    });
+    const { data: company, isLoading } = useMyCompany();
 
     const initial = company?.trade_name?.[0] || company?.nombre_comercial?.[0] || user?.full_name?.[0] || 'C';
     const tradeName = company?.trade_name || company?.nombre_comercial || user?.full_name || 'Mi Empresa';
