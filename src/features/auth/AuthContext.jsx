@@ -1,6 +1,8 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import * as authApi from './services/authApi';
 import { connectSocket, disconnectSocket } from '@/api/socketClient';
+import { queryClientInstance } from '@/lib/query-client';
+import { APP_METADATA_QUERY_KEY } from '@/features/appMetadata/hooks/useAppMetadata';
 
 const AuthContext = createContext();
 
@@ -45,6 +47,10 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(true);
         setAuthError(null);
         connectSocket(); // Conectar socket inmediatamente después del login
+        
+        // Invalidate metadata cache to trigger re-fetch with new token (for delivery methods, etc)
+        queryClientInstance.invalidateQueries({ queryKey: [APP_METADATA_QUERY_KEY] });
+
         return loggedUser;
     };
 
@@ -53,6 +59,10 @@ export const AuthProvider = ({ children }) => {
         setIsAuthenticated(false);
         authApi.clearSession();
         disconnectSocket(); // Asegurar desconexión local e impedir memory leaks en sockets inactivos
+        
+        // Invalidate metadata on logout so it re-fetches public version (without private methods)
+        queryClientInstance.invalidateQueries({ queryKey: [APP_METADATA_QUERY_KEY] });
+
         // Redirect to login page
         window.location.href = '/login';
     };

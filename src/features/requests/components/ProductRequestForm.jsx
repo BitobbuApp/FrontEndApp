@@ -10,7 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import useGeographicData from '../../geographic/hooks/useGeographicData';
+import useAppMetadata from '../../appMetadata/hooks/useAppMetadata';
 
 export default function ProductRequestForm({
     form,
@@ -21,7 +21,7 @@ export default function ProductRequestForm({
 }) {
     // Venezuela is the only active country — always fixed to ID 1
     const VENEZUELA_ID = '1';
-    const { states, isLoadingStates } = useGeographicData(VENEZUELA_ID, null);
+    const { states, isLoading: isLoadingStates } = useAppMetadata();
 
     const set = (key) => (e) =>
         setForm((prev) => ({ ...prev, [key]: typeof e === 'string' ? e : e.target.value }));
@@ -103,14 +103,12 @@ export default function ProductRequestForm({
                     <Label>Estado de Entrega</Label>
                     <Select
                         disabled={isLoadingStates}
-                        value={form.delivery_state_id?.toString()}
+                        value={form.state_id?.toString()}
                         onValueChange={(value) => {
-                            const selectedState = states.find(s => s.id.toString() === value);
                             setForm((prev) => ({
                                 ...prev,
-                                delivery_country_id: VENEZUELA_ID,
-                                delivery_state_id: value,
-                                delivery_state: selectedState?.name || ''
+                                country_id: VENEZUELA_ID,
+                                state_id: value,
                             }));
                         }}
                     >

@@ -1,10 +1,13 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { appMetadataApi } from '../services/appMetadataApi';
+import { geographicApi } from '../../geographic/services/geographicApi';
 
-export const APP_METADATA_QUERY_KEY = ['appMetadata'];
+export const APP_METADATA_QUERY_KEY = 'appMetadata';
 
 const DEFAULT_LANGUAGE = 'es';
+
+const DEFAULT_COUNTRY = 1;
 
 function normalizeList(value) {
     return Array.isArray(value) ? value : [];
@@ -69,11 +72,32 @@ export function toNumberIdList(values) {
 }
 
 export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = true } = {}) {
+    const token = localStorage.getItem('bitobbu_token');
+
     const query = useQuery({
-        queryKey: APP_METADATA_QUERY_KEY,
+        queryKey: [APP_METADATA_QUERY_KEY, !!token],
         queryFn: async () => {
-            const response = await appMetadataApi.getAppMetadata();
-            return response.data || {};
+            const promises = [
+                appMetadataApi.getAppMetadata(),
+                geographicApi.getCountries(),
+                geographicApi.getStatesByCountry(1), // 1 = Venezuela
+            ];
+
+            if (token) {
+                promises.push(appMetadataApi.getDeliveryMethods(1));
+            }
+
+            const results = await Promise.all(promises);
+            const [appMeta, countriesResp, statesResp, deliveryMethodsResp] = results;
+            
+            return {
+                ...(appMeta.data || {}),
+                countries: Array.isArray(countriesResp) ? countriesResp : (countriesResp?.data || []),
+                states: Array.isArray(statesResp) ? statesResp : (statesResp?.data || []),
+                deliveryMethods: deliveryMethodsResp 
+                    ? (Array.isArray(deliveryMethodsResp) ? deliveryMethodsResp : (deliveryMethodsResp?.data || [])) 
+                    : [],
+            };
         },
         enabled,
         staleTime: Infinity,
@@ -94,6 +118,9 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
         paymentConditions,
         estimatedMonthlyTransactions,
         companySizes,
+        countries,
+        states,
+        deliveryMethods,
     } = useMemo(() => {
         return {
             categories:                   normalizeList(metadata.categories),
@@ -106,6 +133,10 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
             paymentConditions:            normalizeList(metadata.payment_conditions),
             estimatedMonthlyTransactions: normalizeList(metadata.estimated_monthly_transactions),
             companySizes:                 normalizeList(metadata.company_sizes),
+            // Geographic 
+            countries:                    normalizeList(metadata.countries),
+            states:                       normalizeList(metadata.states),
+            deliveryMethods:              normalizeList(metadata.deliveryMethods),
         };
     }, [metadata]);
 
@@ -121,6 +152,7 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
         paymentConditionOptions,
         estimatedMonthlyTransactionOptions,
         companySizeOptions,
+        deliveryMethodOptions,
     } = useMemo(() => {
         return {
             categoryOptions: categories
@@ -166,6 +198,10 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
                         : normalizeText(item.display_label_es) || normalizeText(item.display_label);
                     return toSelectOption(item, label || normalizeText(item.size_name));
                 }),
+
+            deliveryMethodOptions: deliveryMethods
+                .filter((item) => item?.is_active !== false)
+                .map((item) => toSelectOption(item, normalizeText(item.name))),
         };
     }, [
         categories,
@@ -177,6 +213,9 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
         paymentConditions,
         estimatedMonthlyTransactions,
         companySizes,
+        countries,
+        states,
+        deliveryMethods,
         language,
     ]);
 
@@ -194,6 +233,9 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
         paymentConditions,
         estimatedMonthlyTransactions,
         companySizes,
+        countries,
+        states,
+        deliveryMethods,
 
         // Select options
         categoryOptions,
@@ -205,9 +247,16 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
         paymentConditionOptions,
         estimatedMonthlyTransactionOptions,
         companySizeOptions,
+        deliveryMethodOptions,
 
         // Convenience
         defaultUnitOption: unitOptions[0] || null,
         toNumberIdList,
+        resolveLocation: (countryId, stateId) => {
+            if (!countryId || !stateId) return 'Por acordar';
+            const country = countries.find((c) => Number(c.id) === Number(countryId));
+            const state = states.find((s) => Number(s.id) === Number(stateId));
+            return country && state ? `${country.name_es} / ${state.name}` : 'Por acordar';
+        },
     };
 }

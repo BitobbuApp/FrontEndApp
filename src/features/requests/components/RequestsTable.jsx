@@ -148,8 +148,12 @@ export default function RequestsTable({
                             return (
                                 <React.Fragment key={req.id}>
                                     <TableRow
-                                        className={`hover:bg-muted/50/50 cursor-pointer transition-colors ${isExpanded ? 'bg-muted/50' : ''}`}
-                                        onClick={() => onExpandRow(isExpanded ? null : req.id)}
+                                        className={`hover:bg-muted/50/50 transition-colors ${req.response_count > 0 ? 'cursor-pointer' : 'cursor-default opacity-80'} ${isExpanded ? 'bg-muted/50' : ''}`}
+                                        onClick={() => {
+                                            if (req.response_count > 0) {
+                                                onExpandRow(isExpanded ? null : req.id);
+                                            }
+                                        }}
                                     >
                                         <TableCell>
                                             <div className="flex items-center gap-3">

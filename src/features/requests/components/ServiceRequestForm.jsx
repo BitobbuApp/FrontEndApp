@@ -10,7 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import useGeographicData from '../../geographic/hooks/useGeographicData';
+import useAppMetadata from '../../appMetadata/hooks/useAppMetadata';
 
 export default function ServiceRequestForm({
     form,
@@ -20,7 +20,7 @@ export default function ServiceRequestForm({
 }) {
     // Venezuela is the only active country — always fixed to ID 1
     const VENEZUELA_ID = '1';
-    const { states, isLoadingStates } = useGeographicData(VENEZUELA_ID, null);
+    const { states, isLoading: isLoadingStates } = useAppMetadata();
 
     const set = (key) => (e) =>
         setForm((prev) => ({ ...prev, [key]: typeof e === 'string' ? e : e.target.value }));
@@ -55,27 +55,15 @@ export default function ServiceRequestForm({
                 </Select>
             </div>
 
-            <div className="space-y-2">
-                <Label>
-                    Descripcion del Proyecto <span className="text-red-500">*</span>
-                </Label>
-                <Textarea
-                    value={form.project_description}
-                    onChange={set('project_description')}
-                    placeholder="Describe el trabajo que necesitas realizar, materiales disponibles, condiciones del sitio..."
-                    className="min-h-[120px]"
-                />
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label>Fecha de Ejecucion</Label>
+                    <Label>Fecha de limite</Label>
                     <div className="relative">
                         <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-slate-400" />
                         <Input
                             type="date"
-                            value={form.execution_date}
-                            onChange={set('execution_date')}
+                            value={form.expiration_date}
+                            onChange={set('expiration_date')}
                             className="h-11 pl-9 text-slate-600"
                         />
                     </div>
@@ -83,8 +71,8 @@ export default function ServiceRequestForm({
                 <div className="space-y-2">
                     <Label>Alcance del Servicio</Label>
                     <Input
-                        value={form.scope}
-                        onChange={set('scope')}
+                        value={form.reach_service}
+                        onChange={set('reach_service')}
                         placeholder="Ej: 3 equipos, 500 m2..."
                         className="h-11"
                     />
@@ -107,14 +95,12 @@ export default function ServiceRequestForm({
                     <Label>Estado donde se ejecuta</Label>
                     <Select
                         disabled={isLoadingStates}
-                        value={form.execution_state_id?.toString()}
+                        value={form.state_id?.toString()}
                         onValueChange={(value) => {
-                            const selectedState = states.find(s => s.id.toString() === value);
                             setForm((prev) => ({
                                 ...prev,
-                                execution_country_id: VENEZUELA_ID,
-                                execution_state_id: value,
-                                execution_state: selectedState?.name || ''
+                                country_id: VENEZUELA_ID,
+                                state_id: value,
                             }));
                         }}
                     >
@@ -147,18 +133,16 @@ export default function ServiceRequestForm({
                     </SelectContent>
                 </Select>
             </div>
-
             <div className="space-y-2">
-                <Label>Fecha Limite</Label>
-                <div className="relative">
-                    <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-slate-400" />
-                    <Input
-                        type="date"
-                        value={form.expiration_date}
-                        onChange={set('expiration_date')}
-                        className="h-11 pl-9 text-slate-600"
-                    />
-                </div>
+                <Label>
+                    Descripcion del Proyecto <span className="text-red-500">*</span>
+                </Label>
+                <Textarea
+                    value={form.description}
+                    onChange={set('description')}
+                    placeholder="Describe el trabajo que necesitas realizar, materiales disponibles, condiciones del sitio..."
+                    className="min-h-[120px]"
+                />
             </div>
         </div>
     );

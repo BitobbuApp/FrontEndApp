@@ -50,6 +50,14 @@ export const quoteResponsesApi = {
     },
 
     /**
+     * GET /quote-responses/:id/with-supplier
+     * Fetch the details of a specific quote response along with its supplier profile
+     */
+    async getQuoteResponseWithSupplier(id) {
+        return await apiClient.get(`/quote-responses/${id}/with-supplier`);
+    },
+
+    /**
      * DELETE /quote-responses/:id
      * Remove a quote response
      */

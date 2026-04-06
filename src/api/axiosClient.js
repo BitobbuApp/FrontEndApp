@@ -54,13 +54,15 @@ apiClient.interceptors.response.use(
                 // No autorizado: Limpiar sesión y recargar base44 o app
                 localStorage.removeItem(SESSION_KEY);
                 localStorage.removeItem(TOKEN_KEY);
-
+                
                 toast.error('Sesión expirada. Por favor ingresa nuevamente.');
 
-                // Pequeño delay para que se vea el toast antes de desmotar
-                setTimeout(() => {
-                    window.location.href = '/login';
-                }, 1500);
+                const isAuthPage = window.location.pathname.includes('/login') || window.location.pathname.includes('/register');
+                if (!isAuthPage) {
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                }
             } else if (status === 403) {
                 toast.error('No tienes permisos suficientes para esta acción.');
             } else if (status >= 500) {

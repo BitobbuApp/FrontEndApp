@@ -26,14 +26,16 @@ import {
 export default function QuoteResponseModal({ open, onOpenChange, request }) {
   const queryClient = useQueryClient();
 
-  const { paymentConditionOptions } = useAppMetadata();
+  const { paymentConditionOptions, deliveryMethodOptions } = useAppMetadata();
 
   const [formData, setFormData] = useState({
     unit_price: '',
     quantity: '',
     payment_condition_id: '',
+    delivery_method_id: '',
     delivery_time: '',
     notes: '',
+    has_guarantee: false,
   });
 
   // Pre-fill quantity with the requested quantity when opened
@@ -52,9 +54,11 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
         request_id: request.id,
         unit_price: Number(data.unit_price),
         quantity: Number(data.quantity),
+        has_guarantee: !!data.has_guarantee,
       };
 
       if (data.payment_condition_id) payload.payment_condition_id = data.payment_condition_id;
+      if (data.delivery_method_id) payload.delivery_method_id = data.delivery_method_id;
       if (data.delivery_time) payload.delivery_time = data.delivery_time;
       if (data.notes) payload.notes = data.notes;
 
@@ -82,8 +86,10 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
       unit_price: '',
       quantity: '',
       payment_condition_id: '',
+      delivery_method_id: '',
       delivery_time: '',
       notes: '',
+      has_guarantee: false,
     });
   };
 
@@ -132,7 +138,8 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
                   placeholder="0.00"
                   value={formData.unit_price}
                   onChange={(e) => setFormData({ ...formData, unit_price: e.target.value })}
-                  className="h-11"
+                  className="h-11 border-slate-200 focus:border-[#D2FC31] focus:ring-[#D2FC31]/20"
+                  disabled={createMutation.isPending}
                 />
               </div>
               <div className="space-y-2">
@@ -146,7 +153,8 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
                   placeholder="Ej: 100"
                   value={formData.quantity}
                   onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                  className="h-11"
+                  className="h-11 border-slate-200 focus:border-[#D2FC31] focus:ring-[#D2FC31]/20"
+                  disabled={createMutation.isPending}
                 />
               </div>
             </div>
@@ -158,8 +166,9 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
               <Select
                 value={formData.payment_condition_id || ''}
                 onValueChange={(value) => setFormData({ ...formData, payment_condition_id: value })}
+                disabled={createMutation.isPending}
               >
-                <SelectTrigger id="payment_condition_id" className="h-11">
+                <SelectTrigger id="payment_condition_id" className="h-11 border-slate-200">
                   <SelectValue placeholder="Seleccionar condición" />
                 </SelectTrigger>
                 <SelectContent>
@@ -172,6 +181,49 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
               </Select>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2 flex-1">
+                <Label htmlFor="delivery_method_id" className="text-sm font-medium">
+                  Método de Envío
+                </Label>
+                <Select
+                  value={formData.delivery_method_id || ''}
+                  onValueChange={(value) => setFormData({ ...formData, delivery_method_id: value })}
+                  disabled={createMutation.isPending}
+                >
+                  <SelectTrigger id="delivery_method_id" className="h-11 border-slate-200">
+                    <SelectValue placeholder="Seleccionar método" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {deliveryMethodOptions.map((option) => (
+                      <SelectItem key={option.id} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2 flex-1">
+                <Label htmlFor="has_guarantee" className="text-sm font-medium">
+                  ¿Ofrece Garantía?
+                </Label>
+                <Select
+                  value={formData.has_guarantee.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, has_guarantee: value === 'true' })}
+                  disabled={createMutation.isPending}
+                >
+                  <SelectTrigger id="has_guarantee" className="h-11 border-slate-200">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="true">Sí, incluye garantía</SelectItem>
+                    <SelectItem value="false">No incluye garantía</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="delivery_time" className="text-sm font-medium">
                 Tiempo de Entrega
@@ -181,8 +233,9 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
                 placeholder="Ej: 1 semana, 3 días hábiles"
                 value={formData.delivery_time}
                 onChange={(e) => setFormData({ ...formData, delivery_time: e.target.value })}
-                className="h-11"
+                className="h-11 border-slate-200 focus:border-[#D2FC31] focus:ring-[#D2FC31]/20"
                 maxLength={100}
+                disabled={createMutation.isPending}
               />
             </div>
 
@@ -195,7 +248,8 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
                 placeholder="Detalles sobre el producto, variaciones o comentarios adicionales..."
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                className="min-h-[100px] resize-none"
+                className="min-h-[100px] resize-none border-slate-200 focus:border-[#D2FC31] focus:ring-[#D2FC31]/20"
+                disabled={createMutation.isPending}
               />
             </div>
           </form>
@@ -206,6 +260,7 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
             type="button"
             variant="outline"
             onClick={() => handleOpenChange(false)}
+            disabled={createMutation.isPending}
           >
             Cancelar
           </Button>

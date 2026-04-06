@@ -17,10 +17,10 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import useGeographicData from '../../geographic/hooks/useGeographicData';
+import useAppMetadata from '../../appMetadata/hooks/useAppMetadata';
 
 export default function LocationTab({ formData, setFormData }) {
-    const { states, isLoadingStates } = useGeographicData('1', formData.location_state_id);
+    const { states, isLoading: isLoadingStates } = useAppMetadata();
     
     return (
         <Card className="border-0 shadow-sm">

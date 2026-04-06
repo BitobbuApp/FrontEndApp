@@ -10,6 +10,7 @@ import useAppMetadata, {
 } from '@/features/appMetadata/hooks/useAppMetadata';
 import { useAuth } from '@/features/auth/AuthContext';
 import { companyApi } from '../services/companyApi';
+import { useMyCompany } from './useMyCompany';
 
 const INTEREST_TO_FLAGS = {
     Comprar: { can_buy: true, can_sell: false },
@@ -79,23 +80,7 @@ export function useSettingsForm() {
         estimatedMonthlyTransactionOptions,
     } = useAppMetadata();
 
-    const { data: companyData, isLoading } = useQuery({
-        queryKey: ['myCompany', user?.company_id || user?.id],
-        queryFn: async () => {
-            if (user?.company_id) {
-                const response = await companyApi.getCompanyById(user.company_id);
-                return response.data;
-            }
-
-            if (user?.has_company) {
-                const response = await companyApi.getMyCompany();
-                return response.data;
-            }
-
-            return null;
-        },
-        enabled: !!user,
-    });
+    const { data: companyData, isLoading } = useMyCompany();
 
     const company = companyData;
 
@@ -212,7 +197,7 @@ export function useSettingsForm() {
             if (!company?.id && response?.data?.id) {
                 updateSession({
                     has_company: true,
-                    company_id: response.data.id,
+                    companyId: response.data.id,
                 });
             }
 

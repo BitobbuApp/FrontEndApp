@@ -29,9 +29,9 @@ export async function registerUser({
     email,
     password,
     trade_name,
-    founding_year,
     country_id,
-    state_id
+    state_id,
+    sector_id
 }) {
     const responseBody = await apiClient.post('/users/register', {
         first_name,
@@ -39,9 +39,9 @@ export async function registerUser({
         email,
         password,
         trade_name,
-        founding_year,
         country_id,
-        state_id
+        state_id,
+        sector_id
     });
     return responseBody.data;
 }

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import StatusBadge from '@/components/ui/StatusBadge';
-import { FileText, Calendar, Package, Layers, Tag, Loader2, CreditCard } from 'lucide-react';
+import { FileText, Calendar, Package, Layers, Tag, Loader2, CreditCard, MapPin } from 'lucide-react';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 
 const unitLabels = {
@@ -35,12 +35,14 @@ export default function RequestDetailModal({ open, onOpenChange, requestId }) {
         enabled: !!requestId && open,
     });
 
-    const { paymentConditionOptions } = useAppMetadata();
+    const { paymentConditionOptions, resolveLocation } = useAppMetadata();
 
     const resolvePaymentCondition = (id) => {
-        if (!id) return null;
-        return paymentConditionOptions.find((o) => o.id === id || o.value === id)?.label || null;
+        if (!id) return 'Por acordar';
+        return paymentConditionOptions.find((o) => Number(o.id) === Number(id) || o.value === id)?.label || 'Por acordar';
     };
+
+    const req = requestData;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -113,17 +115,26 @@ export default function RequestDetailModal({ open, onOpenChange, requestId }) {
                                             : 'Sin fecha límite'}
                                     </p>
                                 </div>
-                                {resolvePaymentCondition(req.payment_condition_id) && (
-                                    <div className="bg-muted/50 rounded-xl p-4 col-span-2">
+                                <div className="bg-muted/50 rounded-xl p-4 col-span-2 grid grid-cols-2 gap-4">
+                                    <div>
+                                        <div className="flex items-center gap-2 text-slate-500 text-sm mb-1">
+                                            <MapPin className="w-4 h-4" />
+                                            Entrega
+                                        </div>
+                                        <p className="font-semibold text-foreground text-sm">
+                                            {resolveLocation(req.country_id, req.state_id)}
+                                        </p>
+                                    </div>
+                                    <div>
                                         <div className="flex items-center gap-2 text-slate-500 text-sm mb-1">
                                             <CreditCard className="w-4 h-4" />
-                                            Condición de Pago
+                                            Pago
                                         </div>
-                                        <p className="font-semibold text-foreground">
+                                        <p className="font-semibold text-foreground text-sm">
                                             {resolvePaymentCondition(req.payment_condition_id)}
                                         </p>
                                     </div>
-                                )}
+                                </div>
                             </div>
 
                             {/* Description */}
