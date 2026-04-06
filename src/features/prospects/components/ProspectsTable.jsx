@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 import ProspectMobileCard from './ProspectMobileCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -120,12 +121,27 @@ export default function ProspectsTable({
                         {filteredSolicitudes.map((req) => (
                             <TableRow key={req.id} className="hover:bg-muted/50/50">
                                 <TableCell>
-                                    <p className="font-semibold text-foreground">
-                                        {req.product_service}
-                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="font-semibold text-foreground">
+                                            {req.product_service}
+                                        </p>
+                                        <Badge 
+                                            variant="outline" 
+                                            className={cn(
+                                                "text-[10px] px-1.5 py-0 h-4 leading-none uppercase tracking-wider font-bold",
+                                                req.type === 'service' 
+                                                    ? "border-purple-200 bg-purple-50 text-purple-600" 
+                                                    : "border-blue-200 bg-blue-50 text-blue-600"
+                                            )}
+                                        >
+                                            {req.type === 'service' ? 'Servicio' : 'Producto'}
+                                        </Badge>
+                                    </div>
                                     {req.description && (
                                         <p className="text-xs text-slate-500 line-clamp-1 mt-1">
-                                            {req.description}
+                                            {req.description.length > 30 
+                                                ? req.description.substring(0, 30) + '...' 
+                                                : req.description}
                                         </p>
                                     )}
                                 </TableCell>

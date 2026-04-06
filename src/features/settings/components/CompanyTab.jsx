@@ -94,9 +94,9 @@ export default function CompanyTab({
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label>Ano de Fundacion</Label>
+                        <Label>Año de Fundacion</Label>
                         <Input
-                            type="number"
+                            type="text"
                             value={formData.founding_year}
                             onChange={(e) =>
                                 setFormData((prev) => ({ ...prev, founding_year: e.target.value }))

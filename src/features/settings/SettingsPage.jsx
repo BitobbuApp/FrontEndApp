@@ -53,6 +53,8 @@ export default function SettingsPage() {
         categoryOptions,
         companyTypeOptions,
         paymentMethodOptions,
+        companySizeOptions,
+        estimatedMonthlyTransactionOptions,
     } = useSettingsForm();
 
     const { user } = useAuth();
@@ -158,6 +160,8 @@ export default function SettingsPage() {
                         toggleMetodoPago={toggleMetodoPago}
                         categoryOptions={categoryOptions}
                         paymentMethodOptions={paymentMethodOptions}
+                        companySizeOptions={companySizeOptions}
+                        estimatedMonthlyTransactionOptions={estimatedMonthlyTransactionOptions}
                     />
                 </TabsContent>
 
