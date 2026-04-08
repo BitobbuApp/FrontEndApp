@@ -22,11 +22,15 @@ import { Textarea } from '@/components/ui/textarea';
 export default function CompanyTab({
     formData,
     setFormData,
+    foundingYearError,
+    setFoundingYearError,
     handleLogoChange,
     uploadLogoPending,
     sectorOptions = [],
     companyTypeOptions = [],
 }) {
+    const currentYear = new Date().getFullYear();
+
     return (
         <Card className="border-0 shadow-sm">
             <CardHeader>
@@ -96,13 +100,32 @@ export default function CompanyTab({
                     <div className="space-y-2">
                         <Label>Año de Fundacion</Label>
                         <Input
-                            type="text"
+                            type="number"
                             value={formData.founding_year}
-                            onChange={(e) =>
-                                setFormData((prev) => ({ ...prev, founding_year: e.target.value }))
-                            }
+                            onChange={(e) => {
+                                const nextValue = e.target.value;
+                                setFormData((prev) => ({ ...prev, founding_year: nextValue }));
+
+                                if (!nextValue) {
+                                    setFoundingYearError('');
+                                    return;
+                                }
+
+                                const parsedYear = Number(nextValue);
+                                if (!Number.isInteger(parsedYear) || parsedYear > currentYear) {
+                                    setFoundingYearError(`Ingresa un año válido no mayor a ${currentYear}.`);
+                                    return;
+                                }
+
+                                setFoundingYearError('');
+                            }}
                             placeholder="2010"
+                            min="1800"
+                            max={currentYear}
                         />
+                        {foundingYearError && (
+                            <p className="text-sm text-red-600">{foundingYearError}</p>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <Label>Sector *</Label>

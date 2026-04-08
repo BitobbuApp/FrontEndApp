@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProspectsData } from './hooks/useProspectsData';
 import ProspectsFilters from './components/ProspectsFilters';
 import ProspectsTable from './components/ProspectsTable';
-import ProspectDetailModal from './components/ProspectDetailModal';
 import QuoteResponseModal from './components/QuoteResponseModal';
 
 export default function ProspectsPage() {
+    const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
     const [categoryFilter, setCategoryFilter] = useState('Todas');
-    const [detailModalOpen, setDetailModalOpen] = useState(false);
-    const [selectedSolicitud, setSelectedSolicitud] = useState(null);
-    
-    // State for Quote Response flow
     const [quoteModalOpen, setQuoteModalOpen] = useState(false);
     const [quoteRequest, setQuoteRequest] = useState(null);
 
@@ -24,8 +21,9 @@ export default function ProspectsPage() {
     } = useProspectsData(searchTerm, categoryFilter);
 
     const handleViewDetail = (req) => {
-        setSelectedSolicitud(req);
-        setDetailModalOpen(true);
+        navigate(`/prospects/${req.id}`, {
+            state: { prospect: req },
+        });
     };
 
     const handleQuoteRequest = (req) => {
@@ -60,17 +58,10 @@ export default function ProspectsPage() {
                 searchTerm={searchTerm}
                 categoryFilter={categoryFilter}
                 handleViewDetail={handleViewDetail}
+                handleQuickQuote={handleQuoteRequest}
                 page={page}
                 totalPages={totalPages}
                 onPageChange={setPage}
-            />
-
-            {/* Detail Modal */}
-            <ProspectDetailModal
-                open={detailModalOpen}
-                onOpenChange={setDetailModalOpen}
-                selectedSolicitud={selectedSolicitud}
-                onQuoteRequest={handleQuoteRequest}
             />
 
             {/* Quote Response Modal */}

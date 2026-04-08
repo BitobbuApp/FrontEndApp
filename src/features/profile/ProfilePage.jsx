@@ -287,14 +287,14 @@ export default function ProfilePage() {
 
                 <TabsContent value="vitrina" className="mt-4">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold text-foreground">Mis Productos y Servicios</h3>
+                        <h3 className="font-semibold text-foreground">Mis Productos</h3>
                         <Button
                             size="sm"
                             className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] gap-1.5"
                             onClick={() => setShowAddProduct(true)}
                         >
                             <Plus className="w-4 h-4" />
-                            Agregar Producto/Servicio
+                            Agregar Producto
                         </Button>
                     </div>
 

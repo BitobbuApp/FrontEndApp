@@ -2,7 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Package, Clock, Star, Eye, ImageOff } from 'lucide-react';
+import { Package, Clock, Star, Eye, ImageOff, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -16,7 +16,7 @@ const unitLabels = {
  * Mobile card for a prospect (solicitud de otro comprador).
  * Shows: product image, company info, request details, Ver detalle button.
  */
-export default function ProspectMobileCard({ req, onViewDetail }) {
+export default function ProspectMobileCard({ req, onViewDetail, onQuickQuote }) {
     const imageUrl = req.files?.[0]?.url || null;
     const companyInitial = req.company?.trade_name?.[0] || 'E';
 
@@ -123,14 +123,25 @@ export default function ProspectMobileCard({ req, onViewDetail }) {
                 )}
 
                 {/* Action */}
-                <Button
-                    size="sm"
-                    className="w-full mt-auto text-xs bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] gap-1"
-                    onClick={() => onViewDetail(req)}
-                >
-                    <Eye className="w-3.5 h-3.5" />
-                    Ver Solicitud
-                </Button>
+                <div className="mt-auto grid grid-cols-2 gap-2">
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        className="text-xs gap-1"
+                        onClick={() => onViewDetail(req)}
+                    >
+                        <Eye className="w-3.5 h-3.5" />
+                        Ver
+                    </Button>
+                    <Button
+                        size="sm"
+                        className="text-xs bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] gap-1"
+                        onClick={() => onQuickQuote?.(req)}
+                    >
+                        <Zap className="w-3.5 h-3.5" />
+                        Cotizar
+                    </Button>
+                </div>
             </div>
         </div>
     );

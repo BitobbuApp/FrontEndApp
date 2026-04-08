@@ -39,7 +39,7 @@ export default function useRequestForm() {
     const { id } = useParams();
     const isEditing = !!id;
     const queryClient = useQueryClient();
-    const [requestType, setRequestType] = useState(null);
+    const [requestType, setRequestType] = useState('Producto');
     const [productForm, setProductForm] = useState(DEFAULT_PRODUCT_FORM);
     const [serviceForm, setServiceForm] = useState(DEFAULT_SERVICE_FORM);
     const [files, setFiles] = useState([]);

@@ -35,6 +35,7 @@ export default function CommercialTab({
                 <CardDescription>Informacion sobre tu actividad comercial</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+                {/*
                 <div className="space-y-3">
                     <Label>Interes Principal *</Label>
                     <RadioGroup
@@ -56,7 +57,7 @@ export default function CommercialTab({
                         </div>
                     </RadioGroup>
                 </div>
-
+                */}
                 <div className="space-y-3">
                     <Label>Categorias de Interes</Label>
                     <div className="flex flex-wrap gap-2">

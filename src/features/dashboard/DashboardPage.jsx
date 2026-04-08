@@ -16,7 +16,7 @@ const containerVariants = {
 export default function DashboardPage() {
     const navigate = useNavigate();
 
-    const { user, solicitudes, loadingSolicitudes, ofertas, loadingOfertas, stats } =
+    const { user, company, solicitudes, loadingSolicitudes, ofertas, loadingOfertas, stats } =
         useDashboardData();
 
     return (
@@ -31,7 +31,7 @@ export default function DashboardPage() {
                 onNewSolicitud={() => navigate('/Requests/new')}
             />
 
-            <StatsGrid stats={stats} />
+            <StatsGrid stats={stats} company={company} />
 
             <div className="grid lg:grid-cols-2 gap-6">
                 <RecentQuotationsTable

@@ -106,7 +106,7 @@ export default function SupplierProfileModal({
                         <div className="bg-muted/50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Ubicación</p>
                             <p className="font-semibold text-foreground">
-                                {[mainLocation.location_city, mainLocation.location_state]
+                                [mainLocation.city?.name, mainLocation.state?.name, mainLocation.location_city, mainLocation.location_state]
                                     .filter(Boolean)
                                     .join(', ') || 'No especificada'}
                             </p>

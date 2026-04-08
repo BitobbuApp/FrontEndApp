@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { base44 } from '@/api/base44Client';
 import useAppMetadata, {
@@ -71,6 +71,7 @@ export function useSettingsForm() {
     const navigate = useNavigate();
     const { user, updateSession } = useAuth();
     const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+    const [foundingYearError, setFoundingYearError] = useState('');
 
     const {
         categoryOptions,
@@ -81,7 +82,6 @@ export function useSettingsForm() {
     } = useAppMetadata();
 
     const { data: companyData, isLoading } = useMyCompany();
-
     const company = companyData;
 
     useEffect(() => {
@@ -225,6 +225,20 @@ export function useSettingsForm() {
     });
 
     const handleSave = () => {
+        const currentYear = new Date().getFullYear();
+        const foundingYearValue = formData.founding_year?.toString().trim();
+
+        if (foundingYearValue) {
+            const parsedYear = Number(foundingYearValue);
+            if (!Number.isInteger(parsedYear) || parsedYear > currentYear) {
+                const message = `El año de fundación no puede ser mayor a ${currentYear}.`;
+                setFoundingYearError(message);
+                toast.error(message);
+                return;
+            }
+        }
+
+        setFoundingYearError('');
         saveMutation.mutate(formData);
     };
 
@@ -271,6 +285,8 @@ export function useSettingsForm() {
         company,
         formData,
         setFormData,
+        foundingYearError,
+        setFoundingYearError,
         isLoading,
         saveMutation,
         uploadLogoMutation,

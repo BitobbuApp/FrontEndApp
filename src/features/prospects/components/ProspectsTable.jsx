@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import ProspectMobileCard from './ProspectMobileCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Eye, Package, Clock, Users, Star } from 'lucide-react';
+import { Eye, Package, Clock, Users, Star, Zap } from 'lucide-react';
 import Pagination from '@/components/atoms/Pagination';
 import {
     Table,
@@ -16,7 +16,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 
 const unitLabels = {
@@ -36,6 +35,7 @@ export default function ProspectsTable({
     searchTerm,
     categoryFilter,
     handleViewDetail,
+    handleQuickQuote,
     page,
     totalPages,
     onPageChange,
@@ -81,6 +81,7 @@ export default function ProspectsTable({
                         key={req.id}
                         req={req}
                         onViewDetail={handleViewDetail}
+                        onQuickQuote={handleQuickQuote}
                     />
                 ))}
             </div>
@@ -204,14 +205,25 @@ export default function ProspectsTable({
                                     )}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-xs h-8 gap-1"
-                                        onClick={() => handleViewDetail(req)}
-                                    >
-                                        <Eye className="w-4 h-4 text-slate-400" />
-                                    </Button>
+                                    <div className="flex items-center justify-end gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 gap-1.5 text-xs"
+                                            onClick={() => handleViewDetail(req)}
+                                        >
+                                            <Eye className="w-3.5 h-3.5 text-slate-500" />
+                                            Ver Solicitud
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            className="h-8 gap-1.5 text-xs bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]"
+                                            onClick={() => handleQuickQuote(req)}
+                                        >
+                                            <Zap className="w-3.5 h-3.5" />
+                                            Cotizar
+                                        </Button>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}
