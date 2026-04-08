@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { RotateCcw, MoreHorizontal, MessageSquare, Flame, Zap, Eye } from 'lucide-react';
+import { RotateCcw, MoreHorizontal, MessageSquare, Flame, Zap, Eye, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -109,6 +109,12 @@ export default function RequestOffersTable({
                                             </div>
                                             <div>
                                                 <p className="font-semibold text-slate-900">{offer.supplier?.trade_name || 'Proveedor'}</p>
+                                                <div className="flex items-center gap-1 mt-0.5">
+                                                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                                    <span className="text-[10px] font-bold text-slate-600">
+                                                        {Number(offer.supplier?.average_rating || 0).toFixed(1)}
+                                                    </span>
+                                                </div>
                                                 <div className="flex gap-1.5 mt-1">
                                                     {isCheapest && (
                                                         <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-green-50 text-green-600 px-2 py-0.5 rounded-md border border-green-100 transition-transform hover:scale-105">

@@ -23,11 +23,8 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { productsApi } from '../services/productsApi';
 
-const TIPOS = ['Producto', 'Servicio'];
 const DISPONIBILIDAD = ['Disponible', 'Bajo Pedido', 'Agotado'];
-
 const DEFAULT_FORM = {
-    type: 'Producto',
     name: '',
     category_id: '',
     brand: '',
@@ -66,7 +63,7 @@ export default function AddProductModal({ open, onOpenChange }) {
     const mutation = useMutation({
         mutationFn: (data) => productsApi.createProduct(data),
         onSuccess: () => {
-            toast.success('Producto/Servicio agregado exitosamente');
+            toast.success('Producto agregado exitosamente');
             queryClient.invalidateQueries({ queryKey: ['companyProducts'] });
             setForm({
                 ...DEFAULT_FORM,
@@ -108,30 +105,13 @@ export default function AddProductModal({ open, onOpenChange }) {
             <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-lg font-bold text-foreground">
-                        Agregar Producto o Servicio
+                        Agregar Producto
                     </DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-5 pt-2">
-                    <div className="flex gap-2">
-                        {TIPOS.map((type) => (
-                            <button
-                                key={type}
-                                type="button"
-                                onClick={() => set('type', type)}
-                                className={`flex-1 rounded-lg border py-2 text-sm font-medium transition-colors ${
-                                    form.type === type
-                                        ? 'border-[#D2FC31] bg-[#D2FC31] text-slate-900'
-                                        : 'border-border text-slate-500 hover:bg-muted/50'
-                                }`}
-                            >
-                                {type}
-                            </button>
-                        ))}
-                    </div>
-
                     <div>
-                        <Label className="mb-2 block">Imagenes del {form.type}</Label>
+                        <Label className="mb-2 block">Imágenes del Producto</Label>
                         <div className="flex h-28 w-28 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border bg-muted/50 transition-colors hover:bg-slate-100">
                             <Upload className="h-6 w-6 text-slate-400" />
                             <span className="text-[10px] text-slate-400">Subir imagen</span>
@@ -139,11 +119,11 @@ export default function AddProductModal({ open, onOpenChange }) {
                     </div>
 
                     <div className="space-y-2">
-                        <Label>Nombre del {form.type} *</Label>
+                        <Label>Nombre del Producto *</Label>
                         <Input
                             value={form.name}
                             onChange={(e) => set('name', e.target.value)}
-                            placeholder={form.type === 'Servicio' ? 'Ej: Diseno de Logo' : 'Ej: Aceite de Motor 5W30'}
+                            placeholder="Ej: Aceite de Motor 5W30"
                         />
                     </div>
 
@@ -163,16 +143,14 @@ export default function AddProductModal({ open, onOpenChange }) {
                                 </SelectContent>
                             </Select>
                         </div>
-                        {form.type === 'Producto' && (
-                            <div className="space-y-2">
-                                <Label>Marca</Label>
-                                <Input
-                                    value={form.brand}
-                                    onChange={(e) => set('brand', e.target.value)}
-                                    placeholder="Ej: Shell"
-                                />
-                            </div>
-                        )}
+                        <div className="space-y-2">
+                            <Label>Marca</Label>
+                            <Input
+                                value={form.brand}
+                                onChange={(e) => set('brand', e.target.value)}
+                                placeholder="Ej: Shell"
+                            />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -204,42 +182,40 @@ export default function AddProductModal({ open, onOpenChange }) {
                         </div>
                     </div>
 
-                    {form.type === 'Producto' && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Cantidad Minima (MOQ) *</Label>
-                                <Input
-                                    type="number"
-                                    min="1"
-                                    value={form.moq}
-                                    onChange={(e) => set('moq', e.target.value)}
-                                    placeholder="1"
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Disponibilidad</Label>
-                                <Select value={form.availability} onValueChange={(value) => set('availability', value)}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {DISPONIBILIDAD.map((availability) => (
-                                            <SelectItem key={availability} value={availability}>
-                                                {availability}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Cantidad Minima (MOQ) *</Label>
+                            <Input
+                                type="number"
+                                min="1"
+                                value={form.moq}
+                                onChange={(e) => set('moq', e.target.value)}
+                                placeholder="1"
+                            />
                         </div>
-                    )}
+                        <div className="space-y-2">
+                            <Label>Disponibilidad</Label>
+                            <Select value={form.availability} onValueChange={(value) => set('availability', value)}>
+                                <SelectTrigger>
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {DISPONIBILIDAD.map((availability) => (
+                                        <SelectItem key={availability} value={availability}>
+                                            {availability}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
 
                     <div className="space-y-2">
-                        <Label>Descripcion</Label>
+                        <Label>Descripción</Label>
                         <Textarea
                             value={form.description}
                             onChange={(e) => set('description', e.target.value)}
-                            placeholder="Descripcion detallada del producto o servicio..."
+                            placeholder="Descripción detallada del producto..."
                             className="min-h-[120px]"
                         />
                     </div>
@@ -253,11 +229,11 @@ export default function AddProductModal({ open, onOpenChange }) {
                             Cancelar
                         </Button>
                         <Button
-                            className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]"
+                            className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] font-bold"
                             onClick={handleSubmit}
                             disabled={mutation.isPending}
                         >
-                            {mutation.isPending ? 'Guardando...' : `Agregar ${form.type}`}
+                            {mutation.isPending ? 'Guardando...' : 'Agregar Producto'}
                         </Button>
                     </div>
                 </div>

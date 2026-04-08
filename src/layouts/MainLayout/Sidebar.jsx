@@ -34,7 +34,11 @@ export default function Sidebar({
     collapsed = false,
     onToggleCollapse,
 }) {
-    const isActive = (page) => currentPageName === page;
+    const normalizedPageName = currentPageName?.startsWith('prospects/')
+        ? 'PosiblesClientes'
+        : currentPageName;
+
+    const isActive = (page) => normalizedPageName === page;
 
     const getBadgeCount = (page) => {
         if (page === 'Requests') return solicitudesCount;

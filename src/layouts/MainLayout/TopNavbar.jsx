@@ -18,6 +18,10 @@ export default function TopNavbar({
     myCompany,
     onOpenSidebar,
 }) {
+    const normalizedPageName = currentPageName?.startsWith('prospects/')
+        ? 'PosiblesClientes'
+        : currentPageName;
+
     return (
         <header className="sticky top-0 z-40 bg-background border-b border-border">
             <div className="flex items-center justify-between px-4 lg:px-8 h-16">
@@ -33,8 +37,8 @@ export default function TopNavbar({
 
                 {/* Page Title */}
                 <h1 className="text-lg font-semibold text-foreground hidden lg:block">
-                    {MENU_ITEMS.find((item) => item.page === currentPageName)?.name ||
-                        currentPageName}
+                    {MENU_ITEMS.find((item) => item.page === normalizedPageName)?.name ||
+                        normalizedPageName}
                 </h1>
 
                 {/* Right Actions */}

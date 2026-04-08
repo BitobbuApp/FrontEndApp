@@ -8,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 
 export default function RequestsPage() {
     const navigate = useNavigate();
-    const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [expandedRow, setExpandedRow] = useState(null);
     const [selectedRequestId, setSelectedRequestId] = useState(null);
@@ -23,21 +22,14 @@ export default function RequestsPage() {
         handleDelete,
     } = useRequestsData();
 
-    // Client-side filtering (search + status on top of server-side pagination)
+    // Client-side filtering (status on top of server-side pagination)
     const filteredRequests = requests.filter((req) => {
-        const matchesSearch = req.product_service
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase());
-        const matchesStatus =
-            statusFilter === 'all' || req.status === statusFilter;
-        return matchesSearch && matchesStatus;
+        return statusFilter === 'all' || req.status === statusFilter;
     });
 
     return (
         <div className="space-y-6">
             <RequestsHeader
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
                 statusFilter={statusFilter}
                 onStatusFilterChange={setStatusFilter}
                 onNewSolicitud={() => navigate('/Requests/new')}
@@ -52,7 +44,6 @@ export default function RequestsPage() {
                 onDelete={handleDelete}
                 onViewDetail={(id) => setSelectedRequestId(id)}
                 onNewSolicitud={() => navigate('/Requests/new')}
-                searchTerm={searchTerm}
                 statusFilter={statusFilter}
                 page={page}
                 totalPages={totalPages}

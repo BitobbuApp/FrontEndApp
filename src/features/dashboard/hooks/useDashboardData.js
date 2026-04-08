@@ -5,9 +5,12 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthContext';
 import { requestsApi } from '@/features/requests/services/requestsApi';
 import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
+import { getDashboardStats } from '../services/dashboardApi';
+import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
 
 export default function useDashboardData() {
     const { user } = useAuth();
+    const { data: company, isLoading: loadingCompany } = useMyCompany();
 
     // My company's requests (cotizaciones)
     const { data: requestsData, isLoading: loadingSolicitudes } = useQuery({
@@ -23,6 +26,14 @@ export default function useDashboardData() {
         enabled: !!user,
     });
 
+    // Centralized Dashboard Stats from Backend
+    const { data: statsData, isLoading: loadingStats } = useQuery({
+        queryKey: ['dashboardStats'],
+        queryFn: getDashboardStats,
+        enabled: !!user,
+        staleTime: 5 * 60 * 1000,
+    });
+
     // API response shape after axiosClient interceptor:
     // { success, message, data: { items: [...], total, page, totalPages } }
     const solicitudes = Array.isArray(requestsData?.data)
@@ -33,25 +44,17 @@ export default function useDashboardData() {
         ? receivedData.data
         : receivedData?.data?.items || receivedData?.data?.data || [];
 
-    const totalReceivedOffers = receivedData?.data?.total || receivedData?.total || ofertas.length;
 
-    const stats = {
-        cotizacionesActivas: solicitudes.filter(
-            (s) => s.status === 'Active' || s.status === 'Expiring_Soon'
-        ).length,
-        ofertasRecibidas: totalReceivedOffers,
-        negociosCerrados: solicitudes.filter(
-            (s) => s.status === 'Completed' || s.status === 'Closed'
-        ).length,
-        proveedoresConectados: new Set(
-            ofertas.map((o) => o.supplier_id).filter(Boolean)
-        ).size,
+    const stats = statsData?.data || {
+        buyer_stats: { generated_requests: 0, received_quotes: 0, generated_purchases: 0, estimated_savings: 0 },
+        supplier_stats: { received_requests: 0, created_quotes: 0, generated_sales: 0, generated_revenue: 0 }
     };
 
     return {
         user,
+        company,
         solicitudes,
-        loadingSolicitudes,
+        loadingSolicitudes: loadingSolicitudes || loadingStats || loadingCompany,
         ofertas,
         loadingOfertas,
         stats,

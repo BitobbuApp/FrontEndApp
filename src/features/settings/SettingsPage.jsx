@@ -43,6 +43,8 @@ export default function SettingsPage() {
         company,
         formData,
         setFormData,
+        foundingYearError,
+        setFoundingYearError,
         isLoading,
         saveMutation,
         uploadLogoMutation,
@@ -137,6 +139,8 @@ export default function SettingsPage() {
                     <CompanyTab
                         formData={formData}
                         setFormData={setFormData}
+                        foundingYearError={foundingYearError}
+                        setFoundingYearError={setFoundingYearError}
                         handleLogoChange={handleLogoChange}
                         uploadLogoPending={uploadLogoMutation.isPending}
                         sectorOptions={categoryOptions}

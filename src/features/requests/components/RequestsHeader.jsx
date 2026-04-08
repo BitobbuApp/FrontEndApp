@@ -12,8 +12,6 @@ import {
 } from '@/components/ui/select';
 
 export default function RequestsHeader({
-    searchTerm,
-    onSearchChange,
     statusFilter,
     onStatusFilterChange,
     onNewSolicitud,
@@ -40,31 +38,24 @@ export default function RequestsHeader({
 
             <Card className="border-0 shadow-sm">
                 <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                            <Input
-                                placeholder="Buscar por producto..."
-                                value={searchTerm}
-                                onChange={(e) => onSearchChange(e.target.value)}
-                                className="pl-10 h-11"
-                            />
+                    <div className="flex flex-col sm:flex-row gap-4 justify-end">
+                        <div className="w-full sm:w-64">
+                            <Select value={statusFilter} onValueChange={onStatusFilterChange}>
+                                <SelectTrigger className="w-full h-11">
+                                    <Filter className="w-4 h-4 mr-2" />
+                                    <SelectValue placeholder="Estado" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Todos los estados</SelectItem>
+                                    <SelectItem value="Active">Activo</SelectItem>
+                                    <SelectItem value="Paused">Pausada</SelectItem>
+                                    <SelectItem value="Expired">Vencida</SelectItem>
+                                    <SelectItem value="Completed">Concretada</SelectItem>
+                                    <SelectItem value="Expiring_Soon">Por expirar</SelectItem>
+                                    <SelectItem value="Closed">Cerrada</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
-                        <Select value={statusFilter} onValueChange={onStatusFilterChange}>
-                            <SelectTrigger className="w-full sm:w-48 h-11">
-                                <Filter className="w-4 h-4 mr-2" />
-                                <SelectValue placeholder="Estado" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all">Todos los estados</SelectItem>
-                                <SelectItem value="Active">Activo</SelectItem>
-                                <SelectItem value="Paused">Pausada</SelectItem>
-                                <SelectItem value="Expired">Vencida</SelectItem>
-                                <SelectItem value="Completed">Concretada</SelectItem>
-                                <SelectItem value="Expiring_Soon">Por expirar</SelectItem>
-                                <SelectItem value="Closed">Cerrada</SelectItem>
-                            </SelectContent>
-                        </Select>
                     </div>
                 </CardContent>
             </Card>
