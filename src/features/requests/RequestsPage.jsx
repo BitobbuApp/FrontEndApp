@@ -3,7 +3,6 @@ import useRequestsData from './hooks/useRequestsData';
 import RequestsHeader from './components/RequestsHeader';
 import RequestsTable from './components/RequestsTable';
 import RequestDetailModal from './components/RequestDetailModal';
-import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 
 export default function RequestsPage() {
@@ -11,6 +10,7 @@ export default function RequestsPage() {
     const [statusFilter, setStatusFilter] = useState('all');
     const [expandedRow, setExpandedRow] = useState(null);
     const [selectedRequestId, setSelectedRequestId] = useState(null);
+    const [viewMode, setViewMode] = useState('list');
 
     const {
         requests,
@@ -33,6 +33,8 @@ export default function RequestsPage() {
                 statusFilter={statusFilter}
                 onStatusFilterChange={setStatusFilter}
                 onNewSolicitud={() => navigate('/Requests/new')}
+                viewMode={viewMode}
+                onViewModeChange={setViewMode}
             />
 
             <RequestsTable
@@ -48,6 +50,7 @@ export default function RequestsPage() {
                 page={page}
                 totalPages={totalPages}
                 onPageChange={setPage}
+                viewMode={viewMode}
             />
 
             <RequestDetailModal

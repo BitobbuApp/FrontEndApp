@@ -12,7 +12,7 @@ import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 function getOfferHighlights(responses) {
     if (!responses.length) return { bestPrice: null, fastestDelivery: null };
     
-    const bestPrice = responses.reduce((prev, curr) => (curr.total_amount < prev.total_amount ? curr : prev));
+    const bestPrice = responses.reduce((prev, curr) => (curr.total_amount_usd < prev.total_amount_usd ? curr : prev));
     
     // Attempt to extract numeric delivery days for comparison
     const getDays = (str) => {
@@ -162,10 +162,10 @@ function OfferPreviewCard({ offer, type, onAccept, paymentConditionOptions }) {
 
             <div className="mt-6 space-y-1">
                 <div className="flex items-baseline gap-1">
-                    <span className="text-2xl font-black text-slate-900">${Number(offer.unit_price).toLocaleString()}</span>
+                    <span className="text-2xl font-black text-slate-900">${Number(offer.unit_price_usd).toLocaleString()}</span>
                     <span className="text-slate-400 text-xs font-medium">/unidad</span>
                 </div>
-                <p className="text-xs text-slate-500">Total: <span className="font-semibold">${Number(offer.total_amount).toLocaleString()}</span></p>
+                <p className="text-xs text-slate-500">Total: <span className="font-semibold">${Number(offer.total_amount_usd).toLocaleString()}</span></p>
             </div>
 
             <div className="mt-4 flex items-center gap-3 text-[11px] text-slate-400 font-medium">

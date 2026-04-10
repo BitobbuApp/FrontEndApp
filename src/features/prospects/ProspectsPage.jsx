@@ -4,6 +4,7 @@ import { useProspectsData } from './hooks/useProspectsData';
 import ProspectsFilters from './components/ProspectsFilters';
 import ProspectsTable from './components/ProspectsTable';
 import QuoteResponseModal from './components/QuoteResponseModal';
+import ViewToggle from '@/components/shared/ViewToggle';
 
 export default function ProspectsPage() {
     const navigate = useNavigate();
@@ -11,6 +12,7 @@ export default function ProspectsPage() {
     const [categoryFilter, setCategoryFilter] = useState('Todas');
     const [quoteModalOpen, setQuoteModalOpen] = useState(false);
     const [quoteRequest, setQuoteRequest] = useState(null);
+    const [viewMode, setViewMode] = useState('list');
 
     const {
         filteredSolicitudes,
@@ -34,13 +36,18 @@ export default function ProspectsPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-                    Posibles Clientes
-                </h1>
-                <p className="text-slate-500 mt-1">
-                    Encuentra empresas que buscan tus productos o servicios
-                </p>
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                <div>
+                    <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+                        Posibles Clientes
+                    </h1>
+                    <p className="text-slate-500 mt-1">
+                        Encuentra empresas que buscan tus productos o servicios
+                    </p>
+                </div>
+                <span className="hidden sm:block pb-2 border-b-0 mt-2 sm:mt-0">
+                    <ViewToggle mode={viewMode} onChange={setViewMode} />
+                </span>
             </div>
 
             {/* Filters */}
@@ -62,6 +69,7 @@ export default function ProspectsPage() {
                 page={page}
                 totalPages={totalPages}
                 onPageChange={setPage}
+                viewMode={viewMode}
             />
 
             {/* Quote Response Modal */}

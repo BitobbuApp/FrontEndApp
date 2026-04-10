@@ -16,14 +16,14 @@ export default function useDashboardData() {
     const { data: requestsData, isLoading: loadingSolicitudes } = useQuery({
         queryKey: ['dashboardRequests'],
         queryFn: () => requestsApi.getCompanyRequests({ page: 1, limit: 5 }),
-        enabled: !!user,
+        enabled: !!user && !!company?.can_buy,
     });
 
     // Quote responses received for MY requests (offers others sent to me)
     const { data: receivedData, isLoading: loadingOfertas } = useQuery({
         queryKey: ['dashboardReceivedOffers'],
         queryFn: () => quoteResponsesApi.getReceivedQuoteResponses({ page: 1, limit: 5 }),
-        enabled: !!user,
+        enabled: !!user && !!company?.can_buy,
     });
 
     // Centralized Dashboard Stats from Backend

@@ -29,7 +29,7 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
   const { paymentConditionOptions, deliveryMethodOptions } = useAppMetadata();
 
   const [formData, setFormData] = useState({
-    unit_price: '',
+    unit_price_usd: '',
     quantity: '',
     payment_condition_id: '',
     delivery_method_id: '',
@@ -52,7 +52,7 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
     mutationFn: async (data) => {
       const payload = {
         request_id: request.id,
-        unit_price: Number(data.unit_price),
+        unit_price_usd: Number(data.unit_price_usd),
         quantity: Number(data.quantity),
         has_guarantee: !!data.has_guarantee,
       };
@@ -83,7 +83,7 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
 
   const resetForm = () => {
     setFormData({
-      unit_price: '',
+      unit_price_usd: '',
       quantity: '',
       payment_condition_id: '',
       delivery_method_id: '',
@@ -95,7 +95,7 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.unit_price || !formData.quantity) {
+    if (!formData.unit_price_usd || !formData.quantity) {
       toast.error('Por favor completa el precio unitario y la cantidad');
       return;
     }
@@ -127,17 +127,17 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
           <form id="quote-response-form" onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="unit_price" className="text-sm font-medium">
+                <Label htmlFor="unit_price_usd" className="text-sm font-medium">
                   Precio Unitario ($) <span className="text-red-500">*</span>
                 </Label>
                 <Input
-                  id="unit_price"
+                  id="unit_price_usd"
                   type="number"
                   step="0.01"
                   min="0"
                   placeholder="0.00"
-                  value={formData.unit_price}
-                  onChange={(e) => setFormData({ ...formData, unit_price: e.target.value })}
+                  value={formData.unit_price_usd}
+                  onChange={(e) => setFormData({ ...formData, unit_price_usd: e.target.value })}
                   className="h-11 border-slate-200 focus:border-[#D2FC31] focus:ring-[#D2FC31]/20"
                   disabled={createMutation.isPending}
                 />

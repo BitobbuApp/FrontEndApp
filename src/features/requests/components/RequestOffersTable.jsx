@@ -70,7 +70,7 @@ export default function RequestOffersTable({
     }
 
     // Calculate cheapest & fastest
-    const minPrice = Math.min(...offers.map(o => o.total_amount));
+    const minPrice = Math.min(...offers.map(o => o.total_amount_usd));
     const minDelivery = Math.min(...offers.map(o => Number(o.delivery_time)).filter(Boolean));
 
     return (
@@ -96,7 +96,7 @@ export default function RequestOffersTable({
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {offers.map((offer) => {
-                            const isCheapest = offer.total_amount === minPrice;
+                            const isCheapest = offer.total_amount_usd === minPrice;
                             const isFastest = Number(offer.delivery_time) === minDelivery;
 
                             return (
@@ -132,12 +132,12 @@ export default function RequestOffersTable({
                                     </td>
                                     {/* Unit price */}
                                     <td className="px-4 py-5 text-right font-medium text-slate-600">
-                                        ${Number(offer.unit_price).toLocaleString()}
+                                        ${Number(offer.unit_price_usd).toLocaleString()}
                                     </td>
                                     {/* Total */}
                                     <td className="px-4 py-5 text-right">
                                         <span className="font-bold text-slate-900 text-base">
-                                            ${Number(offer.total_amount).toLocaleString()}
+                                            ${Number(offer.total_amount_usd).toLocaleString()}
                                         </span>
                                     </td>
                                     {/* Delivery */}
