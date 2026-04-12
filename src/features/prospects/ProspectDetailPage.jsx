@@ -29,6 +29,7 @@ import CompanyProfileCard from '@/components/shared/CompanyProfileCard';
 import QuoteResponseModal from './components/QuoteResponseModal';
 import ReviewModal from '@/features/suppliers/components/ReviewModal';
 import { useProspectDetail } from './hooks/useProspectDetail';
+import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 
 const unitLabels = {
     Units: 'Unidades',
@@ -49,6 +50,7 @@ export default function ProspectDetailPage() {
     const initialProspect = location.state?.prospect || null;
     const [quoteModalOpen, setQuoteModalOpen] = useState(false);
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const { resolveLocation } = useAppMetadata();
 
     const { prospect, isLoading, isError } = useProspectDetail(id, initialProspect);
 
@@ -86,17 +88,20 @@ export default function ProspectDetailPage() {
 
     const company = prospect.company || {};
     
-    // Ratings for the sidebar (Homologated for now)
     const ratingMetrics = [
-        { label: "Cumplimiento", value: Number(company.average_rating) || 0 },
-        { label: "Comunicación", value: Number(company.average_rating) || 0 },
-        { label: "Confiabilidad", value: 0 }
+        { label: "Cumplimiento", value: Number(company.avg_compliance_buyer) || 0 },
+        { label: "Comunicación", value: Number(company.avg_communication_buyer) || 0 },
+        { label: "Confiabilidad", value: Number(company.avg_reliability) || 0 }
     ];
 
     // Info blocks for the sidebar
+    const locationString = company?.locations?.[0] 
+        ? resolveLocation(company.locations[0].country_id, company.locations[0].state_id) 
+        : "No especificada";
+
     const infoBlocks = [
         { icon: <Briefcase className="w-4 h-4" />, label: "Sector", value: company.sector || "N/A" },
-        { icon: <MapPin className="w-4 h-4" />, label: "Ubicación", value: company.location || "No especificada" }
+        { icon: <MapPin className="w-4 h-4" />, label: "Ubicación", value: locationString }
     ];
 
     return (

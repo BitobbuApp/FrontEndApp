@@ -20,10 +20,10 @@ export default function ProductSmallCard({ product }) {
                         <Package className="w-8 h-8 text-slate-200" />
                     </div>
                 )}
-                {product.base_price && (
+                {product.base_price_usd && (
                     <div className="absolute bottom-2 right-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-lg shadow-sm border border-border">
                         <span className="text-sm font-bold text-foreground">
-                            ${Number(product.base_price).toLocaleString()}
+                            ${Number(product.base_price_usd).toLocaleString()}
                         </span>
                     </div>
                 )}

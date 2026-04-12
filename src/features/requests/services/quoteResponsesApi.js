@@ -64,4 +64,12 @@ export const quoteResponsesApi = {
     async deleteQuoteResponse(id) {
         return await apiClient.delete(`/quote-responses/${id}`);
     },
+
+    /**
+     * POST /quote-responses/:id/action
+     * Execute a state machine action on the quote response
+     */
+    async performAction(id, payload) {
+        return await apiClient.post(`/quote-responses/${id}/action`, payload);
+    },
 };

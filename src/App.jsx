@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 import AppMetadataBootstrap from '@/features/appMetadata/AppMetadataBootstrap';
 import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
+import GlobalSocketManager from '@/features/chat/components/GlobalSocketManager';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -89,6 +90,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <AppMetadataBootstrap />
+          <GlobalSocketManager />
           <NavigationTracker />
           <AuthenticatedApp />
         </Router>

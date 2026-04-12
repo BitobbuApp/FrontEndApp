@@ -10,7 +10,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 // Shared Components
 import DetailLayout from '@/components/layout/DetailLayout';
@@ -37,6 +38,27 @@ export default function QuoteDetailPage() {
         queryKey: ['quote-response-detail', id],
         queryFn: () => quoteResponsesApi.getQuoteResponseWithSupplier(id),
         enabled: !!id
+    });
+
+    const startNegotiationMutation = useMutation({
+        mutationFn: async () => {
+            const res = await quoteResponsesApi.performAction(id, { action: 'negotiation_started' });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            toast.success('Bandeja de negociación creada con éxito');
+            // 'data' returning from performAction normally returns the updated quote with its conversation
+            const conversationId = data.conversation?.id || data.conversation_id;
+            if (conversationId) {
+                navigate(`/Chat/${conversationId}`);
+            } else {
+                // Flashback: if we just get success but no payload, fallback to generic /Chat route or refresh
+                navigate(`/Chat`);
+            }
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Error al iniciar negociación');
+        }
     });
 
     if (isLoading) {
@@ -72,8 +94,8 @@ export default function QuoteDetailPage() {
         supplierId: data.supplier_id,
         relatedRequest: data.request?.product_service || "Solicitud de Cotización",
         requestId: data.request_id,
-        totalAmount: Number(data.total_amount),
-        unitPrice: Number(data.unit_price),
+        totalAmount: Number(data.total_amount_usd),
+        unitPrice: Number(data.unit_price_usd),
         quantity: Number(data.quantity),
         deliveryTime: data.delivery_time || "No especificado",
         paymentCondition: paymentConditionOptions.find(opt => opt.id === data.payment_condition_id)?.label || "No especificado",
@@ -82,12 +104,11 @@ export default function QuoteDetailPage() {
         hasGuarantee: data.has_guarantee
     };
 
-    // Rating metrics for the generic card
     const ratingMetrics = [
-        { label: "Cumplimiento", value: Number(supplier.average_rating) || 0 },
-        { label: "Calidad", value: Number(supplier.average_rating) || 0 },
-        { label: "Precio", value: 0 },
-        { label: "Comunicación", value: 0 }
+        { label: "Cumplimiento", value: Number(supplier.avg_compliance_seller) || 0 },
+        { label: "Calidad", value: Number(supplier.avg_quality) || 0 },
+        { label: "Precio", value: Number(supplier.avg_price) || 0 },
+        { label: "Comunicación", value: Number(supplier.avg_communication_seller) || 0 }
     ];
 
     // Info blocks for the generic card
@@ -137,9 +158,16 @@ export default function QuoteDetailPage() {
                         <X className="w-4 h-4" /> Rechazar Oferta
                     </Button>
                     <Button 
+                        disabled={startNegotiationMutation.isPending}
+                        onClick={() => startNegotiationMutation.mutate()}
                         className="flex-[2] h-12 rounded-xl bg-[#D2FC31] hover:bg-[#c4ee2a] text-slate-900 font-black gap-2 shadow-sm border border-[#D2FC31] transition-all"
                     >
-                        <MessageSquare className="w-5 h-5" /> Ir a Negociación
+                        {startNegotiationMutation.isPending ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            <MessageSquare className="w-5 h-5" /> 
+                        )}
+                        Ir a Negociación
                     </Button>
                 </>
             }

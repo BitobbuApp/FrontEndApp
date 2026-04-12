@@ -9,4 +9,8 @@ export const transactionsApi = {
     const response = await apiClient.get(`/transactions/${id}`);
     return response.data;
   },
+  performAction: async (id, payload) => {
+    const response = await apiClient.post(`/transactions/${id}/action`, payload);
+    return response.data;
+  },
 };

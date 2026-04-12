@@ -167,13 +167,13 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
                 .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
 
             unitOptions: unitsOfMeasure
-                .map((item) => toSelectOption(item, normalizeText(item.name))),
+                .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
 
             verificationDocumentTypeOptions: verificationDocumentTypes
-                .map((item) => toSelectOption(item, normalizeText(item.name))),
+                .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
 
             notificationTypeOptions: notificationTypes
-                .map((item) => toSelectOption(item, normalizeText(item.name))),
+                .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
 
             // payment_conditions: bilingual name_en / name_es
             paymentConditionOptions: paymentConditions
@@ -201,7 +201,7 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
 
             deliveryMethodOptions: deliveryMethods
                 .filter((item) => item?.is_active !== false)
-                .map((item) => toSelectOption(item, normalizeText(item.name))),
+                .map((item) => toSelectOption(item, getLocalizedLabel(item, language))),
         };
     }, [
         categories,

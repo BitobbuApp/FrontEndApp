@@ -58,6 +58,26 @@ export default function RequestOffersTable({
         },
     });
 
+    const startNegotiationMutation = useMutation({
+        mutationFn: async (offerId) => {
+            const res = await quoteResponsesApi.performAction(offerId, { action: 'negotiation_started' });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['quote-responses', requestId] });
+            toast.success('Negociación iniciada con éxito');
+            const conversationId = data.conversation?.id || data.conversation_id;
+            if (conversationId) {
+                navigate(`/Chat/${conversationId}`);
+            } else {
+                navigate(`/Chat`);
+            }
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Error al iniciar negociación');
+        }
+    });
+
     if (!offers.length) {
         return (
             <Card className="border-0 shadow-sm overflow-hidden">
@@ -70,7 +90,7 @@ export default function RequestOffersTable({
     }
 
     // Calculate cheapest & fastest
-    const minPrice = Math.min(...offers.map(o => o.total_amount));
+    const minPrice = Math.min(...offers.map(o => o.total_amount_usd));
     const minDelivery = Math.min(...offers.map(o => Number(o.delivery_time)).filter(Boolean));
 
     return (
@@ -96,7 +116,7 @@ export default function RequestOffersTable({
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {offers.map((offer) => {
-                            const isCheapest = offer.total_amount === minPrice;
+                            const isCheapest = offer.total_amount_usd === minPrice;
                             const isFastest = Number(offer.delivery_time) === minDelivery;
 
                             return (
@@ -132,12 +152,12 @@ export default function RequestOffersTable({
                                     </td>
                                     {/* Unit price */}
                                     <td className="px-4 py-5 text-right font-medium text-slate-600">
-                                        ${Number(offer.unit_price).toLocaleString()}
+                                        ${Number(offer.unit_price_usd).toLocaleString()}
                                     </td>
                                     {/* Total */}
                                     <td className="px-4 py-5 text-right">
                                         <span className="font-bold text-slate-900 text-base">
-                                            ${Number(offer.total_amount).toLocaleString()}
+                                            ${Number(offer.total_amount_usd).toLocaleString()}
                                         </span>
                                     </td>
                                     {/* Delivery */}
@@ -190,7 +210,8 @@ export default function RequestOffersTable({
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem 
                                                     className="flex items-center gap-2 py-2 cursor-pointer text-slate-600 focus:text-slate-700 focus:bg-slate-50 font-medium"
-                                                    onClick={() => {/* Negociar: No action for now */}}
+                                                    disabled={startNegotiationMutation.isPending}
+                                                    onClick={() => startNegotiationMutation.mutate(offer.id)}
                                                 >
                                                     <MessageSquare className="w-4 h-4" />
                                                     Negociar

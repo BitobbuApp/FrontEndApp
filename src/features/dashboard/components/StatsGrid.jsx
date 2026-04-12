@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
     FileText, 
@@ -13,11 +13,17 @@ import {
 import StatCard from '@/components/ui/StatCard';
 
 export default function StatsGrid({ stats, company }) {
-    if (!stats) return null;
-
-    const { buyer_stats, supplier_stats } = stats;
     const canBuy = company?.can_buy;
     const canSell = company?.can_sell;
+
+    const [viewMode, setViewMode] = useState(canBuy ? 'buyer' : 'supplier');
+
+    if (!stats) return null;
+    const { buyer_stats, supplier_stats } = stats;
+
+    if (!canBuy && !canSell) return null;
+
+    const showToggle = canBuy && canSell;
 
     const containerVariants = {
         hidden: { opacity: 0 },
@@ -28,13 +34,44 @@ export default function StatsGrid({ stats, company }) {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h2 className="text-xl font-bold text-slate-900">Resumen de Actividad</h2>
+                    <p className="text-sm text-slate-500">
+                        Visualizando métricas como {viewMode === 'buyer' ? 'Comprador' : 'Proveedor'}
+                    </p>
+                </div>
+                
+                {showToggle && (
+                    <div className="flex bg-slate-100 p-1 rounded-xl w-full sm:w-auto overflow-hidden">
+                        <button
+                            onClick={() => setViewMode('buyer')}
+                            className={`flex-1 sm:flex-none px-6 py-2 text-sm font-bold rounded-lg transition-all ${
+                                viewMode === 'buyer' 
+                                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5' 
+                                    : 'text-slate-500 hover:text-slate-700'
+                            }`}
+                        >
+                            Vista Comprador
+                        </button>
+                        <button
+                            onClick={() => setViewMode('supplier')}
+                            className={`flex-1 sm:flex-none px-6 py-2 text-sm font-bold rounded-lg transition-all ${
+                                viewMode === 'supplier' 
+                                    ? 'bg-white text-slate-900 shadow-sm ring-1 ring-slate-900/5' 
+                                    : 'text-slate-500 hover:text-slate-700'
+                            }`}
+                        >
+                            Vista Proveedor
+                        </button>
+                    </div>
+                )}
+            </div>
+
             {/* Buyer Section */}
-            {canBuy && (
+            {viewMode === 'buyer' && canBuy && (
                 <div className="space-y-4">
-                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider px-1">
-                        Como Comprador
-                    </h3>
                     <motion.div
                         variants={containerVariants}
                         initial="hidden"
@@ -74,11 +111,8 @@ export default function StatsGrid({ stats, company }) {
             )}
 
             {/* Supplier Section */}
-            {canSell && (
+            {viewMode === 'supplier' && canSell && (
                 <div className="space-y-4">
-                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider px-1">
-                        Como Proveedor
-                    </h3>
                     <motion.div
                         variants={containerVariants}
                         initial="hidden"

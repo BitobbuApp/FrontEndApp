@@ -28,7 +28,7 @@ const DEFAULT_FORM = {
     name: '',
     category_id: '',
     brand: '',
-    base_price: '',
+    base_price_usd: '',
     unit_id: '',
     moq: '1',
     availability: 'Disponible',
@@ -82,7 +82,7 @@ export default function AddProductModal({ open, onOpenChange }) {
             return;
         }
 
-        if (!form.base_price || Number(form.base_price) < 0) {
+        if (!form.base_price_usd || Number(form.base_price_usd) < 0) {
             toast.error('Ingresa un precio valido');
             return;
         }
@@ -91,7 +91,7 @@ export default function AddProductModal({ open, onOpenChange }) {
             name: form.name.trim(),
             description: form.description?.trim() || null,
             category_id: form.category_id ? Number(form.category_id) : null,
-            base_price: Number(form.base_price),
+            base_price_usd: Number(form.base_price_usd),
             unit_id: form.unit_id ? Number(form.unit_id) : Number(defaultUnitOption?.id) || null,
             moq: Number(form.moq) || 1,
             is_active: form.availability !== 'Agotado',
@@ -160,8 +160,8 @@ export default function AddProductModal({ open, onOpenChange }) {
                                 type="number"
                                 min="0"
                                 step="0.01"
-                                value={form.base_price}
-                                onChange={(e) => set('base_price', e.target.value)}
+                                value={form.base_price_usd}
+                                onChange={(e) => set('base_price_usd', e.target.value)}
                                 placeholder="0.00"
                             />
                         </div>

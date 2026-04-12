@@ -33,17 +33,19 @@ export default function DashboardPage() {
 
             <StatsGrid stats={stats} company={company} />
 
-            <div className="grid lg:grid-cols-2 gap-6">
-                <RecentQuotationsTable
-                    solicitudes={solicitudes}
-                    isLoading={loadingSolicitudes}
-                    onNewSolicitud={() => navigate('/Requests/new')}
-                />
-                <OffersOfInterestTable
-                    ofertas={ofertas}
-                    isLoading={loadingOfertas}
-                />
-            </div>
+            {company?.can_buy && (
+                <div className="grid lg:grid-cols-2 gap-6">
+                    <RecentQuotationsTable
+                        solicitudes={solicitudes}
+                        isLoading={loadingSolicitudes}
+                        onNewSolicitud={() => navigate('/Requests/new')}
+                    />
+                    <OffersOfInterestTable
+                        ofertas={ofertas}
+                        isLoading={loadingOfertas}
+                    />
+                </div>
+            )}
 
             <QuickTipBanner />
         </motion.div>
