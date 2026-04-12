@@ -88,11 +88,10 @@ export default function ProspectDetailPage() {
 
     const company = prospect.company || {};
     
-    // Ratings for the sidebar (Homologated for now)
     const ratingMetrics = [
-        { label: "Cumplimiento", value: Number(company.average_rating) || 0 },
-        { label: "Comunicación", value: Number(company.average_rating) || 0 },
-        { label: "Confiabilidad", value: 0 }
+        { label: "Cumplimiento", value: Number(company.avg_compliance_buyer) || 0 },
+        { label: "Comunicación", value: Number(company.avg_communication_buyer) || 0 },
+        { label: "Confiabilidad", value: Number(company.avg_reliability) || 0 }
     ];
 
     // Info blocks for the sidebar

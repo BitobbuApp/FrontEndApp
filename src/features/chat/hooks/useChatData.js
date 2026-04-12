@@ -38,12 +38,56 @@ export function useChatData(selectedConversationId) {
              queryClient.invalidateQueries({ queryKey: ['mensajes', selectedConversationId] });
         };
 
+        const handleStateUpdate = (payload) => {
+            // Optimistic/Immediate update of conversation state in cache
+            if (payload?.conversation_status) {
+                queryClient.setQueryData(['conversaciones'], (oldData) => {
+                    const rawItems = Array.isArray(oldData) ? oldData : oldData?.data || [];
+                    const updatedItems = rawItems.map(conv => {
+                        if ((payload.transaction_id && conv.transaction_id === payload.transaction_id) || 
+                            (payload.quote_response_id && conv.quote_response_id === payload.quote_response_id)) {
+                            return { 
+                                ...conv, 
+                                status: payload.conversation_status || conv.status,
+                                transaction_id: payload.transaction_id || conv.transaction_id
+                            };
+                        }
+                        return conv;
+                    });
+                    return Array.isArray(oldData) ? updatedItems : { ...oldData, data: updatedItems };
+                });
+            }
+
+            queryClient.invalidateQueries({ queryKey: ['conversaciones'] });
+            if (payload?.quote_response_id) {
+                queryClient.invalidateQueries({ queryKey: ['quote-response-detail', payload.quote_response_id] });
+            }
+            if (payload?.transaction_id) {
+                queryClient.invalidateQueries({ queryKey: ['transaction-detail', payload.transaction_id] });
+            }
+            if (payload?.action || payload?.status) {
+                toast.success(`Actualización recibida: ${payload.action || payload.status}`);
+            }
+        };
+
+        const stateEvents = [
+            'quote:negotiation_started', 'quote:updated', 'quote:formal_requested',
+            'quote:formal_attached', 'quote:formal_rejected', 'quote:accepted',
+            'quote:canceled', 'quote:expired',
+            'transaction:payment_uploaded', 'transaction:payment_approved',
+            'transaction:payment_rejected', 'transaction:order_shipped',
+            'transaction:delivery_confirmed', 'transaction:canceled', 'transaction:dispute_raised',
+            'review:submitted'
+        ];
+
         socket.on('receive_message', handleNewMessage);
         socket.on('conversation_read', handleConversationRead);
+        stateEvents.forEach(evt => socket.on(evt, handleStateUpdate));
 
         return () => {
              socket.off('receive_message', handleNewMessage);
              socket.off('conversation_read', handleConversationRead);
+             stateEvents.forEach(evt => socket.off(evt, handleStateUpdate));
              socket.emit('leave_conversation', selectedConversationId);
         };
     }, [selectedConversationId, queryClient]);
@@ -60,6 +104,9 @@ export function useChatData(selectedConversationId) {
     // Map backend Conversation to Base44 format expected by UI
     const conversaciones = rawConvs.map((conv) => ({
         id: conv.id,
+        status: conv.status,
+        quote_response_id: conv.quote_response_id,
+        transaction_id: conv.transaction_id,
         participante_1_id: conv.participant_1_id,
         participante_2_id: conv.participant_2_id,
         participante_1_nombre: conv.participant_1?.trade_name,
@@ -70,6 +117,15 @@ export function useChatData(selectedConversationId) {
         fecha_ultimo_mensaje: conv.last_message_date,
         mensajes_no_leidos_1: conv.unread_count_1,
         mensajes_no_leidos_2: conv.unread_count_2,
+        request: conv.request ? {
+            product_service: conv.request.product_service,
+            quantity: conv.request.quantity,
+            unit: conv.request.unit_of_measure?.abbreviation,
+        } : null,
+        quote_response: conv.quote_response ? {
+            price: conv.quote_response.unit_price_usd,
+            quantity: conv.quote_response.quantity,
+        } : null,
     }));
 
     const { data: msgResp, isLoading: loadingMessages } = useQuery({

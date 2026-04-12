@@ -20,6 +20,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import EmptyState from '@/components/ui/EmptyState';
+import ChatActionPanel from './ChatActionPanel';
+import ReviewModal from './ReviewModal';
 
 export default function ChatArea({
     selectedConversation,
@@ -82,7 +84,10 @@ export default function ChatArea({
     const otherParticipant = getOtherParticipant(selectedConversation);
 
     return (
-        <Card className="flex-1 border-0 shadow-sm flex flex-col overflow-hidden">
+        <Card className="flex-1 border-0 shadow-sm flex flex-col overflow-hidden relative">
+            {/* Review Overlay */}
+            <ReviewModal selectedConversation={selectedConversation} user={user} />
+
             {/* Chat Header */}
             <div className="p-4 border-b flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -103,6 +108,41 @@ export default function ChatArea({
                     <MoreVertical className="w-5 h-5 text-slate-400" />
                 </Button>
             </div>
+
+            {/* Negotiation Info Bar */}
+            {(selectedConversation.request || selectedConversation.quote_response) && (
+                <div className="px-4 py-2 bg-slate-50 border-b flex items-center gap-6 overflow-x-auto no-scrollbar">
+                    {selectedConversation.request && (
+                        <div className="flex items-center gap-2 min-w-max">
+                            <Badge variant="outline" className="bg-white border-slate-200 text-slate-600 flex gap-1.5 py-1 px-2.5">
+                                <span className="font-semibold text-slate-900 truncate max-w-[200px]">
+                                    {selectedConversation.request.product_service}
+                                </span>
+                            </Badge>
+                        </div>
+                    )}
+                    
+                    <div className="flex items-center gap-4 text-xs font-medium text-slate-500 min-w-max">
+                        {(selectedConversation.quote_response?.quantity || selectedConversation.request?.quantity) && (
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-slate-400">Cantidad:</span>
+                                <span className="text-slate-700">
+                                    {selectedConversation.quote_response?.quantity || selectedConversation.request?.quantity} {selectedConversation.request?.unit || ''}
+                                </span>
+                            </div>
+                        )}
+
+                        {selectedConversation.quote_response?.price && (
+                            <div className="flex items-center gap-1.5 border-l pl-4">
+                                <span className="text-slate-400">Precio:</span>
+                                <span className="text-[#059669] font-bold">
+                                    ${Number(selectedConversation.quote_response.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}/u
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Messages */}
             <ScrollArea className="flex-1 p-4">
@@ -192,25 +232,8 @@ export default function ChatArea({
                 )}
             </ScrollArea>
 
-            {/* Actions */}
-            <div className="px-4 py-3 border-t bg-muted/50 flex gap-2">
-                <Button
-                    variant="outline"
-                    className="flex-1 text-green-600 border-green-200 hover:bg-green-50"
-                    onClick={() => toast.success('Propuesta aceptada')}
-                >
-                    <Check className="w-4 h-4 mr-2" />
-                    Aceptar Propuesta
-                </Button>
-                <Button
-                    variant="outline"
-                    className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
-                    onClick={() => toast.error('Propuesta rechazada')}
-                >
-                    <X className="w-4 h-4 mr-2" />
-                    Rechazar
-                </Button>
-            </div>
+            {/* Contextual Action Panel (State Machine) */}
+            <ChatActionPanel selectedConversation={selectedConversation} user={user} />
 
             {/* Input */}
             <div className="p-4 border-t">

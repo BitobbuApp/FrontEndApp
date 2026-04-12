@@ -58,6 +58,26 @@ export default function RequestOffersTable({
         },
     });
 
+    const startNegotiationMutation = useMutation({
+        mutationFn: async (offerId) => {
+            const res = await quoteResponsesApi.performAction(offerId, { action: 'negotiation_started' });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['quote-responses', requestId] });
+            toast.success('Negociación iniciada con éxito');
+            const conversationId = data.conversation?.id || data.conversation_id;
+            if (conversationId) {
+                navigate(`/Chat/${conversationId}`);
+            } else {
+                navigate(`/Chat`);
+            }
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Error al iniciar negociación');
+        }
+    });
+
     if (!offers.length) {
         return (
             <Card className="border-0 shadow-sm overflow-hidden">
@@ -190,7 +210,8 @@ export default function RequestOffersTable({
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem 
                                                     className="flex items-center gap-2 py-2 cursor-pointer text-slate-600 focus:text-slate-700 focus:bg-slate-50 font-medium"
-                                                    onClick={() => {/* Negociar: No action for now */}}
+                                                    disabled={startNegotiationMutation.isPending}
+                                                    onClick={() => startNegotiationMutation.mutate(offer.id)}
                                                 >
                                                     <MessageSquare className="w-4 h-4" />
                                                     Negociar
