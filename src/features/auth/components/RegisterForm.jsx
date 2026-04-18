@@ -59,9 +59,9 @@ export default function RegisterForm({ onGoToLogin }) {
             setSuccess(true);
         } catch (err) {
             if (err.details && Array.isArray(err.details)) {
-                setError(err.details.join(' · '));
+                // setError(err.details.join(' · '));
             } else {
-                setError(err.message || 'Error al registrar. Intenta de nuevo.');
+                // setError(err.message || 'Error al registrar. Intenta de nuevo.');
             }
         } finally {
             setIsLoading(false);
