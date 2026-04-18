@@ -4,10 +4,14 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { chatApi } from '../services/chatApi';
 import { toast } from 'sonner';
 import { socket } from '@/api/socketClient';
+import { CHAT_SOCKET_EVENTS, normalizeStatePayload } from '../socket/chatSocketEvents';
+import { patchMessageIntoCache, updateConversationLastMessage } from '../socket/chatCacheUpdater';
+import { useRef } from 'react';
 
 export function useChatData(selectedConversationId) {
     const queryClient = useQueryClient();
     const { user: rawUser } = useAuth();
+    const markReadTimeoutRef = useRef(null);
 
     const myId = rawUser?.companyId || rawUser?.company_id || rawUser?.id;
 
@@ -18,79 +22,47 @@ export function useChatData(selectedConversationId) {
     useEffect(() => {
         if (!socket || !selectedConversationId) return;
 
-        socket.emit('join_conversation', selectedConversationId);
-        socket.emit('mark_read', { conversation_id: selectedConversationId });
+        socket.emit(CHAT_SOCKET_EVENTS.JOIN_CONVERSATION, selectedConversationId);
+        socket.emit(CHAT_SOCKET_EVENTS.MARK_READ, { conversation_id: selectedConversationId });
+
+        const debouncedMarkRead = () => {
+            if (markReadTimeoutRef.current) clearTimeout(markReadTimeoutRef.current);
+            markReadTimeoutRef.current = setTimeout(() => {
+                socket.emit(CHAT_SOCKET_EVENTS.MARK_READ, { conversation_id: selectedConversationId });
+            }, 1000);
+        };
 
         const handleNewMessage = (msg) => {
-            queryClient.setQueryData(['mensajes', selectedConversationId], (oldData) => {
-                if (!oldData) return { data: [msg] };
-                const prevItems = Array.isArray(oldData) ? oldData : oldData.data || [];
-                if (prevItems.some(item => item.id === msg.id)) return oldData;
-                return { ...oldData, data: [...prevItems, msg] }; // Agregamos al final (más reciente)
-            });
-            queryClient.invalidateQueries({ queryKey: ['conversaciones'] });
+            patchMessageIntoCache(queryClient, selectedConversationId, msg);
+            updateConversationLastMessage(queryClient, selectedConversationId, msg, msg.sender_id === myId);
             
-            // Mark as read immediately if we are actively viewing this chat
-            socket.emit('mark_read', { conversation_id: selectedConversationId });
+            // Mark as read immediately if we are actively viewing this chat, but debounced to avoid spam
+            debouncedMarkRead();
         };
 
         const handleConversationRead = () => {
+             // Optional: update UI to show messages are read
              queryClient.invalidateQueries({ queryKey: ['mensajes', selectedConversationId] });
         };
 
-        const handleStateUpdate = (payload) => {
-            // Optimistic/Immediate update of conversation state in cache
-            if (payload?.conversation_status) {
-                queryClient.setQueryData(['conversaciones'], (oldData) => {
-                    const rawItems = Array.isArray(oldData) ? oldData : oldData?.data || [];
-                    const updatedItems = rawItems.map(conv => {
-                        if ((payload.transaction_id && conv.transaction_id === payload.transaction_id) || 
-                            (payload.quote_response_id && conv.quote_response_id === payload.quote_response_id)) {
-                            return { 
-                                ...conv, 
-                                status: payload.conversation_status || conv.status,
-                                transaction_id: payload.transaction_id || conv.transaction_id
-                            };
-                        }
-                        return conv;
-                    });
-                    return Array.isArray(oldData) ? updatedItems : { ...oldData, data: updatedItems };
-                });
-            }
-
+        const handleReconnect = () => {
+            // Re-fetch messages and conversation list to backfill any events missed while disconnected
+            queryClient.invalidateQueries({ queryKey: ['mensajes', selectedConversationId] });
             queryClient.invalidateQueries({ queryKey: ['conversaciones'] });
-            if (payload?.quote_response_id) {
-                queryClient.invalidateQueries({ queryKey: ['quote-response-detail', payload.quote_response_id] });
-            }
-            if (payload?.transaction_id) {
-                queryClient.invalidateQueries({ queryKey: ['transaction-detail', payload.transaction_id] });
-            }
-            if (payload?.action || payload?.status) {
-                toast.success(`Actualización recibida: ${payload.action || payload.status}`);
-            }
         };
 
-        const stateEvents = [
-            'quote:negotiation_started', 'quote:updated', 'quote:formal_requested',
-            'quote:formal_attached', 'quote:formal_rejected', 'quote:accepted',
-            'quote:canceled', 'quote:expired',
-            'transaction:payment_uploaded', 'transaction:payment_approved',
-            'transaction:payment_rejected', 'transaction:order_shipped',
-            'transaction:delivery_confirmed', 'transaction:canceled', 'transaction:dispute_raised',
-            'review:submitted'
-        ];
-
-        socket.on('receive_message', handleNewMessage);
-        socket.on('conversation_read', handleConversationRead);
-        stateEvents.forEach(evt => socket.on(evt, handleStateUpdate));
+        socket.on(CHAT_SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
+        socket.on(CHAT_SOCKET_EVENTS.CONVERSATION_READ, handleConversationRead);
+        socket.on('reconnect', handleReconnect);
 
         return () => {
-             socket.off('receive_message', handleNewMessage);
-             socket.off('conversation_read', handleConversationRead);
-             stateEvents.forEach(evt => socket.off(evt, handleStateUpdate));
-             socket.emit('leave_conversation', selectedConversationId);
+             socket.off(CHAT_SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
+             socket.off(CHAT_SOCKET_EVENTS.CONVERSATION_READ, handleConversationRead);
+             socket.off('reconnect', handleReconnect);
+             socket.emit(CHAT_SOCKET_EVENTS.LEAVE_CONVERSATION, selectedConversationId);
+             if (markReadTimeoutRef.current) clearTimeout(markReadTimeoutRef.current);
         };
-    }, [selectedConversationId, queryClient]);
+    }, [selectedConversationId, queryClient, myId]);
 
     const { data: convResp, isLoading: loadingConversations } = useQuery({
         queryKey: ['conversaciones'], // Automatic context for myId based on JWT token

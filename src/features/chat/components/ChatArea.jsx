@@ -22,6 +22,8 @@ import { toast } from 'sonner';
 import EmptyState from '@/components/ui/EmptyState';
 import ChatActionPanel from './ChatActionPanel';
 import ReviewModal from './ReviewModal';
+import { useSocketConnectionState } from '../hooks/useSocketConnectionState';
+import { WifiOff, Loader2 } from 'lucide-react';
 
 export default function ChatArea({
     selectedConversation,
@@ -35,6 +37,7 @@ export default function ChatArea({
     const [attachedFile, setAttachedFile] = useState(null);
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
+    const connectionStatus = useSocketConnectionState();
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -98,9 +101,21 @@ export default function ChatArea({
                         </AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="font-semibold text-foreground">
-                            {otherParticipant.nombre || 'Usuario'}
-                        </p>
+                        <div className="flex items-center gap-2">
+                            <p className="font-semibold text-foreground">
+                                {otherParticipant.nombre || 'Usuario'}
+                            </p>
+                            {connectionStatus === 'offline' && (
+                                <Badge variant="destructive" className="h-5 text-[10px] px-1.5 flex items-center gap-1">
+                                    <WifiOff className="w-3 h-3" /> Offline
+                                </Badge>
+                            )}
+                            {connectionStatus === 'reconnecting' && (
+                                <Badge variant="secondary" className="h-5 text-[10px] px-1.5 flex items-center gap-1 bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">
+                                    <Loader2 className="w-3 h-3 animate-spin" /> Reconectando...
+                                </Badge>
+                            )}
+                        </div>
                         <p className="text-xs text-slate-500">En línea</p>
                     </div>
                 </div>
@@ -267,8 +282,8 @@ export default function ChatArea({
                     />
                     <Button
                         onClick={handleSend}
-                        disabled={(!messageText.trim() && !attachedFile) || sendMutation.isPending}
-                        className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] h-11 px-4"
+                        disabled={(!messageText.trim() && !attachedFile) || sendMutation.isPending || connectionStatus === 'offline'}
+                        className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] h-11 px-4 disabled:opacity-50"
                     >
                         <Send className="w-5 h-5" />
                     </Button>
