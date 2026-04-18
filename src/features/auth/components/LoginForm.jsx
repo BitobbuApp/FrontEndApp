@@ -25,7 +25,7 @@ export default function LoginForm({ onGoToRegister }) {
         try {
             await login(email, password);
         } catch (err) {
-            setError(err.message || 'Error al iniciar sesión.');
+            //setError(err.message || 'Error al iniciar sesión.');
         } finally {
             setIsLoading(false);
         }
