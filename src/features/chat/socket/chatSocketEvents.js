@@ -19,7 +19,21 @@ export const CHAT_SOCKET_EVENTS = {
     ]
 };
 
-export const normalizeStatePayload = (payload) => {
+const SAFE_CONVERSATION_STATUSES = new Set([
+    'active',
+    'completed',
+    'pending_review',
+    'canceled',
+    'expired'
+]);
+
+const coerceConversationStatus = (payload) => {
+    if (payload?.conversation_status) return payload.conversation_status;
+    const genericStatus = payload?.status;
+    return SAFE_CONVERSATION_STATUSES.has(genericStatus) ? genericStatus : null;
+};
+
+export const normalizeStatePayload = (payload, sourceEvent = null) => {
     return {
         conversation_id: payload?.conversation_id || null,
         quote_response_id: payload?.quote_response_id || null,
@@ -27,6 +41,8 @@ export const normalizeStatePayload = (payload) => {
         action: payload?.action || null,
         actor_company_id: payload?.actor_company_id || null,
         timestamp: payload?.timestamp || '', // Avoid Date.now() so duplicate raw payloads yield the same hash
-        conversation_status: payload?.conversation_status || payload?.status || null
+        source_event: sourceEvent,
+        transaction_status: payload?.transaction_status || payload?.status || null,
+        conversation_status: coerceConversationStatus(payload)
     };
 };

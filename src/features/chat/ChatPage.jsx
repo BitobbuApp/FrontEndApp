@@ -18,6 +18,9 @@ export default function ChatPage() {
         getUnreadCount,
     } = useChatData(selectedConversation?.id);
 
+    // Derived state: find the latest version of the selected conversation in the current list
+    const currentConversation = conversaciones.find(c => c.id === selectedConversation?.id) || selectedConversation;
+
     return (
         <div className="h-[calc(100vh-8rem)] flex gap-4">
             <ConversationList
@@ -31,7 +34,7 @@ export default function ChatPage() {
                 getUnreadCount={getUnreadCount}
             />
             <ChatArea
-                selectedConversation={selectedConversation}
+                selectedConversation={currentConversation}
                 user={user}
                 mensajes={mensajes}
                 loadingMessages={loadingMessages}

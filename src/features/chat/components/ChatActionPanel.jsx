@@ -66,7 +66,7 @@ export default function ChatActionPanel({ selectedConversation, user }) {
 
             queryClient.invalidateQueries({ queryKey: ['quote-response-detail'] });
             queryClient.invalidateQueries({ queryKey: ['conversaciones'] });
-            toast.success(`Acción '${action}' ejecutada`);
+            //toast.success(`Acción '${action}' ejecutada`);
             setActionForm(null);
             setFormData({});
         },
@@ -97,7 +97,7 @@ export default function ChatActionPanel({ selectedConversation, user }) {
 
             queryClient.invalidateQueries({ queryKey: ['transaction-detail'] });
             queryClient.invalidateQueries({ queryKey: ['conversaciones'] }); // to sync state shift
-            toast.success(`Acción '${action}' ejecutada`);
+            // toast.success(`Acción '${action}' ejecutada`);
         },
         onError: (err) => {
             toast.error(err?.response?.data?.message || 'Error al ejecutar logística');

@@ -2,23 +2,33 @@
  * Updates the 'conversaciones' query cache list based on a state payload.
  */
 export const updateConversationsCache = (queryClient, payload) => {
-    if (!payload?.conversation_status) return false; // Nothing to patch
+    if (!payload) return false;
 
     let wasPatched = false;
+    const norm = (value) => (value == null ? null : String(value));
+    const matchesById = (conv) => {
+        const convId = norm(conv.id);
+        const convTxId = norm(conv.transaction_id);
+        const convQuoteId = norm(conv.quote_response_id);
+
+        return (
+            (payload.transaction_id != null && convTxId === norm(payload.transaction_id)) ||
+            (payload.quote_response_id != null && convQuoteId === norm(payload.quote_response_id)) ||
+            (payload.conversation_id != null && convId === norm(payload.conversation_id))
+        );
+    };
 
     queryClient.setQueryData(['conversaciones'], (oldData) => {
         if (!oldData) return oldData;
 
         const rawItems = Array.isArray(oldData) ? oldData : oldData?.data || [];
         const updatedItems = rawItems.map(conv => {
-            if ((payload.transaction_id && conv.transaction_id === payload.transaction_id) ||
-                (payload.quote_response_id && conv.quote_response_id === payload.quote_response_id) ||
-                (payload.conversation_id && conv.id === payload.conversation_id)) {
+            if (matchesById(conv)) {
 
                 wasPatched = true;
                 return {
                     ...conv,
-                    status: payload.conversation_status || conv.status,
+                    ...(payload.conversation_status ? { status: payload.conversation_status } : {}),
                     transaction_id: payload.transaction_id || conv.transaction_id
                 };
             }

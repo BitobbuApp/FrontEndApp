@@ -19,11 +19,17 @@ export default function GlobalSocketManager() {
         // This relies on the backend broadcasting `emit` to `company_${myCompanyId}`
         // specifically for cross-session/cross-view notifications!
 
-        const handleGlobalStateUpdate = (rawPayload) => {
-            const payload = normalizeStatePayload(rawPayload);
+        const handleGlobalStateUpdate = (rawPayload, eventName) => {
+            const payload = normalizeStatePayload(rawPayload, eventName);
 
             // Deduplicate incoming events
-            const eventHash = `${payload.action}-${payload.quote_response_id || payload.transaction_id}-${payload.timestamp}`;
+            const scopedId = payload.conversation_id || payload.quote_response_id || payload.transaction_id || 'no-id';
+            const eventHash = [
+                payload.source_event || 'no-event',
+                payload.action || 'no-action',
+                scopedId,
+                payload.timestamp || 'no-ts'
+            ].join('|');
             if (recentEventsRef.current.has(eventHash)) {
                 return; // Duplicate event skipped
             }
@@ -51,16 +57,22 @@ export default function GlobalSocketManager() {
             if (!wasPatched) {
                 queryClient.invalidateQueries({ queryKey: ['conversaciones'] });
             }
+            // Keep conversations in sync with backend truth without waiting for UI navigation.
+            queryClient.invalidateQueries({ queryKey: ['conversaciones'], refetchType: 'active' });
 
             // Apply toast policy
             showToastForEvent(payload, myCompanyId);
         };
 
         // Attach global listeners
-        CHAT_SOCKET_EVENTS.STATE_EVENTS.forEach(evt => socket.on(evt, handleGlobalStateUpdate));
+        const listeners = CHAT_SOCKET_EVENTS.STATE_EVENTS.map((evt) => {
+            const listener = (rawPayload) => handleGlobalStateUpdate(rawPayload, evt);
+            socket.on(evt, listener);
+            return { evt, listener };
+        });
 
         return () => {
-            CHAT_SOCKET_EVENTS.STATE_EVENTS.forEach(evt => socket.off(evt, handleGlobalStateUpdate));
+            listeners.forEach(({ evt, listener }) => socket.off(evt, listener));
         };
     }, [isAuthenticated, user, queryClient]);
 
