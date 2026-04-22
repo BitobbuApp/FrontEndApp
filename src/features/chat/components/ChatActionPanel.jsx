@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
     Package, DollarSign, CheckCircle, Truck, 
@@ -21,6 +21,8 @@ export default function ChatActionPanel({ selectedConversation, user }) {
     const queryClient = useQueryClient();
     const [actionForm, setActionForm] = useState(null);
     const [formData, setFormData] = useState({});
+    const uploadInputRef = useRef(null);
+    const paymentInputRef = useRef(null);
 
     // since the chat is B2B. So the actor company ID is cleanly read from the object.
     const myId = user?.companyId || user?.company_id || user?.id;
@@ -45,8 +47,8 @@ export default function ChatActionPanel({ selectedConversation, user }) {
     });
 
     const quoteMutation = useMutation({
-        mutationFn: async ({ action, payload }) => {
-            const res = await quoteResponsesApi.performAction(selectedConversation.quote_response_id, { action, payload });
+        mutationFn: async ({ action, payload, file }) => {
+            const res = await quoteResponsesApi.performAction(selectedConversation.quote_response_id, { action, payload, file });
             return res.data;
         },
         onSuccess: (responseData, { action }) => {
@@ -76,8 +78,8 @@ export default function ChatActionPanel({ selectedConversation, user }) {
     });
 
     const transactionMutation = useMutation({
-        mutationFn: async ({ action, payload }) => {
-            const res = await transactionsApi.performAction(selectedConversation.transaction_id, { action, payload });
+        mutationFn: async ({ action, payload, file }) => {
+            const res = await transactionsApi.performAction(selectedConversation.transaction_id, { action, payload, file });
             return res.data;
         },
         onSuccess: (responseData, { action }) => {
@@ -103,6 +105,21 @@ export default function ChatActionPanel({ selectedConversation, user }) {
             toast.error(err?.response?.data?.message || 'Error al ejecutar logística');
         }
     });
+
+    const handleFileUpload = async (e, action, mutation) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('El archivo excede el límite de 5MB');
+            return;
+        }
+
+        mutation.mutate({ action, file });
+        
+        // Reset file input
+        e.target.value = '';
+    };
 
     // Render logic per phase
     if (isQuotePhase && quoteData) {
@@ -173,10 +190,10 @@ export default function ChatActionPanel({ selectedConversation, user }) {
                                             onClick={() => quoteMutation.mutate({ action: 'formal_quote_requested' })} disabled={quoteMutation.isPending}>
                                         <FileText className="w-4 h-4 mr-1.5" /> Solicitar PDF Formal
                                     </Button>
-                                    <Button size="sm" className="bg-[#D2FC31] hover:bg-[#c4ee2a] text-slate-900 border border-[#D2FC31] shadow-none"
+                                     {/* <Button size="sm" className="bg-[#D2FC31] hover:bg-[#c4ee2a] text-slate-900 border border-[#D2FC31] shadow-none"
                                             onClick={() => quoteMutation.mutate({ action: 'accepted' })} disabled={quoteMutation.isPending}>
                                         <CheckCircle className="w-4 h-4 mr-1.5" /> Aceptar Cotización
-                                    </Button>
+                                    </Button> */}
                                 </>
                             )}
                         </div>
@@ -204,14 +221,21 @@ export default function ChatActionPanel({ selectedConversation, user }) {
                         </div>
                         <div className="flex gap-2">
                             {isSupplier ? (
-                                <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white font-semibold"
-                                        onClick={() => quoteMutation.mutate({ 
-                                            action: 'formal_quote_attached', 
-                                            payload: { formal_quote_url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' } 
-                                        })} 
-                                        disabled={quoteMutation.isPending}>
-                                    <UploadCloud className="w-4 h-4 mr-1.5" /> Generar y Enviar PDF (Simulación)
-                                </Button>
+                                <>
+                                    <input 
+                                        type="file" 
+                                        accept=".pdf" 
+                                        className="hidden" 
+                                        ref={uploadInputRef}
+                                        onChange={(e) => handleFileUpload(e, 'formal_quote_attached', quoteMutation)}
+                                    />
+                                    <Button size="sm" className="bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+                                            onClick={() => uploadInputRef.current?.click()} 
+                                            disabled={quoteMutation.isPending}>
+                                        {quoteMutation.isPending ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-1.5" />}
+                                        Subir y Enviar PDF
+                                    </Button>
+                                </>
                             ) : (
                                 <div className="flex items-center gap-2 text-amber-600">
                                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -312,17 +336,18 @@ export default function ChatActionPanel({ selectedConversation, user }) {
                     <div className="flex gap-2">
                         {currentStatus === 'awaiting_payment' && isBuyer && (
                             <div className="flex flex-col sm:flex-row gap-2">
-                                <Button size="sm" variant="outline" className="border-emerald-300 text-emerald-700 bg-white"
-                                        onClick={() => toast.info("Funcionalidad de carga real próximamente.")}>
-                                    Subir Comprobante Real
-                                </Button>
+                                <input 
+                                    type="file" 
+                                    accept=".pdf,.png,.jpg,.jpeg" 
+                                    className="hidden" 
+                                    ref={paymentInputRef}
+                                    onChange={(e) => handleFileUpload(e, 'payment_uploaded', transactionMutation)}
+                                />
                                 <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
-                                        onClick={() => transactionMutation.mutate({ 
-                                            action: 'payment_uploaded',
-                                            payload: { payment_proof_url: 'https://bitobbu.com/mock-payment.pdf' }
-                                        })} 
+                                        onClick={() => paymentInputRef.current?.click()} 
                                         disabled={transactionMutation.isPending}>
-                                    Subir Pago (Simulación)
+                                    {transactionMutation.isPending ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-1.5" />}
+                                    Subir Comprobante
                                 </Button>
                             </div>
                         )}

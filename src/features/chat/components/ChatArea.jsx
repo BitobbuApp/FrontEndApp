@@ -22,6 +22,7 @@ import { toast } from 'sonner';
 import EmptyState from '@/components/ui/EmptyState';
 import ChatActionPanel from './ChatActionPanel';
 import ReviewModal from './ReviewModal';
+import SystemMessageBubble from './SystemMessageBubble';
 import { useSocketConnectionState } from '../hooks/useSocketConnectionState';
 import { WifiOff, Loader2 } from 'lucide-react';
 
@@ -180,6 +181,10 @@ export default function ChatArea({
                 ) : (
                     <div className="space-y-3">
                         {mensajes.map((msg, index) => {
+                            if (msg.message_type === 'system') {
+                                return <SystemMessageBubble key={msg.id} message={msg} currentCompanyId={user?.email} />;
+                            }
+
                             const isOwn = msg.remitente_id === user?.email;
                             const showDate =
                                 index === 0 ||
@@ -218,7 +223,7 @@ export default function ChatArea({
                                                             }`}
                                                     >
                                                         <File className="w-4 h-4" />
-                                                        Ver archivo adjunto
+                                                        {msg.file_name || 'Ver archivo adjunto'}
                                                     </a>
                                                 )}
                                                 <p className="text-sm whitespace-pre-wrap">

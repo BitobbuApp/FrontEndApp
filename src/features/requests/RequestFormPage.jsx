@@ -22,6 +22,7 @@ export default function RequestFormPage() {
         serviceForm,
         setServiceForm,
         files,
+        existingFiles,
         handleFileChange,
         removeFile,
         handleSubmit,
@@ -76,6 +77,7 @@ export default function RequestFormPage() {
                         <div className="pt-2">
                             <FileUpload
                                 files={files}
+                                existingFiles={existingFiles}
                                 onAdd={handleFileChange}
                                 onRemove={removeFile}
                             />
