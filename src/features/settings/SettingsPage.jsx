@@ -47,7 +47,7 @@ export default function SettingsPage() {
         setFoundingYearError,
         isLoading,
         saveMutation,
-        uploadLogoMutation,
+        logoPreview,
         handleSave,
         handleLogoChange,
         toggleCategoria,
@@ -142,7 +142,7 @@ export default function SettingsPage() {
                         foundingYearError={foundingYearError}
                         setFoundingYearError={setFoundingYearError}
                         handleLogoChange={handleLogoChange}
-                        uploadLogoPending={uploadLogoMutation.isPending}
+                        uploadLogoPending={saveMutation.isPending}
                         sectorOptions={categoryOptions}
                         companyTypeOptions={companyTypeOptions}
                     />

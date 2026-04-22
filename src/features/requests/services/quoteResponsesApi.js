@@ -69,7 +69,16 @@ export const quoteResponsesApi = {
      * POST /quote-responses/:id/action
      * Execute a state machine action on the quote response
      */
-    async performAction(id, payload) {
-        return await apiClient.post(`/quote-responses/${id}/action`, payload);
+    async performAction(id, { action, payload, file }) {
+        if (file) {
+            const fd = new FormData();
+            fd.append('action', action);
+            if (payload) fd.append('payload', JSON.stringify(payload));
+            fd.append('file', file);
+            return await apiClient.post(`/quote-responses/${id}/action`, fd, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+        }
+        return await apiClient.post(`/quote-responses/${id}/action`, { action, payload });
     },
 };

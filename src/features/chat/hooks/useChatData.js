@@ -115,6 +115,9 @@ export function useChatData(selectedConversationId) {
     const mensajes = [...rawMsgs].map((msg) => ({
         id: msg.id,
         remitente_id: msg.sender_id,
+        message_type: msg.message_type || 'user',
+        event_key: msg.event_key,
+        event_payload: msg.event_payload,
         contenido: msg.content,
         archivo_adjunto_url: msg.file_url,
         leido: msg.is_read,
@@ -123,13 +126,18 @@ export function useChatData(selectedConversationId) {
 
     const sendMutation = useMutation({
         mutationFn: async ({ contenido, archivo, selectedConversation }) => {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 try {
                     let archivo_adjunto_url = null;
+                    let archivo_name = null;
+                    
                     if (archivo) {
-                        // TODO: Re-connect real S3 upload service logic
-                        // For now we skip or log standard errors if an attachment is placed
-                        console.warn("Adjuntos aún no implementados en el nuevo socket");
+                        const fd = new FormData();
+                        fd.append('file', archivo);
+                        const uploadRes = await chatApi.uploadFile(fd);
+                        // Dependiendo de cómo mapea el interceptor, puede estar en data o data.data
+                        archivo_adjunto_url = uploadRes.data?.file_url || uploadRes.file_url;
+                        archivo_name = uploadRes.data?.file_name || uploadRes.file_name;
                     }
 
                     const payload = {
@@ -137,6 +145,7 @@ export function useChatData(selectedConversationId) {
                         client_msg_id: crypto.randomUUID(),
                         content: contenido,
                         file_url: archivo_adjunto_url,
+                        file_name: archivo_name
                     };
 
                     socket.emit('send_message', payload, (response) => {

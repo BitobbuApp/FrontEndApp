@@ -32,17 +32,33 @@ apiClient.interceptors.request.use(
     }
 );
 
+// ─── Storage URL normalizer ────────────────────────────────────────────────────
+import { getStorageUrl } from '../utils/storage';
+
+const STORAGE_URL_FIELDS = ['logo_url', 'url', 'file_url', 'formal_quote_url', 'payment_proof_url'];
+
+function normalizeStorageUrls(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) {
+        obj.forEach(normalizeStorageUrls);
+        return obj;
+    }
+    for (const key of Object.keys(obj)) {
+        if (STORAGE_URL_FIELDS.includes(key) && typeof obj[key] === 'string') {
+            obj[key] = getStorageUrl(obj[key]);
+        } else if (typeof obj[key] === 'object') {
+            normalizeStorageUrls(obj[key]);
+        }
+    }
+    return obj;
+}
+
 // ─── Response Interceptor ──────────────────────────────────────────────────────
 apiClient.interceptors.response.use(
     (response) => {
-        // Axios siempre envuelve la data en "response.data". 
-        // Nuestro backend devuelve usualmente { data: { ... } }, así que si quieres
-        // aplanarlo, podrías retornar response.data.data (opcional), pero 
-        // para mantener compatibilidad con lo actual retornamos la res entera de Axios
-        // o mapeamos de acuerdo a cómo devolvía el handleResponse anterior.
-        // El handleResponse anterior retornaba `json`, y luego el frontend hacía `json.data`.
-        // Así que aquí retornamos la respuesta parseada del body directo.
-        return response.data;
+        const data = response.data;
+        normalizeStorageUrls(data);
+        return data;
     },
     (error) => {
         // Manejo centralizado de errores
