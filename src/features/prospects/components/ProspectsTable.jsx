@@ -216,14 +216,25 @@ export default function ProspectsTable({
                                             <Eye className="w-3.5 h-3.5 text-slate-500" />
                                             Ver Solicitud
                                         </Button>
-                                        <Button
-                                            size="sm"
-                                            className="h-8 gap-1.5 text-xs bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]"
-                                            onClick={() => handleQuickQuote(req)}
-                                        >
-                                            <Zap className="w-3.5 h-3.5" />
-                                            Cotizar
-                                        </Button>
+                                        {req.has_responded ? (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 gap-1.5 text-xs text-green-600 bg-green-50/50 cursor-default hover:bg-green-50/50"
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                                Oferta enviada
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                size="sm"
+                                                className="h-8 gap-1.5 text-xs bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] font-bold"
+                                                onClick={() => handleQuickQuote(req)}
+                                            >
+                                                <Zap className="w-3.5 h-3.5" />
+                                                Cotizar
+                                            </Button>
+                                        )}
                                     </div>
                                 </TableCell>
                             </TableRow>

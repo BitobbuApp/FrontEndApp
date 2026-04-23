@@ -33,13 +33,14 @@ const DEFAULT_FORM = {
     moq: '1',
     availability: 'Disponible',
     description: '',
-    image_url: '',
 };
 
 export default function AddProductModal({ open, onOpenChange }) {
     const { user } = useAuth();
     const queryClient = useQueryClient();
     const [form, setForm] = useState(DEFAULT_FORM);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
     const {
         categoryOptions,
         unitOptions,
@@ -69,12 +70,22 @@ export default function AddProductModal({ open, onOpenChange }) {
                 ...DEFAULT_FORM,
                 unit_id: defaultUnitOption?.value || '',
             });
+            setSelectedFile(null);
+            setPreviewUrl(null);
             onOpenChange(false);
         },
         onError: (err) => {
             toast.error(err?.response?.data?.message || 'Error al guardar');
         },
     });
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
 
     const handleSubmit = () => {
         if (!form.name.trim()) {
@@ -87,17 +98,26 @@ export default function AddProductModal({ open, onOpenChange }) {
             return;
         }
 
-        mutation.mutate({
-            name: form.name.trim(),
-            description: form.description?.trim() || null,
-            category_id: form.category_id ? Number(form.category_id) : null,
-            base_price_usd: Number(form.base_price_usd),
-            unit_id: form.unit_id ? Number(form.unit_id) : Number(defaultUnitOption?.id) || null,
-            moq: Number(form.moq) || 1,
-            is_active: form.availability !== 'Agotado',
-            company_id: user?.company_id,
-            photos: form.image_url ? [{ url: form.image_url, sort_order: 0 }] : [],
-        });
+        if (!selectedFile) {
+            toast.error('Debes subir al menos una imagen del producto');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('name', form.name.trim());
+        formData.append('description', form.description?.trim() || '');
+        if (form.category_id) formData.append('category_id', Number(form.category_id));
+        formData.append('base_price_usd', Number(form.base_price_usd));
+        formData.append('unit_id', form.unit_id ? Number(form.unit_id) : Number(defaultUnitOption?.id) || '');
+        formData.append('moq', Number(form.moq) || 1);
+        formData.append('is_active', form.availability !== 'Agotado');
+        formData.append('company_id', user?.company_id);
+        
+        if (selectedFile) {
+            formData.append('files', selectedFile);
+        }
+
+        mutation.mutate(formData);
     };
 
     return (
@@ -111,10 +131,26 @@ export default function AddProductModal({ open, onOpenChange }) {
 
                 <div className="space-y-5 pt-2">
                     <div>
-                        <Label className="mb-2 block">Imágenes del Producto</Label>
-                        <div className="flex h-28 w-28 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border bg-muted/50 transition-colors hover:bg-slate-100">
-                            <Upload className="h-6 w-6 text-slate-400" />
-                            <span className="text-[10px] text-slate-400">Subir imagen</span>
+                        <Label className="mb-2 block text-xs uppercase tracking-wider font-bold text-slate-500">Imágenes del Producto *</Label>
+                        <div 
+                            className="flex h-28 w-28 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border bg-muted/50 transition-colors hover:bg-slate-100 overflow-hidden relative"
+                            onClick={() => document.getElementById('product-image-upload').click()}
+                        >
+                            {previewUrl ? (
+                                <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+                            ) : (
+                                <>
+                                    <Upload className="h-6 w-6 text-slate-400" />
+                                    <span className="text-[10px] text-slate-400">Subir imagen</span>
+                                </>
+                            )}
+                            <input 
+                                id="product-image-upload"
+                                type="file" 
+                                accept="image/*" 
+                                className="hidden" 
+                                onChange={handleFileChange}
+                            />
                         </div>
                     </div>
 

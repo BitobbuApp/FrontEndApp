@@ -1,16 +1,19 @@
 // src/features/dashboard/hooks/useDashboardData.js
 // Centralises every react-query call the Dashboard page needs.
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/features/auth/AuthContext';
 import { requestsApi } from '@/features/requests/services/requestsApi';
 import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
 import { getDashboardStats } from '../services/dashboardApi';
 import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
+import { transactionsApi } from '@/features/transactions/services/transactionsApi';
 
 export default function useDashboardData() {
     const { user } = useAuth();
     const { data: company, isLoading: loadingCompany } = useMyCompany();
+    const [transPage, setTransPage] = useState(1);
 
     // My company's requests (cotizaciones)
     const { data: requestsData, isLoading: loadingSolicitudes } = useQuery({
@@ -34,6 +37,14 @@ export default function useDashboardData() {
         staleTime: 5 * 60 * 1000,
     });
 
+    // Recent Transactions
+    const { data: transData, isLoading: loadingTransactions } = useQuery({
+        queryKey: ['dashboardTransactions', transPage],
+        queryFn: () => transactionsApi.getTransactions({ page: transPage, limit: 5 }),
+        enabled: !!user,
+    });
+    console.log(transData);
+
     // API response shape after axiosClient interceptor:
     // { success, message, data: { items: [...], total, page, totalPages } }
     const solicitudes = Array.isArray(requestsData?.data)
@@ -43,6 +54,10 @@ export default function useDashboardData() {
     const ofertas = Array.isArray(receivedData?.data)
         ? receivedData.data
         : receivedData?.data?.items || receivedData?.data?.data || [];
+
+    const transactions = Array.isArray(transData?.data)
+        ? transData.data
+        : transData?.items || [];
 
 
     const stats = statsData?.data || {
@@ -57,6 +72,12 @@ export default function useDashboardData() {
         loadingSolicitudes: loadingSolicitudes || loadingStats || loadingCompany,
         ofertas,
         loadingOfertas,
+        transactions,
+        loadingTransactions,
+        transPage,
+        transTotalPages: transData?.totalPages || 1,
+        transTotalItems: transData?.total || 0,
+        setTransPage,
         stats,
     };
 }
