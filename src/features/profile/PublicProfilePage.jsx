@@ -21,6 +21,15 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import Pagination from '@/components/atoms/Pagination';
 import usePublicProfileData from './hooks/usePublicProfileData';
 import useCompanyProducts from './hooks/useCompanyProducts';
 import ProductSmallCard from './components/ProductSmallCard';
@@ -69,7 +78,10 @@ export default function PublicProfilePage() {
     } = usePublicProfileData();
 
     const { data: companyProducts = [], isLoading: isLoadingProducts } = useCompanyProducts(company?.id);
-    const { reviews, loading: isLoadingReviews } = useSupplierReviews(company?.id);
+    
+    const [reviewPage, setReviewPage] = React.useState(1);
+    const reviewsLimit = 5;
+    const { reviews, total: totalReviewsCount, totalPages: reviewsTotalPages, loading: isLoadingReviews } = useSupplierReviews(company?.id, reviewPage, reviewsLimit);
 
     if (isLoading) {
         return (
@@ -273,35 +285,61 @@ export default function PublicProfilePage() {
                                 </div>
                             ) : reviews.length > 0 ? (
                                 <div className="space-y-4">
-                                    {reviews.map((review, index) => (
-                                        <div key={review.id || index} className="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
-                                            <div className="flex items-start justify-between gap-3">
-                                                <div>
-                                                    <p className="text-sm font-semibold text-slate-900">
-                                                        {review.author?.trade_name || 'Empresa anonima'}
-                                                    </p>
-                                                    <p className="text-xs text-slate-400">
-                                                        {review.created_at
-                                                            ? new Date(review.created_at).toLocaleDateString('es-VE', {
-                                                                day: 'numeric',
-                                                                month: 'short',
-                                                                year: 'numeric',
-                                                            })
-                                                            : 'Reciente'}
-                                                    </p>
-                                                </div>
-                                                <div className="flex items-center gap-1 text-amber-500">
-                                                    <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
-                                                    <span className="text-sm font-semibold text-slate-900">
-                                                        {Number(review.rating || 0).toFixed(1)}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                            <p className="text-sm text-slate-600 leading-relaxed">
-                                                {review.comment || 'Sin comentarios adicionales.'}
-                                            </p>
-                                        </div>
-                                    ))}
+                                    <div className="rounded-xl border border-border overflow-hidden">
+                                        <Table>
+                                            <TableHeader className="bg-slate-50/50">
+                                                <TableRow className="hover:bg-transparent">
+                                                    <TableHead className="w-[200px] text-xs font-semibold uppercase tracking-wider text-slate-500 py-4 px-6">Empresa</TableHead>
+                                                    <TableHead className="w-[120px] text-xs font-semibold uppercase tracking-wider text-slate-500 py-4 text-center">Calificación</TableHead>
+                                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-500 py-4 px-6">Comentario</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {reviews.map((review, index) => (
+                                                    <TableRow key={review.id || index} className="group hover:bg-slate-50 transition-colors border-slate-100">
+                                                        <TableCell className="py-4 px-6">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-semibold text-slate-900 text-sm">
+                                                                    {review.author?.trade_name || 'Empresa anónima'}
+                                                                </span>
+                                                                <span className="text-[10px] text-slate-400 font-medium tracking-tight mt-0.5">
+                                                                    {review.created_at
+                                                                        ? new Date(review.created_at).toLocaleDateString('es-VE', {
+                                                                            day: 'numeric',
+                                                                            month: 'short',
+                                                                            year: 'numeric',
+                                                                        })
+                                                                        : 'Reciente'}
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="py-4 text-center">
+                                                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-600">
+                                                                <Star className="w-3.5 h-3.5 fill-amber-500" />
+                                                                <span className="text-xs font-bold leading-none">
+                                                                    {Number(review.rating || 0).toFixed(1)}
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="py-4 px-6">
+                                                            <p className="text-sm text-slate-600 leading-relaxed italic line-clamp-2 group-hover:line-clamp-none transition-all duration-300">
+                                                                "{review.comment || 'Sin comentarios adicionales.'}"
+                                                            </p>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                        <Pagination
+                                            totalItems={totalReviewsCount}
+                                            itemsLabel="reseña"
+                                            itemsLabelPlural="reseñas"
+                                            currentPage={reviewPage}
+                                            totalPages={reviewsTotalPages}
+                                            onPageChange={setReviewPage}
+                                            className="bg-slate-50/30"
+                                        />
+                                    </div>
                                 </div>
                             ) : (
                                 <div className="py-16 flex flex-col items-center gap-3 text-center">

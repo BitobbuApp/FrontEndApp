@@ -13,13 +13,11 @@ import {
 import { Badge } from '@/components/ui/badge';
 
 const MENU_ITEMS = [
-    { name: 'Resumen', icon: LayoutDashboard, page: 'Dashboard' },
-    { name: 'Mis Solicitudes', icon: FileText, page: 'Requests' },
-    // { name: 'Ofertas', icon: Tag, page: 'Offers' },
-    { name: 'Posibles Clientes', icon: Users, page: 'PosiblesClientes' },
-    { name: 'Proveedores', icon: Store, page: 'Proveedores' },
-    // { name: 'Marketplace', icon: ShoppingBag, page: 'Marketplace' },
-    { name: 'Chat', icon: MessageSquare, page: 'Chat' },
+    { name: 'Resumen', icon: LayoutDashboard, page: 'Dashboard', roles: ['buyer', 'supplier'] },
+    { name: 'Mis Solicitudes', icon: FileText, page: 'Requests', roles: ['buyer'] },
+    { name: 'Posibles Clientes', icon: Users, page: 'PosiblesClientes', roles: ['supplier'] },
+    { name: 'Proveedores', icon: Store, page: 'Proveedores', roles: ['buyer'] },
+    { name: 'Chat', icon: MessageSquare, page: 'Chat', roles: ['buyer', 'supplier'] },
 ];
 
 export { MENU_ITEMS };
@@ -46,6 +44,12 @@ export default function Sidebar({
         if (page === 'Chat') return mensajesCount;
         return 0;
     };
+
+    const filteredItems = MENU_ITEMS.filter(item => {
+        const hasBuyerRole = item.roles.includes('buyer') && myCompany?.can_buy;
+        const hasSupplierRole = item.roles.includes('supplier') && myCompany?.can_sell;
+        return hasBuyerRole || hasSupplierRole;
+    });
 
     return (
         <div className="flex flex-col h-full relative">
@@ -77,7 +81,7 @@ export default function Sidebar({
 
             {/* Navigation */}
             <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-                {MENU_ITEMS.map((item) => {
+                {filteredItems.map((item) => {
                     const badgeCount = getBadgeCount(item.page);
 
                     return (

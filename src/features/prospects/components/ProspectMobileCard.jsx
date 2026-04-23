@@ -133,14 +133,25 @@ export default function ProspectMobileCard({ req, onViewDetail, onQuickQuote }) 
                         <Eye className="w-3.5 h-3.5" />
                         Ver
                     </Button>
-                    <Button
-                        size="sm"
-                        className="text-xs bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] gap-1"
-                        onClick={() => onQuickQuote?.(req)}
-                    >
-                        <Zap className="w-3.5 h-3.5" />
-                        Cotizar
-                    </Button>
+                    {req.has_responded ? (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-[10px] h-9 text-green-600 bg-green-50/50 cursor-default hover:bg-green-50/50"
+                        >
+                            <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                            Oferta enviada
+                        </Button>
+                    ) : (
+                        <Button
+                            size="sm"
+                            className="text-xs bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] gap-1 font-bold"
+                            onClick={() => onQuickQuote?.(req)}
+                        >
+                            <Zap className="w-3.5 h-3.5" />
+                            Cotizar
+                        </Button>
+                    )}
                 </div>
             </div>
         </div>

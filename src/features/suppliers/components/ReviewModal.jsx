@@ -18,7 +18,7 @@ export default function ReviewModal({
     companyName,
     typeLabel = 'proveedor' 
 }) {
-    const { reviews, loading } = useSupplierReviews(companyId);
+    const { reviews, loading } = useSupplierReviews(companyId, 1, 5);
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -29,7 +29,7 @@ export default function ReviewModal({
                         Calificaciones de {companyName || 'Empresa'}
                     </DialogTitle>
                     <DialogDescription className="text-slate-500 font-medium">
-                        Últimas 10 reseñas recibidas
+                        Últimas 5 reseñas recibidas
                     </DialogDescription>
                 </DialogHeader>
 
