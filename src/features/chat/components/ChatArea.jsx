@@ -11,6 +11,7 @@ import {
     CheckCheck,
     File,
     X,
+    ChevronLeft,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +34,9 @@ export default function ChatArea({
     loadingMessages,
     getOtherParticipant,
     sendMutation,
+    isMobile = false,
+    onBack = () => { },
+    className = "",
 }) {
     const [messageText, setMessageText] = useState('');
     const [attachedFile, setAttachedFile] = useState(null);
@@ -73,7 +77,7 @@ export default function ChatArea({
 
     if (!selectedConversation) {
         return (
-            <Card className="flex-1 border-0 shadow-sm flex flex-col overflow-hidden">
+            <Card className={`flex-1 border-0 shadow-sm flex flex-col overflow-hidden ${className}`}>
                 <div className="flex-1 flex items-center justify-center">
                     <EmptyState
                         icon={MessageSquare}
@@ -88,14 +92,24 @@ export default function ChatArea({
     const otherParticipant = getOtherParticipant(selectedConversation);
 
     return (
-        <Card className="flex-1 border-0 shadow-sm flex flex-col overflow-hidden relative">
+        <Card className={`flex-1 border-0 shadow-sm flex flex-col overflow-hidden relative ${className}`}>
             {/* Review Overlay */}
             <ReviewModal selectedConversation={selectedConversation} user={user} />
 
             {/* Chat Header */}
-            <div className="p-4 border-b flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Avatar className="w-10 h-10">
+            <div className="p-3 lg:p-4 border-b flex items-center justify-between bg-white sticky top-0 z-10">
+                <div className="flex items-center gap-2 lg:gap-3 min-w-0">
+                    {isMobile && (
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={onBack} 
+                            className="mr-1 h-9 w-9"
+                        >
+                            <ChevronLeft className="w-5 h-5" />
+                        </Button>
+                    )}
+                    <Avatar className="w-9 h-9 lg:w-10 lg:h-10 flex-shrink-0">
                         <AvatarImage src={otherParticipant.logo} />
                         <AvatarFallback className="bg-[#D2FC31] text-slate-900">
                             {otherParticipant.nombre?.[0] || 'U'}
@@ -207,7 +221,7 @@ export default function ChatArea({
                                         animate={{ opacity: 1, y: 0 }}
                                         className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
                                     >
-                                        <div className={`max-w-[70%] ${isOwn ? 'order-2' : 'order-1'}`}>
+                                        <div className={`max-w-[85%] lg:max-w-[70%] ${isOwn ? 'order-2' : 'order-1'}`}>
                                             <div
                                                 className={`rounded-2xl px-4 py-2.5 ${isOwn
                                                         ? 'bg-[#1E293B] text-white rounded-br-md'
@@ -256,7 +270,7 @@ export default function ChatArea({
             <ChatActionPanel selectedConversation={selectedConversation} user={user} />
 
             {/* Input */}
-            <div className="p-4 border-t">
+            <div className="p-4 border-t bg-white pb-8 lg:pb-4">
                 {attachedFile && (
                     <div className="mb-3 flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-2">
                         <File className="w-4 h-4 text-slate-500" />

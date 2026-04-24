@@ -130,16 +130,16 @@ export default function ChatActionPanel({ selectedConversation, user }) {
             return (
                 <div className="bg-slate-50 border-b border-slate-200 p-4 shrink-0 transition-all">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                        <div className="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
+                            <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                                 <DollarSign className="w-5 h-5 text-blue-600" />
                             </div>
-                            <div>
-                                <div className="flex items-center gap-2">
-                                    <h4 className="font-bold text-slate-800 text-sm">Fase de Negociación</h4>
+                            <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-1.5 lg:gap-2">
+                                    <h4 className="font-bold text-slate-800 text-xs lg:text-sm truncate">Fase de Negociación</h4>
                                     <StatusBadge label="En Progreso" bgColor="bg-blue-500" textColor="text-white" />
                                 </div>
-                                <p className="text-xs text-slate-500 mt-0.5">
+                                <p className="text-[10px] lg:text-xs text-slate-500 mt-0.5 truncate">
                                     Oferta actual: <strong className="text-slate-700">${Number(quoteData.total_amount_usd).toLocaleString()}</strong>
                                 </p>
                             </div>
@@ -149,38 +149,40 @@ export default function ChatActionPanel({ selectedConversation, user }) {
                             {isSupplier && (
                                 <>
                                     {actionForm === 'price' && (
-                                        <div className="flex gap-2 items-center bg-white p-1 rounded-md border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2">
-                                            <Input type="number" placeholder="Precio ($)" className="w-24 h-8" value={formData.unit_price_usd || ''} onChange={e => setFormData({...formData, unit_price_usd: Number(e.target.value)})} />
+                                        <div className="flex gap-2 items-center bg-white p-1 rounded-md border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2 w-full sm:w-auto">
+                                            <Input type="number" placeholder="Precio ($)" className="flex-1 sm:w-24 h-8" value={formData.unit_price_usd || ''} onChange={e => setFormData({...formData, unit_price_usd: Number(e.target.value)})} />
                                             <Button size="sm" onClick={() => quoteMutation.mutate({ action: 'price_updated', payload: { unit_price_usd: formData.unit_price_usd }})} disabled={quoteMutation.isPending || !formData.unit_price_usd}>Guardar</Button>
                                             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setActionForm(null)}><X className="w-4 h-4"/></Button>
                                         </div>
                                     )}
                                     {actionForm === 'quantity' && (
-                                        <div className="flex gap-2 items-center bg-white p-1 rounded-md border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2">
-                                            <Input type="number" placeholder="Cant" className="w-20 h-8" value={formData.quantity || ''} onChange={e => setFormData({...formData, quantity: Number(e.target.value)})} />
+                                        <div className="flex gap-2 items-center bg-white p-1 rounded-md border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2 w-full sm:w-auto">
+                                            <Input type="number" placeholder="Cant" className="flex-1 sm:w-20 h-8" value={formData.quantity || ''} onChange={e => setFormData({...formData, quantity: Number(e.target.value)})} />
                                             <Button size="sm" onClick={() => quoteMutation.mutate({ action: 'quantity_updated', payload: { quantity: formData.quantity }})} disabled={quoteMutation.isPending || !formData.quantity}>Guardar</Button>
                                             <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setActionForm(null)}><X className="w-4 h-4"/></Button>
                                         </div>
                                     )}
                                     {actionForm === 'terms' && (
-                                        <div className="flex gap-2 items-center bg-white p-1 rounded-md border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2">
-                                            <Input type="text" placeholder="Notas" className="w-32 h-8" value={formData.notes || ''} onChange={e => setFormData({...formData, notes: e.target.value})} />
-                                            <Input type="text" placeholder="Tiempo entrega" className="w-32 h-8" value={formData.delivery_time || ''} onChange={e => setFormData({...formData, delivery_time: e.target.value})} />
-                                            <Button size="sm" onClick={() => quoteMutation.mutate({ action: 'terms_updated', payload: { notes: formData.notes, delivery_time: formData.delivery_time }})} disabled={quoteMutation.isPending}>Guardar</Button>
-                                            <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setActionForm(null)}><X className="w-4 h-4"/></Button>
+                                        <div className="flex flex-col sm:flex-row gap-2 sm:items-center bg-white p-2 sm:p-1 rounded-md border border-slate-200 shadow-sm animate-in fade-in slide-in-from-top-2 w-full sm:w-auto">
+                                            <Input type="text" placeholder="Notas" className="flex-1 sm:w-32 h-8" value={formData.notes || ''} onChange={e => setFormData({...formData, notes: e.target.value})} />
+                                            <Input type="text" placeholder="Tiempo entrega" className="flex-1 sm:w-32 h-8" value={formData.delivery_time || ''} onChange={e => setFormData({...formData, delivery_time: e.target.value})} />
+                                            <div className="flex gap-2 justify-end">
+                                                <Button size="sm" onClick={() => quoteMutation.mutate({ action: 'terms_updated', payload: { notes: formData.notes, delivery_time: formData.delivery_time }})} disabled={quoteMutation.isPending}>Guardar</Button>
+                                                <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setActionForm(null)}><X className="w-4 h-4"/></Button>
+                                            </div>
                                         </div>
                                     )}
 
                                     {!actionForm && (
-                                        <>
+                                        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                                             <Button size="sm" variant="outline" className="bg-white" onClick={() => setActionForm('price')}><Edit3 className="w-3 h-3 mr-1"/> Precio</Button>
                                             <Button size="sm" variant="outline" className="bg-white" onClick={() => setActionForm('quantity')}><Package className="w-3 h-3 mr-1"/> Cantidad</Button>
                                             <Button size="sm" variant="outline" className="bg-white" onClick={() => setActionForm('terms')}><FileText className="w-3 h-3 mr-1"/> Specs</Button>
-                                            <Button size="sm" variant="destructive" className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-100 ml-auto" 
+                                            <Button size="sm" variant="destructive" className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-100 sm:ml-auto" 
                                                     onClick={() => quoteMutation.mutate({ action: 'canceled' })} disabled={quoteMutation.isPending}>
                                                 Retirar Oferta
                                             </Button>
-                                        </>
+                                        </div>
                                     )}
                                 </>
                             )}

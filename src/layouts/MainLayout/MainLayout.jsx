@@ -3,6 +3,7 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import useLayoutData from './useLayoutData';
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
+import MobileBottomNav from './MobileBottomNav';
 
 const SIDEBAR_EXPANDED_W = 'w-64';
 const SIDEBAR_COLLAPSED_W = 'w-[68px]';
@@ -65,8 +66,16 @@ export default function MainLayout({ children, currentPageName }) {
                 />
 
                 {/* Page Content */}
-                <main className="p-4 lg:p-8">{children}</main>
+                <main className="p-4 lg:p-8 pb-20 lg:pb-8">{children}</main>
             </div>
+
+            {/* Mobile Bottom Navigation */}
+            <MobileBottomNav 
+                currentPageName={currentPageName}
+                myCompany={myCompany}
+                mensajesCount={mensajesCount}
+                onOpenSidebar={() => setSidebarOpen(true)}
+            />
         </div>
     );
 }
