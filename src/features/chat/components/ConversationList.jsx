@@ -18,6 +18,7 @@ export default function ConversationList({
     setSelectedConversation,
     getOtherParticipant,
     getUnreadCount,
+    className = "",
 }) {
     const filteredConversations = conversaciones.filter((conv) => {
         const other = getOtherParticipant(conv);
@@ -25,7 +26,7 @@ export default function ConversationList({
     });
 
     return (
-        <Card className="w-80 flex-shrink-0 border-0 shadow-sm flex flex-col overflow-hidden">
+        <Card className={`flex flex-col border-0 shadow-sm overflow-hidden ${className}`}>
             {/* Search */}
             <div className="p-4 border-b">
                 <div className="relative">
