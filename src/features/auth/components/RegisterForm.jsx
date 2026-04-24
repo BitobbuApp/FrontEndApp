@@ -7,6 +7,52 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { registerUser } from '../services/authApi';
 import useAppMetadata from '../../appMetadata/hooks/useAppMetadata';
+import { Check } from 'lucide-react';
+
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!#%*?&])[A-Za-z\d@$!#%*?&]{8,}$/;
+
+const PasswordStrengthMeter = ({ password }) => {
+    const checks = [
+        { label: 'Mínimo 8 caracteres', met: password.length >= 8 },
+        { label: 'Mayúsculas y minúsculas', met: /[a-z]/.test(password) && /[A-Z]/.test(password) },
+        { label: 'Al menos un número', met: /\d/.test(password) },
+        { label: 'Carácter especial (@$!#%*?&)', met: /[@$!#%*?&]/.test(password) },
+    ];
+
+    const metCount = checks.filter(c => c.met).length;
+    
+    return (
+        <div className="mt-3 space-y-3 p-3 bg-slate-50/50 rounded-xl border border-slate-100 transition-all">
+            <div className="flex gap-1 h-1">
+                {[1, 2, 3, 4].map((step) => (
+                    <div 
+                        key={step}
+                        className={`flex-1 rounded-full transition-all duration-500 ${
+                            step <= metCount 
+                                ? metCount <= 2 ? 'bg-orange-400' : metCount === 3 ? 'bg-blue-400' : 'bg-[#D2FC31]'
+                                : 'bg-slate-200'
+                        }`}
+                    />
+                ))}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {checks.map((check, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                        {check.met ? (
+                            <Check className="w-3.5 h-3.5 text-[#a8cc27]" />
+                        ) : (
+                            <div className="w-3.5 h-3.5 rounded-full border border-slate-300" />
+                        )}
+                        <span className={`text-[11px] leading-none ${check.met ? 'text-slate-900 font-medium' : 'text-slate-400'}`}>
+                            {check.label}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 export default function RegisterForm({ onGoToLogin }) {
     const [form, setForm] = useState({
@@ -45,6 +91,11 @@ export default function RegisterForm({ onGoToLogin }) {
         setError('');
         if (!form.first_name || !form.last_name || !form.email || !form.password || !form.trade_name || !form.country_id || !form.state_id || !form.sector_id) {
             setError('Por favor completa todos los campos.');
+            return;
+        }
+
+        if (!PASSWORD_REGEX.test(form.password)) {
+            setError('La contraseña no cumple con los requisitos de seguridad.');
             return;
         }
         setIsLoading(true);
@@ -175,8 +226,14 @@ export default function RegisterForm({ onGoToLogin }) {
                                 type={showPassword ? 'text' : 'password'}
                                 value={form.password}
                                 onChange={handleChange}
-                                placeholder="Mínimo 6 caracteres"
-                                className="h-12 bg-background border-border pr-12"
+                                placeholder="Crea una contraseña segura"
+                                className={`h-12 bg-background border-border pr-12 transition-all ${
+                                    form.password && !PASSWORD_REGEX.test(form.password) 
+                                        ? 'border-orange-200 focus-visible:ring-orange-200' 
+                                        : form.password && PASSWORD_REGEX.test(form.password)
+                                        ? 'border-[#D2FC31] focus-visible:ring-[#D2FC31]'
+                                        : ''
+                                }`}
                                 autoComplete="new-password"
                                 disabled={isLoading}
                             />
@@ -188,6 +245,7 @@ export default function RegisterForm({ onGoToLogin }) {
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
                         </div>
+                        {form.password && <PasswordStrengthMeter password={form.password} />}
                     </div>
                     
                     <div className="space-y-4 pt-2 border-t border-border mt-4">

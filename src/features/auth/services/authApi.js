@@ -31,7 +31,9 @@ export async function registerUser({
     trade_name,
     country_id,
     state_id,
-    sector_id
+    sector_id,
+    can_buy,
+    can_sell
 }) {
     const responseBody = await apiClient.post('/users/register', {
         first_name,
@@ -41,7 +43,9 @@ export async function registerUser({
         trade_name,
         country_id,
         state_id,
-        sector_id
+        sector_id,
+        can_buy,
+        can_sell
     });
     return responseBody.data;
 }
