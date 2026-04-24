@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Star, FileText, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -34,6 +36,7 @@ const StarRater = ({ label, value, onChange }) => {
 
 export default function ReviewModal({ selectedConversation, user }) {
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
     
     const [scores, setScores] = useState({
         score_quality: 0,
@@ -43,6 +46,10 @@ export default function ReviewModal({ selectedConversation, user }) {
         score_reliability: 0,
     });
     const [comment, setComment] = useState('');
+
+    const isMobile = useIsMobile();
+
+
 
     // Determine the role. The only robust way is fetching the transaction OR relying on participant IDs
     // Assuming participant_1 is buyer? No, Quote generator is buyer.
@@ -81,6 +88,15 @@ export default function ReviewModal({ selectedConversation, user }) {
             toast.error(err?.response?.data?.message || 'Error al enviar evaluación');
         }
     });
+
+    useEffect(() => {
+        if (submitMutation.isSuccess && isMobile) {
+            const timer = setTimeout(() => {
+                navigate('/dashboard');
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [submitMutation.isSuccess, navigate, isMobile]);
 
     if (!isVisible) return null;
 

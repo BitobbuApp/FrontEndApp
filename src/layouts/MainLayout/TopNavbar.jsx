@@ -25,18 +25,15 @@ export default function TopNavbar({
     return (
         <header className="sticky top-0 z-40 bg-background border-b border-border">
             <div className="flex items-center justify-between px-4 lg:px-8 h-16">
-                {/* Mobile Menu Button */}
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="lg:hidden"
-                    onClick={onOpenSidebar}
-                >
-                    <Menu className="w-5 h-5" />
-                </Button>
+                {/* Mobile Logo */}
+                <div className="flex lg:hidden items-center gap-2">
+                    <div className="w-8 h-8 bg-[#D2FC31] rounded-lg flex items-center justify-center">
+                        <span className="text-foreground font-bold text-sm">B</span>
+                    </div>
+                </div>
 
                 {/* Page Title */}
-                <h1 className="text-lg font-semibold text-foreground hidden lg:block">
+                <h1 className="text-lg font-semibold text-foreground lg:block">
                     {MENU_ITEMS.find((item) => item.page === normalizedPageName)?.name ||
                         normalizedPageName}
                 </h1>
