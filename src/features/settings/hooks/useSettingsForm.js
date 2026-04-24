@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { base44 } from '@/api/base44Client';
 import useAppMetadata, {
     findOptionValueById,
     findOptionValueByLabel,
@@ -71,6 +70,9 @@ export function useSettingsForm() {
     const navigate = useNavigate();
     const { user, updateSession } = useAuth();
     const [formData, setFormData] = useState(INITIAL_FORM_DATA);
+    const [foundingYearError, setFoundingYearError] = useState('');
+    const [logoFile, setLogoFile] = useState(null);
+    const [logoPreview, setLogoPreview] = useState(null);
 
     const {
         categoryOptions,
@@ -81,7 +83,6 @@ export function useSettingsForm() {
     } = useAppMetadata();
 
     const { data: companyData, isLoading } = useMyCompany();
-
     const company = companyData;
 
     useEffect(() => {
@@ -154,13 +155,13 @@ export function useSettingsForm() {
     const saveMutation = useMutation({
         mutationFn: async (data) => {
             const interestFlags = INTEREST_TO_FLAGS[data.interest] || INTEREST_TO_FLAGS.Ambos;
+
             const payload = {
                 trade_name: data.trade_name,
                 legal_name: data.legal_name || null,
                 tax_id: data.tax_id || null,
                 founding_year: data.founding_year ? Number(data.founding_year) : null,
                 bio: data.bio || null,
-                logo_url: data.logo_url || null,
                 sector_id: data.sector_id ? Number(data.sector_id) : null,
                 company_type_id: data.company_type_id ? Number(data.company_type_id) : null,
                 can_buy: interestFlags.can_buy,
@@ -185,7 +186,19 @@ export function useSettingsForm() {
                 interest_category_ids: toNumberIdList(data.interest_category_ids),
             };
 
+            // If there's no logo file, keep the existing logo_url
+            if (!logoFile) {
+                payload.logo_url = data.logo_url || null;
+            }
+
             if (company?.id) {
+                // Use FormData when we have a logo file to upload
+                if (logoFile) {
+                    const fd = new FormData();
+                    fd.append('payload', JSON.stringify(payload));
+                    fd.append('files', logoFile);
+                    return companyApi.updateCompany(company.id, fd);
+                }
                 return companyApi.updateCompany(company.id, payload);
             }
 
@@ -201,6 +214,13 @@ export function useSettingsForm() {
                 });
             }
 
+            // Clean up local preview
+            setLogoFile(null);
+            if (logoPreview) {
+                URL.revokeObjectURL(logoPreview);
+                setLogoPreview(null);
+            }
+
             toast.success('Compania guardada con exito');
 
             setTimeout(() => {
@@ -213,26 +233,44 @@ export function useSettingsForm() {
         },
     });
 
-    const uploadLogoMutation = useMutation({
-        mutationFn: async (file) => {
-            const { file_url } = await base44.integrations.Core.UploadFile({ file });
-            return file_url;
-        },
-        onSuccess: (url) => {
-            setFormData((prev) => ({ ...prev, logo_url: url }));
-            toast.success('Logo cargado');
-        },
-    });
-
-    const handleSave = () => {
-        saveMutation.mutate(formData);
-    };
-
     const handleLogoChange = (e) => {
         const file = e.target.files?.[0];
-        if (file) {
-            uploadLogoMutation.mutate(file);
+        if (!file) return;
+
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            toast.error('Solo se admiten imágenes JPG, PNG o WebP.');
+            return;
         }
+
+        setLogoFile(file);
+
+        // Create local preview
+        if (logoPreview) {
+            URL.revokeObjectURL(logoPreview);
+        }
+        const previewUrl = URL.createObjectURL(file);
+        setLogoPreview(previewUrl);
+        setFormData((prev) => ({ ...prev, logo_url: previewUrl }));
+        toast.success('Logo listo para guardar');
+    };
+
+    const handleSave = () => {
+        const currentYear = new Date().getFullYear();
+        const foundingYearValue = formData.founding_year?.toString().trim();
+
+        if (foundingYearValue) {
+            const parsedYear = Number(foundingYearValue);
+            if (!Number.isInteger(parsedYear) || parsedYear > currentYear) {
+                const message = `El año de fundación no puede ser mayor a ${currentYear}.`;
+                setFoundingYearError(message);
+                toast.error(message);
+                return;
+            }
+        }
+
+        setFoundingYearError('');
+        saveMutation.mutate(formData);
     };
 
     const toggleCategoria = (categoryId) => {
@@ -271,9 +309,11 @@ export function useSettingsForm() {
         company,
         formData,
         setFormData,
+        foundingYearError,
+        setFoundingYearError,
         isLoading,
         saveMutation,
-        uploadLogoMutation,
+        logoPreview,
         handleSave,
         handleLogoChange,
         toggleCategoria,

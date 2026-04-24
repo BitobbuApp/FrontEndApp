@@ -282,19 +282,18 @@ export default function ProfilePage() {
             <Tabs defaultValue="vitrina">
                 <TabsList className="bg-slate-100 p-1">
                     <TabsTrigger value="vitrina">Mi Vitrina</TabsTrigger>
-                    <TabsTrigger value="historial">Historial</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="vitrina" className="mt-4">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold text-foreground">Mis Productos y Servicios</h3>
+                        <h3 className="font-semibold text-foreground">Mis Productos</h3>
                         <Button
                             size="sm"
                             className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] gap-1.5"
                             onClick={() => setShowAddProduct(true)}
                         >
                             <Plus className="w-4 h-4" />
-                            Agregar Producto/Servicio
+                            Agregar Producto
                         </Button>
                     </div>
 
@@ -321,20 +320,6 @@ export default function ProfilePage() {
                             </CardContent>
                         </Card>
                     )}
-                </TabsContent>
-
-                <TabsContent value="historial" className="mt-4">
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="py-16 flex flex-col items-center gap-3 text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
-                                <FileText className="w-8 h-8 text-slate-300" />
-                            </div>
-                            <p className="font-medium text-slate-600">Sin historial de transacciones</p>
-                            <p className="text-sm text-slate-400 max-w-xs">
-                                Tus transacciones completadas aparecerán aquí
-                            </p>
-                        </CardContent>
-                    </Card>
                 </TabsContent>
             </Tabs>
 

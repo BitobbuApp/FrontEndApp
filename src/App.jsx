@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 import AppMetadataBootstrap from '@/features/appMetadata/AppMetadataBootstrap';
 import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
+import GlobalSocketManager from '@/features/chat/components/GlobalSocketManager';
 
 const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
@@ -21,6 +22,22 @@ const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 const LayoutWrapper = ({ children, currentPageName }) => Layout ?
   <Layout currentPageName={currentPageName}>{children}</Layout>
   : <>{children}</>;
+
+import RoleGuard from '@/components/shared/RoleGuard';
+
+const BUYER_ROUTES = [
+  "Requests",
+  "Requests/new",
+  "Requests/:id/edit",
+  "Requests/:id/summary",
+  "Proveedores",
+  "Quotes/:id"
+];
+
+const SELLER_ROUTES = [
+  "PosiblesClientes",
+  "prospects/:id"
+];
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated } = useAuth();
@@ -62,17 +79,28 @@ const AuthenticatedApp = () => {
           <MainPage />
         </LayoutWrapper>
       } />
-      {Object.entries(Pages).map(([path, Page]) => (
-        <Route
-          key={path}
-          path={`/${path}`}
-          element={
-            <LayoutWrapper currentPageName={path}>
-              <Page />
-            </LayoutWrapper>
-          }
-        />
-      ))}
+      {Object.entries(Pages).map(([path, Page]) => {
+        let content = (
+          <LayoutWrapper currentPageName={path}>
+            <Page />
+          </LayoutWrapper>
+        );
+
+        // Apply Role Guards
+        if (BUYER_ROUTES.includes(path)) {
+          content = <RoleGuard require="buy">{content}</RoleGuard>;
+        } else if (SELLER_ROUTES.includes(path)) {
+          content = <RoleGuard require="sell">{content}</RoleGuard>;
+        }
+
+        return (
+          <Route
+            key={path}
+            path={`/${path}`}
+            element={content}
+          />
+        );
+      })}
       {/* Unknown routes: send authenticated users to Dashboard, unauthenticated users
           are already handled above by the !isAuthenticated guard (shows LoginPage) */}
       <Route path="*" element={<Navigate to="/Dashboard" replace />} />
@@ -89,6 +117,7 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <AppMetadataBootstrap />
+          <GlobalSocketManager />
           <NavigationTracker />
           <AuthenticatedApp />
         </Router>

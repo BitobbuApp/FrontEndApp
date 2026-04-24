@@ -20,6 +20,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import EmptyState from '@/components/ui/EmptyState';
+import ChatActionPanel from './ChatActionPanel';
+import ReviewModal from './ReviewModal';
+import SystemMessageBubble from './SystemMessageBubble';
+import { useSocketConnectionState } from '../hooks/useSocketConnectionState';
+import { WifiOff, Loader2 } from 'lucide-react';
 
 export default function ChatArea({
     selectedConversation,
@@ -33,6 +38,7 @@ export default function ChatArea({
     const [attachedFile, setAttachedFile] = useState(null);
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
+    const connectionStatus = useSocketConnectionState();
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -82,7 +88,10 @@ export default function ChatArea({
     const otherParticipant = getOtherParticipant(selectedConversation);
 
     return (
-        <Card className="flex-1 border-0 shadow-sm flex flex-col overflow-hidden">
+        <Card className="flex-1 border-0 shadow-sm flex flex-col overflow-hidden relative">
+            {/* Review Overlay */}
+            <ReviewModal selectedConversation={selectedConversation} user={user} />
+
             {/* Chat Header */}
             <div className="p-4 border-b flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -93,9 +102,21 @@ export default function ChatArea({
                         </AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="font-semibold text-foreground">
-                            {otherParticipant.nombre || 'Usuario'}
-                        </p>
+                        <div className="flex items-center gap-2">
+                            <p className="font-semibold text-foreground">
+                                {otherParticipant.nombre || 'Usuario'}
+                            </p>
+                            {connectionStatus === 'offline' && (
+                                <Badge variant="destructive" className="h-5 text-[10px] px-1.5 flex items-center gap-1">
+                                    <WifiOff className="w-3 h-3" /> Offline
+                                </Badge>
+                            )}
+                            {connectionStatus === 'reconnecting' && (
+                                <Badge variant="secondary" className="h-5 text-[10px] px-1.5 flex items-center gap-1 bg-amber-100 text-amber-800 hover:bg-amber-100 border-amber-200">
+                                    <Loader2 className="w-3 h-3 animate-spin" /> Reconectando...
+                                </Badge>
+                            )}
+                        </div>
                         <p className="text-xs text-slate-500">En línea</p>
                     </div>
                 </div>
@@ -103,6 +124,41 @@ export default function ChatArea({
                     <MoreVertical className="w-5 h-5 text-slate-400" />
                 </Button>
             </div>
+
+            {/* Negotiation Info Bar */}
+            {(selectedConversation.request || selectedConversation.quote_response) && (
+                <div className="px-4 py-2 bg-slate-50 border-b flex items-center gap-6 overflow-x-auto no-scrollbar">
+                    {selectedConversation.request && (
+                        <div className="flex items-center gap-2 min-w-max">
+                            <Badge variant="outline" className="bg-white border-slate-200 text-slate-600 flex gap-1.5 py-1 px-2.5">
+                                <span className="font-semibold text-slate-900 truncate max-w-[200px]">
+                                    {selectedConversation.request.product_service}
+                                </span>
+                            </Badge>
+                        </div>
+                    )}
+                    
+                    <div className="flex items-center gap-4 text-xs font-medium text-slate-500 min-w-max">
+                        {(selectedConversation.quote_response?.quantity || selectedConversation.request?.quantity) && (
+                            <div className="flex items-center gap-1.5">
+                                <span className="text-slate-400">Cantidad:</span>
+                                <span className="text-slate-700">
+                                    {selectedConversation.quote_response?.quantity || selectedConversation.request?.quantity} {selectedConversation.request?.unit || ''}
+                                </span>
+                            </div>
+                        )}
+
+                        {selectedConversation.quote_response?.price && (
+                            <div className="flex items-center gap-1.5 border-l pl-4">
+                                <span className="text-slate-400">Precio:</span>
+                                <span className="text-[#059669] font-bold">
+                                    ${Number(selectedConversation.quote_response.price).toLocaleString('en-US', { minimumFractionDigits: 2 })}/u
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
 
             {/* Messages */}
             <ScrollArea className="flex-1 p-4">
@@ -125,6 +181,10 @@ export default function ChatArea({
                 ) : (
                     <div className="space-y-3">
                         {mensajes.map((msg, index) => {
+                            if (msg.message_type === 'system') {
+                                return <SystemMessageBubble key={msg.id} message={msg} currentCompanyId={user?.email} />;
+                            }
+
                             const isOwn = msg.remitente_id === user?.email;
                             const showDate =
                                 index === 0 ||
@@ -163,7 +223,7 @@ export default function ChatArea({
                                                             }`}
                                                     >
                                                         <File className="w-4 h-4" />
-                                                        Ver archivo adjunto
+                                                        {msg.file_name || 'Ver archivo adjunto'}
                                                     </a>
                                                 )}
                                                 <p className="text-sm whitespace-pre-wrap">
@@ -192,25 +252,8 @@ export default function ChatArea({
                 )}
             </ScrollArea>
 
-            {/* Actions */}
-            <div className="px-4 py-3 border-t bg-muted/50 flex gap-2">
-                <Button
-                    variant="outline"
-                    className="flex-1 text-green-600 border-green-200 hover:bg-green-50"
-                    onClick={() => toast.success('Propuesta aceptada')}
-                >
-                    <Check className="w-4 h-4 mr-2" />
-                    Aceptar Propuesta
-                </Button>
-                <Button
-                    variant="outline"
-                    className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
-                    onClick={() => toast.error('Propuesta rechazada')}
-                >
-                    <X className="w-4 h-4 mr-2" />
-                    Rechazar
-                </Button>
-            </div>
+            {/* Contextual Action Panel (State Machine) */}
+            <ChatActionPanel selectedConversation={selectedConversation} user={user} />
 
             {/* Input */}
             <div className="p-4 border-t">
@@ -244,8 +287,8 @@ export default function ChatArea({
                     />
                     <Button
                         onClick={handleSend}
-                        disabled={(!messageText.trim() && !attachedFile) || sendMutation.isPending}
-                        className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] h-11 px-4"
+                        disabled={(!messageText.trim() && !attachedFile) || sendMutation.isPending || connectionStatus === 'offline'}
+                        className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] h-11 px-4 disabled:opacity-50"
                     >
                         <Send className="w-5 h-5" />
                     </Button>

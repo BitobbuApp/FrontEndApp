@@ -27,7 +27,7 @@ const unitLabels = {
 
 function getStats(offers) {
     if (!offers || !offers.length) return null;
-    const amounts = offers.filter(o => o.status !== 'Rejected').map((o) => Number(o.total_amount));
+    const amounts = offers.filter(o => o.status !== 'Rejected').map((o) => Number(o.total_amount_usd));
     const deliveries = offers.filter(o => o.status !== 'Rejected').map((o) => Number(o.delivery_time)).filter(Boolean);
     if (!amounts.length) return null;
     return {

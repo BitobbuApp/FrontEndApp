@@ -4,10 +4,14 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { chatApi } from '../services/chatApi';
 import { toast } from 'sonner';
 import { socket } from '@/api/socketClient';
+import { CHAT_SOCKET_EVENTS, normalizeStatePayload } from '../socket/chatSocketEvents';
+import { patchMessageIntoCache, updateConversationLastMessage } from '../socket/chatCacheUpdater';
+import { useRef } from 'react';
 
 export function useChatData(selectedConversationId) {
     const queryClient = useQueryClient();
     const { user: rawUser } = useAuth();
+    const markReadTimeoutRef = useRef(null);
 
     const myId = rawUser?.companyId || rawUser?.company_id || rawUser?.id;
 
@@ -18,35 +22,47 @@ export function useChatData(selectedConversationId) {
     useEffect(() => {
         if (!socket || !selectedConversationId) return;
 
-        socket.emit('join_conversation', selectedConversationId);
-        socket.emit('mark_read', { conversation_id: selectedConversationId });
+        socket.emit(CHAT_SOCKET_EVENTS.JOIN_CONVERSATION, selectedConversationId);
+        socket.emit(CHAT_SOCKET_EVENTS.MARK_READ, { conversation_id: selectedConversationId });
+
+        const debouncedMarkRead = () => {
+            if (markReadTimeoutRef.current) clearTimeout(markReadTimeoutRef.current);
+            markReadTimeoutRef.current = setTimeout(() => {
+                socket.emit(CHAT_SOCKET_EVENTS.MARK_READ, { conversation_id: selectedConversationId });
+            }, 1000);
+        };
 
         const handleNewMessage = (msg) => {
-            queryClient.setQueryData(['mensajes', selectedConversationId], (oldData) => {
-                if (!oldData) return { data: [msg] };
-                const prevItems = Array.isArray(oldData) ? oldData : oldData.data || [];
-                if (prevItems.some(item => item.id === msg.id)) return oldData;
-                return { ...oldData, data: [...prevItems, msg] }; // Agregamos al final (más reciente)
-            });
-            queryClient.invalidateQueries({ queryKey: ['conversaciones'] });
+            patchMessageIntoCache(queryClient, selectedConversationId, msg);
+            updateConversationLastMessage(queryClient, selectedConversationId, msg, msg.sender_id === myId);
             
-            // Mark as read immediately if we are actively viewing this chat
-            socket.emit('mark_read', { conversation_id: selectedConversationId });
+            // Mark as read immediately if we are actively viewing this chat, but debounced to avoid spam
+            debouncedMarkRead();
         };
 
         const handleConversationRead = () => {
+             // Optional: update UI to show messages are read
              queryClient.invalidateQueries({ queryKey: ['mensajes', selectedConversationId] });
         };
 
-        socket.on('receive_message', handleNewMessage);
-        socket.on('conversation_read', handleConversationRead);
+        const handleReconnect = () => {
+            // Re-fetch messages and conversation list to backfill any events missed while disconnected
+            queryClient.invalidateQueries({ queryKey: ['mensajes', selectedConversationId] });
+            queryClient.invalidateQueries({ queryKey: ['conversaciones'] });
+        };
+
+        socket.on(CHAT_SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
+        socket.on(CHAT_SOCKET_EVENTS.CONVERSATION_READ, handleConversationRead);
+        socket.on('reconnect', handleReconnect);
 
         return () => {
-             socket.off('receive_message', handleNewMessage);
-             socket.off('conversation_read', handleConversationRead);
-             socket.emit('leave_conversation', selectedConversationId);
+             socket.off(CHAT_SOCKET_EVENTS.RECEIVE_MESSAGE, handleNewMessage);
+             socket.off(CHAT_SOCKET_EVENTS.CONVERSATION_READ, handleConversationRead);
+             socket.off('reconnect', handleReconnect);
+             socket.emit(CHAT_SOCKET_EVENTS.LEAVE_CONVERSATION, selectedConversationId);
+             if (markReadTimeoutRef.current) clearTimeout(markReadTimeoutRef.current);
         };
-    }, [selectedConversationId, queryClient]);
+    }, [selectedConversationId, queryClient, myId]);
 
     const { data: convResp, isLoading: loadingConversations } = useQuery({
         queryKey: ['conversaciones'], // Automatic context for myId based on JWT token
@@ -60,6 +76,9 @@ export function useChatData(selectedConversationId) {
     // Map backend Conversation to Base44 format expected by UI
     const conversaciones = rawConvs.map((conv) => ({
         id: conv.id,
+        status: conv.status,
+        quote_response_id: conv.quote_response_id,
+        transaction_id: conv.transaction_id,
         participante_1_id: conv.participant_1_id,
         participante_2_id: conv.participant_2_id,
         participante_1_nombre: conv.participant_1?.trade_name,
@@ -70,6 +89,15 @@ export function useChatData(selectedConversationId) {
         fecha_ultimo_mensaje: conv.last_message_date,
         mensajes_no_leidos_1: conv.unread_count_1,
         mensajes_no_leidos_2: conv.unread_count_2,
+        request: conv.request ? {
+            product_service: conv.request.product_service,
+            quantity: conv.request.quantity,
+            unit: conv.request.unit_of_measure?.abbreviation,
+        } : null,
+        quote_response: conv.quote_response ? {
+            price: conv.quote_response.unit_price_usd,
+            quantity: conv.quote_response.quantity,
+        } : null,
     }));
 
     const { data: msgResp, isLoading: loadingMessages } = useQuery({
@@ -87,6 +115,9 @@ export function useChatData(selectedConversationId) {
     const mensajes = [...rawMsgs].map((msg) => ({
         id: msg.id,
         remitente_id: msg.sender_id,
+        message_type: msg.message_type || 'user',
+        event_key: msg.event_key,
+        event_payload: msg.event_payload,
         contenido: msg.content,
         archivo_adjunto_url: msg.file_url,
         leido: msg.is_read,
@@ -95,13 +126,18 @@ export function useChatData(selectedConversationId) {
 
     const sendMutation = useMutation({
         mutationFn: async ({ contenido, archivo, selectedConversation }) => {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
                 try {
                     let archivo_adjunto_url = null;
+                    let archivo_name = null;
+                    
                     if (archivo) {
-                        // TODO: Re-connect real S3 upload service logic
-                        // For now we skip or log standard errors if an attachment is placed
-                        console.warn("Adjuntos aún no implementados en el nuevo socket");
+                        const fd = new FormData();
+                        fd.append('file', archivo);
+                        const uploadRes = await chatApi.uploadFile(fd);
+                        // Dependiendo de cómo mapea el interceptor, puede estar en data o data.data
+                        archivo_adjunto_url = uploadRes.data?.file_url || uploadRes.file_url;
+                        archivo_name = uploadRes.data?.file_name || uploadRes.file_name;
                     }
 
                     const payload = {
@@ -109,6 +145,7 @@ export function useChatData(selectedConversationId) {
                         client_msg_id: crypto.randomUUID(),
                         content: contenido,
                         file_url: archivo_adjunto_url,
+                        file_name: archivo_name
                     };
 
                     socket.emit('send_message', payload, (response) => {

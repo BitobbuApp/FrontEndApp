@@ -18,7 +18,7 @@ export default function RegisterForm({ onGoToLogin }) {
         country_id: '1', // Venezuela is the only default
         state_id: '',
         sector_id: '',
-        // city_id: '', // Hidden as per request
+        roleType: 'both',
     });
     
     // Geographic data cascading hook
@@ -49,13 +49,19 @@ export default function RegisterForm({ onGoToLogin }) {
         }
         setIsLoading(true);
         try {
-            await registerUser(form);
+            const payload = {
+                ...form,
+                can_buy: form.roleType === 'buyer_only' || form.roleType === 'both',
+                can_sell: form.roleType === 'seller_only' || form.roleType === 'both',
+            };
+            delete payload.roleType;
+            await registerUser(payload);
             setSuccess(true);
         } catch (err) {
             if (err.details && Array.isArray(err.details)) {
-                setError(err.details.join(' · '));
+                // setError(err.details.join(' · '));
             } else {
-                setError(err.message || 'Error al registrar. Intenta de nuevo.');
+                // setError(err.message || 'Error al registrar. Intenta de nuevo.');
             }
         } finally {
             setIsLoading(false);
@@ -221,6 +227,26 @@ export default function RegisterForm({ onGoToLogin }) {
                                     {categoryOptions && categoryOptions.map((cat) => (
                                         <SelectItem key={cat.id} value={cat.id.toString()}>{cat.label}</SelectItem>
                                     ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="roleType" className="text-sm font-medium text-slate-700">
+                                ¿Qué quieres hacer en Bitobbu?
+                            </Label>
+                            <Select 
+                                disabled={isLoading} 
+                                value={form.roleType} 
+                                onValueChange={(val) => handleSelectChange('roleType', val)}
+                            >
+                                <SelectTrigger className="w-full h-12 bg-background border-border">
+                                    <SelectValue placeholder="Selecciona tu interés principal" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="both">Comprar y Vender</SelectItem>
+                                    <SelectItem value="buyer_only">Solo Comprar</SelectItem>
+                                    <SelectItem value="seller_only">Solo Vender</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

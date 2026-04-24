@@ -55,6 +55,7 @@ export default function RequestsTable({
     page,
     totalPages,
     onPageChange,
+    viewMode = 'list',
 }) {
     const navigate = useNavigate();
     if (isLoading) {
@@ -101,8 +102,8 @@ export default function RequestsTable({
 
     return (
         <div className="space-y-4">
-            {/* ── Mobile grid (hidden on sm+) ── */}
-            <div className="grid grid-cols-1 gap-4 sm:hidden">
+            {/* ── Grid/Mobile view ── */}
+            <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "grid grid-cols-1 gap-4 sm:hidden"}>
                 {requests.map((req) => (
                     <RequestMobileCard
                         key={req.id}
@@ -113,8 +114,8 @@ export default function RequestsTable({
                 ))}
             </div>
 
-            {/* Mobile pagination */}
-            <div className="sm:hidden">
+            {/* Mobile/Grid pagination */}
+            <div className={viewMode === 'grid' ? "block mt-2" : "sm:hidden"}>
                 <Pagination
                     totalItems={requests.length}
                     itemsLabel="solicitud"
@@ -126,8 +127,8 @@ export default function RequestsTable({
                 />
             </div>
 
-            {/* ── Desktop table (hidden on mobile) ── */}
-            <Card className="hidden sm:block border-0 shadow-sm overflow-hidden">
+            {/* ── Desktop table (hidden on mobile, and hidden if viewMode === grid) ── */}
+            <Card className={viewMode === 'grid' ? "hidden" : "hidden sm:block border-0 shadow-sm overflow-hidden"}>
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>

@@ -39,10 +39,11 @@ export default function useRequestForm() {
     const { id } = useParams();
     const isEditing = !!id;
     const queryClient = useQueryClient();
-    const [requestType, setRequestType] = useState(null);
+    const [requestType, setRequestType] = useState('Producto');
     const [productForm, setProductForm] = useState(DEFAULT_PRODUCT_FORM);
     const [serviceForm, setServiceForm] = useState(DEFAULT_SERVICE_FORM);
     const [files, setFiles] = useState([]);
+    const [existingFiles, setExistingFiles] = useState([]);
 
     const {
         categoryOptions,
@@ -79,6 +80,10 @@ export default function useRequestForm() {
 
         const isService = requestData.request_type === 'Servicio';
         setRequestType(isService ? 'Servicio' : 'Producto');
+        
+        if (requestData.files) {
+            setExistingFiles(requestData.files);
+        }
 
         if (isService) {
             setServiceForm({
@@ -131,15 +136,7 @@ export default function useRequestForm() {
 
     const mutation = useMutation({
         mutationFn: async (payload) => {
-            const fileAttachments = files.map((file) => ({
-                url: URL.createObjectURL(file),
-                file_name: file.name,
-            }));
-
-            const data = {
-                ...payload,
-                files: fileAttachments.length > 0 ? fileAttachments : undefined,
-            };
+            const { raw_files_payload, ...data } = payload;
 
             Object.keys(data).forEach((key) => {
                 if (data[key] === '' || data[key] === null || data[key] === undefined) {
@@ -147,9 +144,20 @@ export default function useRequestForm() {
                 }
             });
 
-            return isEditing
-                ? requestsApi.updateRequest(id, data)
-                : requestsApi.createRequest(data);
+            if (isEditing) {
+                return requestsApi.updateRequest(id, data);
+            }
+
+            const formData = new FormData();
+            formData.append('payload', JSON.stringify(data));
+
+            if (raw_files_payload && raw_files_payload.length > 0) {
+                raw_files_payload.forEach((file) => {
+                    formData.append('files', file);
+                });
+            }
+
+            return requestsApi.createRequest(formData);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['requests'] });
@@ -162,7 +170,18 @@ export default function useRequestForm() {
     });
 
     const handleFileChange = (e) => {
-        setFiles((prev) => [...prev, ...Array.from(e.target.files)]);
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+        const selectedFiles = Array.from(e.target.files);
+        
+        const validFiles = selectedFiles.filter(f => allowedTypes.includes(f.type));
+        
+        if (validFiles.length < selectedFiles.length) {
+            toast.error('Algunos archivos fueron ignorados. Solo se admite PDF, JPG y PNG.');
+        }
+
+        if(validFiles.length > 0) {
+            setFiles((prev) => [...prev, ...validFiles]);
+        }
     };
 
     const removeFile = (index) => {
@@ -209,6 +228,7 @@ export default function useRequestForm() {
                 country_id: productForm.country_id ? Number(productForm.country_id) : 1, // Defaulting to VENEZUELA_ID if tracking allows
                 state_id: productForm.state_id ? Number(productForm.state_id) : null,
                 city_id: productForm.city_id ? Number(productForm.city_id) : null,
+                raw_files_payload: files
             });
             return;
         }
@@ -223,6 +243,7 @@ export default function useRequestForm() {
             country_id: serviceForm.country_id ? Number(serviceForm.country_id) : 1,
             state_id: serviceForm.state_id ? Number(serviceForm.state_id) : null,
             city_id: serviceForm.city_id ? Number(serviceForm.city_id) : null,
+            raw_files_payload: files
         });
     };
 
@@ -236,6 +257,7 @@ export default function useRequestForm() {
         serviceForm,
         setServiceForm,
         files,
+        existingFiles,
         handleFileChange,
         removeFile,
         handleSubmit,

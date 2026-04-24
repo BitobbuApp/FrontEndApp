@@ -22,6 +22,7 @@ export default function RequestFormPage() {
         serviceForm,
         setServiceForm,
         files,
+        existingFiles,
         handleFileChange,
         removeFile,
         handleSubmit,
@@ -39,7 +40,8 @@ export default function RequestFormPage() {
         );
     }
 
-    const step = requestType ? 2 : 1;
+    const step = 1;
+    const totalSteps = 1;
 
     return (
         <div className="max-w-3xl mx-auto space-y-8 pb-12">
@@ -54,73 +56,28 @@ export default function RequestFormPage() {
                         {isEditing ? 'Editar Solicitud' : 'Solicitar Cotización'}
                     </h1>
                     <p className="text-sm text-slate-500 mt-1">
-                        Paso {step} de 2
+                        Información de tu requerimiento
                     </p>
                 </div>
             </div>
 
-            {/* Stepper Bar */}
-            <div className="relative flex items-center justify-between px-2 w-full mt-6 mb-8">
-                <div className="absolute left-4 right-4 top-1/2 h-0.5 bg-slate-200 -z-10 -translate-y-1/2"></div>
-                {step === 2 && (
-                    <div className="absolute left-4 right-4 top-1/2 h-0.5 bg-[#D2FC31] -z-10 -translate-y-1/2 transition-all duration-300"></div>
-                )}
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${step === 1 ? 'bg-[#D2FC31] text-slate-900 border-2 border-white ring-2 ring-[#D2FC31]' : 'bg-[#D2FC31] text-slate-900'}`}>
-                    {step === 2 ? <Check className="w-4 h-4 stroke-[3]" /> : '1'}
-                </div>
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${step === 2 ? 'bg-[#D2FC31] text-slate-900' : 'bg-slate-100 text-slate-400'}`}>
-                    2
-                </div>
-            </div>
 
-            {/* Step 1: Type Selection */}
-            {step === 1 && (
-                <div className="space-y-4">
-                    <h2 className="text-xl font-bold text-foreground mb-4">¿Qué necesitas cotizar?</h2>
-                    <TypeSelector value={requestType} onChange={setRequestType} />
-                </div>
-            )}
-
-            {/* Step 2: Form */}
-            {step === 2 && (
-                <Card className="border-0 shadow-sm overflow-hidden">
-                    {/* Selected Type Banner inside card */}
-                    <div className="bg-slate-50/50 border-b border-border px-6 py-4 flex items-center justify-between">
-                        <div className="flex items-center gap-2 font-semibold">
-                            {requestType === 'Producto' ? <Package className="w-5 h-5" /> : <Wrench className="w-5 h-5" />}
-                            {requestType}
-                        </div>
-                        <button 
-                            onClick={() => setRequestType('')}
-                            className="text-sm text-slate-500 hover:text-indigo-600 underline underline-offset-2 transition-colors"
-                        >
-                            Cambiar tipo
-                        </button>
-                    </div>
+            {/* Form */}
+            <Card className="border-0 shadow-sm overflow-hidden">
 
                     <CardContent className="p-6 space-y-6">
-                        {requestType === 'Producto' && (
-                            <ProductRequestForm
-                                form={productForm}
-                                setForm={setProductForm}
-                                categoryOptions={categoryOptions}
-                                unitOptions={unitOptions}
-                                paymentConditionOptions={paymentConditionOptions}
-                            />
-                        )}
-
-                        {requestType === 'Servicio' && (
-                            <ServiceRequestForm
-                                form={serviceForm}
-                                setForm={setServiceForm}
-                                categoryOptions={categoryOptions}
-                                paymentConditionOptions={paymentConditionOptions}
-                            />
-                        )}
+                        <ProductRequestForm
+                            form={productForm}
+                            setForm={setProductForm}
+                            categoryOptions={categoryOptions}
+                            unitOptions={unitOptions}
+                            paymentConditionOptions={paymentConditionOptions}
+                        />
 
                         <div className="pt-2">
                             <FileUpload
                                 files={files}
+                                existingFiles={existingFiles}
                                 onAdd={handleFileChange}
                                 onRemove={removeFile}
                             />
@@ -147,7 +104,6 @@ export default function RequestFormPage() {
                         </div>
                     </CardContent>
                 </Card>
-            )}
         </div>
     );
 }

@@ -58,6 +58,7 @@ import ProfilePage from './features/profile/ProfilePage';
 import PublicProfilePage from './features/profile/PublicProfilePage';
 // import Offers from './features/offers/OffersPage';
 import PosiblesClientes from './features/prospects/ProspectsPage';
+import ProspectDetailPage from './features/prospects/ProspectDetailPage';
 import Proveedores from './features/suppliers/SuppliersPage';
 import QuoteDetailPage from './features/requests/QuoteDetailPage';
 import __Layout from './layouts/MainLayout/MainLayout.jsx';
@@ -75,6 +76,7 @@ export const PAGES = {
     "Perfil/:id": PublicProfilePage,
     // "Offers": Offers,
     "PosiblesClientes": PosiblesClientes,
+    "prospects/:id": ProspectDetailPage,
     "Proveedores": Proveedores,
     "Quotes/:id": QuoteDetailPage,
 }

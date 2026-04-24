@@ -82,7 +82,7 @@ export default function OffersOfInterestTable({ ofertas, isLoading }) {
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-right font-semibold text-foreground">
-                                            ${Number(oferta.unit_price || 0).toLocaleString()}
+                                            ${Number(oferta.unit_price_usd || 0).toLocaleString()}
                                         </TableCell>
                                         <TableCell className="text-right text-sm text-slate-500">
                                             {oferta.created_at

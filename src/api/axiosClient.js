@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { toast } from 'sonner';
+import { normalizeApiError, getUserFriendlyErrorMessage } from '../utils/errors';
 
 // Usa la variable de entorno o un fallback local
 const API_BASE = import.meta.env.VITE_API_BASE;
@@ -31,31 +32,51 @@ apiClient.interceptors.request.use(
     }
 );
 
+// ─── Storage URL normalizer ────────────────────────────────────────────────────
+import { getStorageUrl } from '../utils/storage';
+
+const STORAGE_URL_FIELDS = ['logo_url', 'url', 'file_url', 'formal_quote_url', 'payment_proof_url'];
+
+function normalizeStorageUrls(obj) {
+    if (!obj || typeof obj !== 'object') return obj;
+    if (Array.isArray(obj)) {
+        obj.forEach(normalizeStorageUrls);
+        return obj;
+    }
+    for (const key of Object.keys(obj)) {
+        if (STORAGE_URL_FIELDS.includes(key) && typeof obj[key] === 'string') {
+            obj[key] = getStorageUrl(obj[key]);
+        } else if (typeof obj[key] === 'object') {
+            normalizeStorageUrls(obj[key]);
+        }
+    }
+    return obj;
+}
+
 // ─── Response Interceptor ──────────────────────────────────────────────────────
 apiClient.interceptors.response.use(
     (response) => {
-        // Axios siempre envuelve la data en "response.data". 
-        // Nuestro backend devuelve usualmente { data: { ... } }, así que si quieres
-        // aplanarlo, podrías retornar response.data.data (opcional), pero 
-        // para mantener compatibilidad con lo actual retornamos la res entera de Axios
-        // o mapeamos de acuerdo a cómo devolvía el handleResponse anterior.
-        // El handleResponse anterior retornaba `json`, y luego el frontend hacía `json.data`.
-        // Así que aquí retornamos la respuesta parseada del body directo.
-        return response.data;
+        const data = response.data;
+        normalizeStorageUrls(data);
+        return data;
     },
     (error) => {
         // Manejo centralizado de errores
         if (error.response) {
             const status = error.response.status;
-            // Mensaje que viene del backend o uno genérico
-            const message = error.response.data?.message || error.response.data?.error || 'Ha ocurrido un error';
+            const normalizedError = normalizeApiError(error.response.data, status);
+            const userMessage = getUserFriendlyErrorMessage(normalizedError, "es");
+
+            // Attach normalized data to the error for component use
+            error.normalizedError = normalizedError;
+            error.userMessage = userMessage;
 
             if (status === 401) {
                 // No autorizado: Limpiar sesión y recargar base44 o app
                 localStorage.removeItem(SESSION_KEY);
                 localStorage.removeItem(TOKEN_KEY);
                 
-                toast.error('Sesión expirada. Por favor ingresa nuevamente.');
+                toast.error(userMessage);
 
                 const isAuthPage = window.location.pathname.includes('/login') || window.location.pathname.includes('/register');
                 if (!isAuthPage) {
@@ -64,9 +85,11 @@ apiClient.interceptors.response.use(
                     }, 1500);
                 }
             } else if (status === 403) {
-                toast.error('No tienes permisos suficientes para esta acción.');
+                toast.error(userMessage);
             } else if (status >= 500) {
-                toast.error('Error en el servidor. Intenta de nuevo más tarde.');
+                toast.error(userMessage);
+            } else if (status === 404 || status === 409) {
+                toast.error(userMessage);
             } else {
                 // Para 400 y otros errores de negocio (o validación)
                 // Depende de cómo quieras manejarlo. Por defecto lanzamos el error
