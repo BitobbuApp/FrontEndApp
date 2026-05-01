@@ -16,7 +16,9 @@ import {
     Music,
     Calendar,
     BadgeCheck,
+    ShieldCheck,
 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -75,6 +77,7 @@ export default function PublicProfilePage() {
         totalReviews,
         transactions,
         products,
+        trustScore,
     } = usePublicProfileData();
 
     const { data: companyProducts = [], isLoading: isLoadingProducts } = useCompanyProducts(company?.id);
@@ -148,6 +151,25 @@ export default function PublicProfilePage() {
                 )}
             </div>
 
+            {/* ── Trust Score ── */}
+            <Card className="border border-border shadow-sm overflow-hidden bg-slate-50/50">
+                <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-6 h-6 text-[#a8d92a]" />
+                            <h3 className="font-semibold text-foreground text-lg">Nivel de Confianza</h3>
+                        </div>
+                        <span className="font-bold text-xl">{trustScore}%</span>
+                    </div>
+                    <Progress value={trustScore} className="h-3 mb-2" />
+                    <p className="text-sm text-slate-500">
+                        {trustScore >= 100 
+                            ? 'Este perfil esta verificado y completo. Es altamente confiable.' 
+                            : 'Este perfil no esta completo. Sugerimos tomar precauciones al hacer negocios.'}
+                    </p>
+                </CardContent>
+            </Card>
+
             <Card className="border border-border shadow-sm">
                 <CardContent className="p-6 space-y-5">
                     <h3 className="text-base font-semibold text-foreground">Contacto y Redes</h3>
@@ -178,8 +200,7 @@ export default function PublicProfilePage() {
                             company.instagram && { icon: Instagram, label: 'Instagram', href: `https://instagram.com/${company.instagram.replace('@', '')}` },
                             company.linkedin && { icon: Linkedin, label: 'LinkedIn', href: company.linkedin },
                             company.tiktok && { icon: Music, label: 'TikTok', href: `https://tiktok.com/@${company.tiktok.replace('@', '')}` },
-                            isMyProfile && contact.whatsapp && { icon: Phone, label: 'WhatsApp', href: `https://wa.me/${contact.whatsapp.replace(/\D/g, '')}` },
-                            isMyProfile && contact.corporate_email && { icon: Mail, label: 'Email', href: `mailto:${contact.corporate_email}` },
+
                         ].filter(Boolean);
 
                         if (!links.length) return null;

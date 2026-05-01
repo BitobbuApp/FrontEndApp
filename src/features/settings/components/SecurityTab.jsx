@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { changePassword } from '@/features/auth/services/authApi';
 
 /**
  * SecurityTab - Component for handling password changes in Settings.
@@ -14,6 +15,7 @@ export default function SecurityTab() {
     const [showCurrent, setShowCurrent] = useState(false);
     const [showNew, setShowNew] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     const [passwords, setPasswords] = useState({
         current: '',
@@ -45,17 +47,34 @@ export default function SecurityTab() {
 
     const isFormValid = requirements.minLength && requirements.alphanumeric && requirements.match && passwords.current !== '';
 
-    const handleSave = () => {
+    const handleSave = async () => {
         if (!isFormValid) return;
         
-        // Mock save logic
-        toast.success('Contraseña actualizada correctamente', {
-            description: 'Tu sesión permanecerá activa.',
-            icon: <Check className="w-4 h-4 text-emerald-500" />
-        });
-        
-        // Reset form
-        setPasswords({ current: '', new: '', confirm: '' });
+        setIsLoading(true);
+        try {
+            await changePassword({
+                currentPassword: passwords.current,
+                newPassword: passwords.new,
+                confirmPassword: passwords.confirm
+            });
+            
+            toast.success('Contraseña actualizada correctamente', {
+                description: 'Tu sesión permanecerá activa.',
+                icon: <Check className="w-4 h-4 text-emerald-500" />
+            });
+            
+            // Reset form
+            setPasswords({ current: '', new: '', confirm: '' });
+            setShowCurrent(false);
+            setShowNew(false);
+            setShowConfirm(false);
+        } catch (error) {
+            toast.error('Error al actualizar contraseña', {
+                description: error?.response?.data?.message || 'Contraseña actual incorrecta o hubo un problema de conexión.'
+            });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const RequirementItem = ({ met, text }) => (
@@ -162,10 +181,10 @@ export default function SecurityTab() {
                     <div className="pt-2 flex justify-end">
                         <Button 
                             onClick={handleSave} 
-                            disabled={!isFormValid}
+                            disabled={!isFormValid || isLoading}
                             className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]"
                         >
-                            Actualizar Contraseña
+                            {isLoading ? 'Actualizando...' : 'Actualizar Contraseña'}
                         </Button>
                     </div>
                 </CardContent>
