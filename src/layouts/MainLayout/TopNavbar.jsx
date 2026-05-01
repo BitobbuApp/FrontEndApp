@@ -7,7 +7,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import UserMenu from './UserMenu';
-import { ThemeToggle } from '@/components/theme-toggle';
+
 import { MENU_ITEMS } from './Sidebar';
 
 export default function TopNavbar({
@@ -26,10 +26,8 @@ export default function TopNavbar({
         <header className="sticky top-0 z-40 bg-background border-b border-border">
             <div className="flex items-center justify-between px-4 lg:px-8 h-16">
                 {/* Mobile Logo */}
-                <div className="flex lg:hidden items-center gap-2">
-                    <div className="w-8 h-8 bg-[#D2FC31] rounded-lg flex items-center justify-center">
-                        <span className="text-foreground font-bold text-sm">B</span>
-                    </div>
+                <div className="flex lg:hidden items-center">
+                    <img src="/favicon.svg" alt="Bitobbu" className="w-8 h-8 object-contain" />
                 </div>
 
                 {/* Page Title */}
@@ -87,8 +85,7 @@ export default function TopNavbar({
                         <HelpCircle className="w-5 h-5 text-slate-600 dark:text-slate-400" />
                     </Button>
 
-                    {/* Theme Toggle */}
-                    <ThemeToggle />
+
 
                     {/* User Menu */}
                     <UserMenu user={user} myCompany={myCompany} />

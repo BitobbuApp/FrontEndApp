@@ -50,6 +50,30 @@ export async function registerUser({
     return responseBody.data;
 }
 
+/**
+ * POST /api/v1/users/reset-password
+ */
+export async function resetPassword({ email, newPassword, confirmPassword }) {
+    const responseBody = await apiClient.post('/users/reset-password', {
+        email,
+        newPassword,
+        confirmPassword
+    });
+    return responseBody;
+}
+
+/**
+ * POST /api/v1/users/change-password
+ */
+export async function changePassword({ currentPassword, newPassword, confirmPassword }) {
+    const responseBody = await apiClient.post('/users/change-password', {
+        currentPassword,
+        newPassword,
+        confirmPassword
+    });
+    return responseBody;
+}
+
 // ─── Session helpers ──────────────────────────────────────────────────────────
 
 /** Save user session data (without the token) and token separately */

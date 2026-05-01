@@ -151,12 +151,10 @@ export default function RegisterForm({ onGoToLogin }) {
                 transition={{ duration: 0.4 }}
                 className="w-full max-w-md"
             >
-                {/* Logo mobile */}
-                <div className="flex items-center gap-2 mb-10 lg:hidden">
-                    <div className="w-10 h-10 bg-[#D2FC31] rounded-xl flex items-center justify-center">
-                        <span className="text-foreground font-bold text-lg">B</span>
+                <div className="flex items-center justify-left mb-10 lg:hidden">
+                    <div className="w-[60%] h-auto flex items-center justify-center overflow-hidden">
+                        <img src="/assets/logo-b.svg" alt="Bitobbu" className="w-full h-full object-contain" />
                     </div>
-                    <span className="text-2xl font-bold text-foreground">Bitobbu</span>
                 </div>
 
                 <div className="mb-8">

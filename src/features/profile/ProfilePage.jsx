@@ -5,8 +5,9 @@ import {
     Settings, Globe, MapPin, Package,
     Users, FileText, Plus, Box, Loader2,
     Phone, Mail, Instagram, Linkedin, ExternalLink, Music,
-    Calendar, BadgeCheck,
+    Calendar, BadgeCheck, ShieldCheck,
 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -57,6 +58,7 @@ export default function ProfilePage() {
         totalReviews,
         transactions,
         products,
+        trustScore,
     } = useProfileData();
 
     const { data: companyProducts = [], isLoading: isLoadingProducts } = useCompanyProducts(company?.id);
@@ -125,6 +127,25 @@ export default function ProfilePage() {
                 </div>
             </div>
 
+            {/* ── Trust Score ── */}
+            <Card className="mb-8 border border-border shadow-sm overflow-hidden bg-slate-50/50">
+                <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-6 h-6 text-[#a8d92a]" />
+                            <h3 className="font-semibold text-foreground text-lg">Nivel de Confianza</h3>
+                        </div>
+                        <span className="font-bold text-xl">{trustScore}%</span>
+                    </div>
+                    <Progress value={trustScore} className="h-3 mb-2" />
+                    <p className="text-sm text-slate-500">
+                        {trustScore >= 100 
+                            ? '¡Tu perfil esta completo! Tienes mayor probabilidad de cerrar negocios.' 
+                            : 'Completa tu perfil para aumentar la confianza de otros usuarios en la plataforma.'}
+                    </p>
+                </CardContent>
+            </Card>
+
             {/* ── Bio + Social — two cards side by side ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
@@ -191,18 +212,7 @@ export default function ProfilePage() {
                         {(() => {
                             const contact = company?.contacts?.[0] || {};
                             const links = [
-                                contact.whatsapp && {
-                                    label: 'WhatsApp',
-                                    href: `https://wa.me/${contact.whatsapp.replace(/\D/g, '')}`,
-                                    icon: Phone,
-                                    bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', iconColor: 'text-green-600',
-                                },
-                                contact.corporate_email && {
-                                    label: contact.corporate_email,
-                                    href: `mailto:${contact.corporate_email}`,
-                                    icon: Mail,
-                                    bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', iconColor: 'text-blue-500',
-                                },
+
                                 company?.website && {
                                     label: 'Sitio Web',
                                     href: company.website,
