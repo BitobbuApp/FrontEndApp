@@ -16,6 +16,8 @@ import { toast } from 'sonner';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
 import RequestOffersTable from './components/RequestOffersTable';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 // Unit labels map
 const unitLabels = {
@@ -28,7 +30,10 @@ const unitLabels = {
 function getStats(offers) {
     if (!offers || !offers.length) return null;
     const amounts = offers.filter(o => o.status !== 'Rejected').map((o) => Number(o.total_amount_usd));
-    const deliveries = offers.filter(o => o.status !== 'Rejected').map((o) => Number(o.delivery_time)).filter(Boolean);
+    const deliveries = offers
+        .filter(o => o.status !== 'Rejected' && o.estimated_delivery_hours != null)
+        .map((o) => Number(o.estimated_delivery_hours));
+    
     if (!amounts.length) return null;
     return {
         min: Math.min(...amounts),
@@ -127,7 +132,10 @@ export default function RequestSummaryPage() {
                         <div className="flex items-start gap-2 text-sm">
                             <Package className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
                             <div>
-                                <p className="text-xs text-slate-400">Cantidad</p>
+                                <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 flex items-center">
+                                   CANTIDAD
+                                   <InfoTooltip content={tooltips.summary.quantity} />
+                                </p>
                                 <p className="font-semibold text-foreground">
                                     {req.quantity} {unitLabels[req.unit_of_measure] || req.unit_of_measure}
                                 </p>
@@ -150,7 +158,10 @@ export default function RequestSummaryPage() {
                         <div className="flex items-start gap-2 text-sm">
                             <Calendar className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
                             <div>
-                                <p className="text-xs text-slate-400">Fecha Límite</p>
+                                <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 flex items-center">
+                                   CIERRE
+                                   <InfoTooltip content={tooltips.summary.deadline} />
+                                </p>
                                 <p className="font-semibold text-foreground">
                                     {req.expiration_date
                                         ? format(new Date(req.expiration_date), 'd MMM yyyy', { locale: es })
@@ -206,7 +217,11 @@ export default function RequestSummaryPage() {
                             <Zap className="w-6 h-6 text-yellow-500" />
                             <p className="text-xs text-slate-500">Entrega más rápida</p>
                             <p className="text-xl font-bold text-yellow-600">
-                                {stats.fastest != null ? `${stats.fastest} días` : '—'}
+                                {stats.fastest != null 
+                                    ? stats.fastest >= 24 
+                                        ? `${Math.round(stats.fastest / 24)} días` 
+                                        : `${stats.fastest} horas`
+                                    : '—'}
                             </p>
                         </CardContent>
                     </Card>

@@ -53,6 +53,12 @@ const AuthenticatedApp = () => {
       }, 3000);
       return () => clearTimeout(timer);
     } else {
+      // Check for registration action from external landing
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'register') {
+        setShowRegister(true);
+      }
+
       // For initial public load, we also want it
       const timer = setTimeout(() => {
         setMinLoading(false);

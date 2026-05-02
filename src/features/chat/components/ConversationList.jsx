@@ -1,4 +1,3 @@
-import React from 'react';
 import { Search } from 'lucide-react';
 import { format } from 'date-fns';
 import {
@@ -20,6 +19,19 @@ export default function ConversationList({
     getUnreadCount,
     className = "",
 }) {
+    const getReferenceInfo = (conv) => {
+        if (conv.transaction?.serial_number) {
+            return { code: `TRX-${String(conv.transaction.serial_number).padStart(5, '0')}`, type: 'transaction' };
+        }
+        if (conv.quote_response?.serial_number) {
+            return { code: `QUO-${String(conv.quote_response.serial_number).padStart(5, '0')}`, type: 'quote' };
+        }
+        if (conv.request?.serial_number) {
+            return { code: `RFQ-${String(conv.request.serial_number).padStart(5, '0')}`, type: 'request' };
+        }
+        return null;
+    };
+
     const filteredConversations = conversaciones.filter((conv) => {
         const other = getOtherParticipant(conv);
         return other.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -79,22 +91,42 @@ export default function ConversationList({
                                         </AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 text-left min-w-0">
-                                        <div className="flex items-center justify-between">
+                                        <div className="flex items-center justify-between mb-0.5">
                                             <p className="font-medium text-foreground truncate">
                                                 {other.nombre || 'Usuario'}
                                             </p>
                                             {conv.fecha_ultimo_mensaje && (
-                                                <span className="text-xs text-slate-400">
+                                                <span className="text-[10px] text-slate-400">
                                                     {format(new Date(conv.fecha_ultimo_mensaje), 'HH:mm')}
                                                 </span>
                                             )}
                                         </div>
+                                        
+                                        {/* Reference Code & Product */}
+                                        <div className="flex items-center gap-2 mb-1">
+                                            {(() => {
+                                                const ref = getReferenceInfo(conv);
+                                                if (!ref) return null;
+                                                return (
+                                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
+                                                        ref.type === 'transaction' ? 'bg-emerald-100 text-emerald-700' :
+                                                        ref.type === 'quote' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
+                                                    }`}>
+                                                        {ref.code}
+                                                    </span>
+                                                );
+                                            })()}
+                                            <span className="text-[11px] text-slate-400 truncate italic">
+                                                {conv.request?.product_service || 'Chat general'}
+                                            </span>
+                                        </div>
+
                                         <div className="flex items-center justify-between">
                                             <p className="text-sm text-slate-500 truncate">
                                                 {conv.ultimo_mensaje || 'Sin mensajes'}
                                             </p>
                                             {unread > 0 && (
-                                                <Badge className="bg-[#D2FC31] text-slate-900 h-5 min-w-5 justify-center">
+                                                <Badge className="bg-[#D2FC31] text-slate-900 h-5 min-w-5 justify-center ml-2 flex-shrink-0">
                                                     {unread}
                                                 </Badge>
                                             )}

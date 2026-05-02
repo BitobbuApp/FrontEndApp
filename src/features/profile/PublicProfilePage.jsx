@@ -17,7 +17,10 @@ import {
     Calendar,
     BadgeCheck,
     ShieldCheck,
+    Info,
 } from 'lucide-react';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -157,7 +160,10 @@ export default function PublicProfilePage() {
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
                             <ShieldCheck className="w-6 h-6 text-[#a8d92a]" />
-                            <h3 className="font-semibold text-foreground text-lg">Nivel de Confianza</h3>
+                            <h3 className="font-semibold text-foreground text-lg flex items-center">
+                                Nivel de Confianza
+                                <InfoTooltip content={tooltips.profile.trust_score} />
+                            </h3>
                         </div>
                         <span className="font-bold text-xl">{trustScore}%</span>
                     </div>
@@ -194,34 +200,42 @@ export default function PublicProfilePage() {
                     )}
 
                     {(() => {
-                        const contact = company.contacts?.[0] || {};
-                        const links = [
-                            company.website && { icon: Globe, label: 'Sitio Web', href: company.website },
-                            company.instagram && { icon: Instagram, label: 'Instagram', href: `https://instagram.com/${company.instagram.replace('@', '')}` },
-                            company.linkedin && { icon: Linkedin, label: 'LinkedIn', href: company.linkedin },
-                            company.tiktok && { icon: Music, label: 'TikTok', href: `https://tiktok.com/@${company.tiktok.replace('@', '')}` },
+                        const PLATFORM_CONFIG = {
+                            instagram:       { label: 'Instagram',          icon: Instagram, color: 'text-pink-500' },
+                            tiktok:          { label: 'TikTok',             icon: Music,     color: 'text-slate-700' },
+                            facebook:        { label: 'Facebook',           icon: Globe,     color: 'text-blue-600' },
+                            website:         { label: 'Sitio Web',          icon: Globe,     color: 'text-slate-500' },
+                            google_business: { label: 'Google My Business', icon: Globe,     color: 'text-red-500'   },
+                            linkedin:        { label: 'LinkedIn',           icon: Linkedin,  color: 'text-blue-700' },
+                            twitter:         { label: 'X (Twitter)',        icon: Globe,     color: 'text-slate-700' },
+                        };
 
-                        ].filter(Boolean);
-
-                        if (!links.length) return null;
+                        const socialLinks = (company?.social_media || []).filter(sm => sm?.url);
+                        if (!socialLinks.length) return null;
 
                         return (
                             <div className="grid grid-cols-2 gap-2">
-                                {links.map(({ icon: Icon, label, href }) => (
-                                    <a
-                                        key={label}
-                                        href={href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border text-sm text-slate-700 hover:bg-muted/50 transition-colors"
-                                    >
-                                        <Icon className="w-4 h-4 text-slate-500 flex-shrink-0" />
-                                        {label}
-                                    </a>
-                                ))}
+                                {socialLinks.map(({ platform, url }) => {
+                                    const config = PLATFORM_CONFIG[platform];
+                                    if (!config) return null;
+                                    const Icon = config.icon;
+                                    return (
+                                        <a
+                                            key={platform}
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border text-sm text-slate-700 dark:text-slate-300 hover:bg-muted/50 transition-colors"
+                                        >
+                                            <Icon className={`w-4 h-4 flex-shrink-0 ${config.color}`} />
+                                            {config.label}
+                                        </a>
+                                    );
+                                })}
                             </div>
                         );
                     })()}
+
 
                     <div className="border-t border-border" />
 
@@ -252,16 +266,19 @@ export default function PublicProfilePage() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                    { icon: Package, label: 'Productos', value: products, color: 'text-blue-500' },
-                    { icon: Users, label: 'Transacciones', value: transactions, color: 'text-purple-500' },
-                    { icon: Star, label: 'Calificacion', value: rating.toFixed(1), color: 'text-amber-500' },
-                    { icon: FileText, label: 'Reseñas', value: totalReviews, color: 'text-slate-400' },
-                ].map(({ icon: Icon, label, value, color }) => (
+                    { icon: Package, label: 'Productos', value: products, color: 'text-blue-500', info: tooltips.profile.products },
+                    { icon: Users, label: 'Transacciones', value: transactions, color: 'text-purple-500', info: tooltips.profile.transactions },
+                    { icon: Star, label: 'Calificacion', value: rating.toFixed(1), color: 'text-amber-500', info: tooltips.profile.rating },
+                    { icon: FileText, label: 'Reseñas', value: totalReviews, color: 'text-slate-400', info: tooltips.profile.reviews },
+                ].map(({ icon: Icon, label, value, color, info }) => (
                     <Card key={label} className="border border-border shadow-sm">
                         <CardContent className="p-5 flex flex-col items-center gap-2 text-center">
                             <Icon className={`w-7 h-7 ${color}`} />
                             <p className="text-2xl font-bold text-foreground">{value}</p>
-                            <p className="text-xs text-slate-500">{label}</p>
+                            <p className="text-xs text-slate-500 flex items-center justify-center">
+                                {label}
+                                <InfoTooltip content={info} />
+                            </p>
                         </CardContent>
                     </Card>
                 ))}

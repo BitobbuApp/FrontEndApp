@@ -64,15 +64,24 @@ export default function GlobalSocketManager() {
             showToastForEvent(payload, myCompanyId);
         };
 
-        // Attach global listeners
+        // Attach global state listeners (chat / negotiations / transactions)
         const listeners = CHAT_SOCKET_EVENTS.STATE_EVENTS.map((evt) => {
             const listener = (rawPayload) => handleGlobalStateUpdate(rawPayload, evt);
             socket.on(evt, listener);
             return { evt, listener };
         });
 
+        // 🔔 Real-time notification listener — only updates the bell badge silently.
+        // Toasts are already handled by chatToastPolicy for these same events.
+        const handleNewNotification = () => {
+            queryClient.invalidateQueries({ queryKey: ['notifications'] });
+        };
+
+        socket.on('notification:new', handleNewNotification);
+
         return () => {
             listeners.forEach(({ evt, listener }) => socket.off(evt, listener));
+            socket.off('notification:new', handleNewNotification);
         };
     }, [isAuthenticated, user, queryClient]);
 

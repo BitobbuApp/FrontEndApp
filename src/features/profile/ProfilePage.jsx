@@ -210,64 +210,52 @@ export default function ProfilePage() {
                         <h3 className="text-base font-semibold text-foreground">Redes Sociales</h3>
 
                         {(() => {
-                            const contact = company?.contacts?.[0] || {};
-                            const links = [
+                            const PLATFORM_CONFIG = {
+                                instagram:      { label: 'Instagram',          bg: 'bg-pink-50 dark:bg-pink-950/20',    border: 'border-pink-200 dark:border-pink-800',    text: 'text-pink-700 dark:text-pink-300',    iconColor: 'text-pink-500',    icon: Instagram },
+                                tiktok:         { label: 'TikTok',             bg: 'bg-slate-50 dark:bg-slate-900/50',  border: 'border-slate-200 dark:border-slate-700',  text: 'text-slate-800 dark:text-slate-200',  iconColor: 'text-slate-700',   icon: Music },
+                                facebook:       { label: 'Facebook',           bg: 'bg-blue-50 dark:bg-blue-950/20',    border: 'border-blue-200 dark:border-blue-800',    text: 'text-blue-800 dark:text-blue-300',    iconColor: 'text-blue-600',    icon: Globe },
+                                website:        { label: 'Sitio Web',          bg: 'bg-muted/50',                       border: 'border-border',                           text: 'text-slate-700 dark:text-slate-300',  iconColor: 'text-slate-500',   icon: Globe },
+                                google_business:{ label: 'Google My Business', bg: 'bg-red-50 dark:bg-red-950/20',      border: 'border-red-200 dark:border-red-800',      text: 'text-red-700 dark:text-red-300',      iconColor: 'text-red-500',     icon: Globe },
+                                linkedin:       { label: 'LinkedIn',           bg: 'bg-blue-50 dark:bg-blue-950/20',    border: 'border-blue-200 dark:border-blue-800',    text: 'text-blue-800 dark:text-blue-300',    iconColor: 'text-blue-700',    icon: Linkedin },
+                                twitter:        { label: 'X (Twitter)',        bg: 'bg-slate-50 dark:bg-slate-900/50',  border: 'border-slate-200 dark:border-slate-700',  text: 'text-slate-800 dark:text-slate-200',  iconColor: 'text-slate-700',   icon: Globe },
+                            };
 
-                                company?.website && {
-                                    label: 'Sitio Web',
-                                    href: company.website,
-                                    icon: Globe,
-                                    bg: 'bg-muted/50', border: 'border-border', text: 'text-slate-700', iconColor: 'text-slate-500',
-                                },
-                                company?.instagram && {
-                                    label: 'Instagram',
-                                    href: `https://instagram.com/${company.instagram.replace('@', '')}`,
-                                    icon: Instagram,
-                                    bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700', iconColor: 'text-pink-500',
-                                },
-                                company?.linkedin && {
-                                    label: 'LinkedIn',
-                                    href: company.linkedin,
-                                    icon: Linkedin,
-                                    bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', iconColor: 'text-blue-700',
-                                },
-                                company?.tiktok && {
-                                    label: 'TikTok',
-                                    href: `https://tiktok.com/@${company.tiktok.replace('@', '')}`,
-                                    icon: Music,
-                                    bg: 'bg-slate-900/5', border: 'border-slate-300', text: 'text-slate-800', iconColor: 'text-slate-700',
-                                },
-                            ].filter(Boolean);
+                            const socialLinks = (company?.social_media || []).filter(sm => sm?.url);
 
-                            if (!links.length) {
+                            if (!socialLinks.length) {
                                 return (
                                     <p className="text-sm text-slate-400 italic">
-                                        No hay redes sociales configuradas.{' '}
-                                        <a href="/Configuracion" className="text-blue-500 hover:underline not-italic">Agregar →</a>
+                                        No hay redes sociales configuradas.
                                     </p>
                                 );
                             }
 
                             return (
                                 <div className="space-y-2">
-                                    {links.map(({ label, href, icon: Icon, bg, border, text, iconColor }) => (
-                                        <a
-                                            key={label}
-                                            href={href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${bg} ${border} ${text} text-sm font-medium hover:opacity-80 transition-opacity`}
-                                        >
-                                            <Icon className={`w-5 h-5 flex-shrink-0 ${iconColor}`} />
-                                            <span className="truncate">{label}</span>
-                                            <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-40" />
-                                        </a>
-                                    ))}
+                                    {socialLinks.map(({ platform, url }) => {
+                                        const config = PLATFORM_CONFIG[platform];
+                                        if (!config) return null;
+                                        const Icon = config.icon;
+                                        return (
+                                            <a
+                                                key={platform}
+                                                href={url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${config.bg} ${config.border} ${config.text} text-sm font-medium hover:opacity-80 transition-opacity`}
+                                            >
+                                                <Icon className={`w-5 h-5 flex-shrink-0 ${config.iconColor}`} />
+                                                <span className="truncate">{config.label}</span>
+                                                <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-40" />
+                                            </a>
+                                        );
+                                    })}
                                 </div>
                             );
                         })()}
                     </CardContent>
                 </Card>
+
             </div>
 
             {/* ── Stats row ── */}
