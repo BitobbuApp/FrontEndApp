@@ -17,6 +17,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 export default function CommercialTab({
     formData,
@@ -59,7 +61,10 @@ export default function CommercialTab({
                 </div>
                 */}
                 <div className="space-y-3">
-                    <Label>Categorias de Interes</Label>
+                    <Label className="flex items-center">
+                        Categorias de Interes
+                        <InfoTooltip content={tooltips.settings.commercial.categories} />
+                    </Label>
                     <div className="flex flex-wrap gap-2">
                         {categoryOptions.map((category) => (
                             <Badge
@@ -125,7 +130,10 @@ export default function CommercialTab({
 
                     <div className="flex items-center justify-between rounded-xl bg-muted/50 p-4">
                         <div>
-                            <p className="font-medium text-foreground">Agente de Retencion</p>
+                            <p className="font-medium text-foreground flex items-center">
+                                Agente de Retencion
+                                <InfoTooltip content={tooltips.settings.commercial.retention_agent} />
+                            </p>
                             <p className="text-sm text-slate-500">
                                 Tu empresa es agente de retencion de IVA?
                             </p>
@@ -140,7 +148,10 @@ export default function CommercialTab({
 
                     <div className="flex items-center justify-between rounded-xl bg-muted/50 p-4">
                         <div>
-                            <p className="font-medium text-foreground">Trabajas con Credito</p>
+                            <p className="font-medium text-foreground flex items-center">
+                                Trabajas con Credito
+                                <InfoTooltip content={tooltips.settings.commercial.credit} />
+                            </p>
                             <p className="text-sm text-slate-500">
                                 Ofreces o aceptas pagos a credito?
                             </p>
@@ -154,7 +165,10 @@ export default function CommercialTab({
                     </div>
 
                     <div className="space-y-3">
-                        <Label>Metodos de Pago Aceptados</Label>
+                        <Label className="flex items-center">
+                            Metodos de Pago Aceptados
+                            <InfoTooltip content={tooltips.settings.commercial.payment_methods} />
+                        </Label>
                         <div className="flex flex-wrap gap-2">
                             {paymentMethodOptions.map((paymentMethod) => (
                                 <Badge

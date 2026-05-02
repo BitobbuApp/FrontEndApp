@@ -12,6 +12,8 @@ import DocumentUploadCard from './DocumentUploadCard';
 import { companyApi } from '../services/companyApi';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 export default function VerificationTab({ company }) {
     const queryClient = useQueryClient();
@@ -65,7 +67,7 @@ export default function VerificationTab({ company }) {
                     )}
                     <div>
                         <p
-                            className={`font-semibold ${status === 'verified'
+                            className={`font-semibold flex items-center ${status === 'verified'
                                 ? 'text-emerald-700'
                                 : status === 'rejected'
                                     ? 'text-red-700'
@@ -73,6 +75,9 @@ export default function VerificationTab({ company }) {
                                 }`}
                         >
                             Estado: {STATUS_LABELS[status] || 'Pendiente'}
+                            {status === 'rejected' && (
+                                <InfoTooltip content={tooltips.settings.verification.rejected} />
+                            )}
                         </p>
                         {status === 'rejected' && verificationInfo.rejection_reason && (
                             <p className="text-sm text-red-600 mt-1">{verificationInfo.rejection_reason}</p>

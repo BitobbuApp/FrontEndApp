@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import useAppMetadata from '../../appMetadata/hooks/useAppMetadata';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 export default function ServiceRequestForm({
     form,
@@ -28,8 +30,9 @@ export default function ServiceRequestForm({
     return (
         <div className="space-y-5">
             <div className="space-y-2">
-                <Label>
-                    Nombre del Servicio <span className="text-red-500">*</span>
+                <Label className="flex items-center">
+                    Nombre del servicio *
+                    <InfoTooltip content={tooltips.requests.service.name} />
                 </Label>
                 <Input
                     value={form.product_service}
@@ -40,7 +43,10 @@ export default function ServiceRequestForm({
             </div>
 
             <div className="space-y-2">
-                <Label>Categoria / Rubro</Label>
+                <Label className="flex items-center">
+                    Categoría / Rubro *
+                    <InfoTooltip content={tooltips.requests.service.category} />
+                </Label>
                 <Select value={form.category_id} onValueChange={set('category_id')}>
                     <SelectTrigger className="h-11">
                         <SelectValue placeholder="Seleccionar categoria" />
@@ -57,7 +63,10 @@ export default function ServiceRequestForm({
 
             <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                    <Label>Fecha de limite</Label>
+                    <Label className="flex items-center">
+                        Fecha límite de recepción de cotizaciones *
+                        <InfoTooltip content={tooltips.requests.service.deadline} />
+                    </Label>
                     <div className="relative">
                         <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-slate-400" />
                         <Input
@@ -92,7 +101,10 @@ export default function ServiceRequestForm({
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label>Estado donde se ejecuta</Label>
+                    <Label className="flex items-center">
+                        Estado / Ubicación de ejecución *
+                        <InfoTooltip content={tooltips.requests.service.location} />
+                    </Label>
                     <Select
                         disabled={isLoadingStates}
                         value={form.state_id?.toString()}
@@ -119,7 +131,10 @@ export default function ServiceRequestForm({
             </div>
 
             <div className="space-y-2">
-                <Label>Condición de Pago</Label>
+                <Label className="flex items-center">
+                    Condición de pago preferida *
+                    <InfoTooltip content={tooltips.requests.service.payment} />
+                </Label>
                 <Select value={form.payment_condition_id || ''} onValueChange={set('payment_condition_id')}>
                     <SelectTrigger className="h-11">
                         <SelectValue placeholder="Seleccionar condición" />
@@ -134,8 +149,9 @@ export default function ServiceRequestForm({
                 </Select>
             </div>
             <div className="space-y-2">
-                <Label>
-                    Descripcion del Proyecto <span className="text-red-500">*</span>
+                <Label className="flex items-center">
+                    Descripción adicional / Alcances
+                    <InfoTooltip content={tooltips.requests.service.description} />
                 </Label>
                 <Textarea
                     value={form.description}

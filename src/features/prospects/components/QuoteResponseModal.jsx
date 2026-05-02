@@ -15,6 +15,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from 'lucide-react';
 import { toast } from "sonner";
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 import {
   Select,
   SelectContent,
@@ -34,6 +36,8 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
     payment_condition_id: '',
     delivery_method_id: '',
     delivery_time: '',
+    delivery_value: '',
+    delivery_unit: 'dias',
     notes: '',
     has_guarantee: false,
   });
@@ -60,6 +64,18 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
       if (data.payment_condition_id) payload.payment_condition_id = data.payment_condition_id;
       if (data.delivery_method_id) payload.delivery_method_id = data.delivery_method_id;
       if (data.delivery_time) payload.delivery_time = data.delivery_time;
+      
+      // Calculate estimated hours
+      if (data.delivery_value) {
+        const multipliers = { horas: 1, dias: 24, semanas: 168 };
+        payload.estimated_delivery_hours = Math.round(Number(data.delivery_value) * (multipliers[data.delivery_unit] || 24));
+        
+        // Auto-generate delivery_time text if empty
+        if (!payload.delivery_time) {
+          payload.delivery_time = `${data.delivery_value} ${data.delivery_unit}`;
+        }
+      }
+
       if (data.notes) payload.notes = data.notes;
 
       return quoteResponsesApi.createQuoteResponse(payload);
@@ -88,6 +104,8 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
       payment_condition_id: '',
       delivery_method_id: '',
       delivery_time: '',
+      delivery_value: '',
+      delivery_unit: 'dias',
       notes: '',
       has_guarantee: false,
     });
@@ -127,8 +145,9 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
           <form id="quote-response-form" onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="unit_price_usd" className="text-sm font-medium">
-                  Precio Unitario ($) <span className="text-red-500">*</span>
+                <Label className="flex items-center">
+                  Precio Unitario ($) *
+                  <InfoTooltip content={tooltips.quotes.unit_price} />
                 </Label>
                 <Input
                   id="unit_price_usd"
@@ -143,8 +162,9 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="quantity" className="text-sm font-medium">
-                  Cantidad a Ofrecer <span className="text-red-500">*</span>
+                <Label className="flex items-center">
+                  Cantidad a Ofrecer *
+                  <InfoTooltip content={tooltips.quotes.quantity} />
                 </Label>
                 <Input
                   id="quantity"
@@ -160,8 +180,9 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="payment_condition_id" className="text-sm font-medium">
-                Condición de Pago
+              <Label className="flex items-center">
+                Condición de Pago *
+                <InfoTooltip content={tooltips.quotes.payment} />
               </Label>
               <Select
                 value={formData.payment_condition_id || ''}
@@ -183,8 +204,9 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2 flex-1">
-                <Label htmlFor="delivery_method_id" className="text-sm font-medium">
-                  Método de Envío
+                <Label className="flex items-center">
+                  Método de Envío *
+                  <InfoTooltip content={tooltips.quotes.delivery_method} />
                 </Label>
                 <Select
                   value={formData.delivery_method_id || ''}
@@ -205,8 +227,9 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
               </div>
 
               <div className="space-y-2 flex-1">
-                <Label htmlFor="has_guarantee" className="text-sm font-medium">
-                  ¿Ofrece Garantía?
+                <Label className="flex items-center">
+                  ¿Ofrece Garantía? *
+                  <InfoTooltip content={tooltips.quotes.guarantee} />
                 </Label>
                 <Select
                   value={formData.has_guarantee.toString()}
@@ -225,23 +248,57 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="delivery_time" className="text-sm font-medium">
-                Tiempo de Entrega
+              <Label className="flex items-center">
+                Tiempo de Entrega Estimado *
+                <InfoTooltip content={tooltips.quotes.delivery_time} />
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  id="delivery_value"
+                  type="number"
+                  placeholder="Ej: 3"
+                  value={formData.delivery_value}
+                  onChange={(e) => setFormData({ ...formData, delivery_value: e.target.value })}
+                  className="h-11 border-slate-200 focus:border-[#D2FC31] focus:ring-[#D2FC31]/20 flex-1"
+                  min="1"
+                  disabled={createMutation.isPending}
+                />
+                <Select
+                  value={formData.delivery_unit}
+                  onValueChange={(value) => setFormData({ ...formData, delivery_unit: value })}
+                  disabled={createMutation.isPending}
+                >
+                  <SelectTrigger className="h-11 border-slate-200 w-[140px]">
+                    <SelectValue placeholder="Unidad" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="horas">Horas</SelectItem>
+                    <SelectItem value="dias">Días</SelectItem>
+                    <SelectItem value="semanas">Semanas</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="flex items-center text-xs text-slate-500">
+                Detalle adicional del tiempo (opcional)
               </Label>
               <Input
                 id="delivery_time"
-                placeholder="Ej: 1 semana, 3 días hábiles"
+                placeholder="Ej: Solo días hábiles, sujeto a stock"
                 value={formData.delivery_time}
                 onChange={(e) => setFormData({ ...formData, delivery_time: e.target.value })}
-                className="h-11 border-slate-200 focus:border-[#D2FC31] focus:ring-[#D2FC31]/20"
+                className="h-10 border-slate-200 focus:border-[#D2FC31] focus:ring-[#D2FC31]/20"
                 maxLength={100}
                 disabled={createMutation.isPending}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes" className="text-sm font-medium">
+              <Label className="flex items-center">
                 Notas Adicionales
+                <InfoTooltip content={tooltips.quotes.notes} />
               </Label>
               <Textarea
                 id="notes"

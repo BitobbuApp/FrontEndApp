@@ -2,15 +2,13 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
     FileText, 
-    Tag, 
-    CheckCircle, 
     TrendingDown, 
-    Mail, 
-    Send, 
-    ShoppingBag, 
-    BarChart3 
+    MessageSquare,
+    ShoppingCart,
+    TrendingUp
 } from 'lucide-react';
 import StatCard from '@/components/ui/StatCard';
+import tooltips from '@/constants/tooltips.json';
 
 export default function StatsGrid({ stats, company }) {
     const canBuy = company?.can_buy;
@@ -82,29 +80,29 @@ export default function StatsGrid({ stats, company }) {
                             title="Solicitudes Generadas"
                             value={buyer_stats.generated_requests}
                             icon={FileText}
-                            bgColor="bg-indigo-50"
-                            iconColor="text-indigo-600"
+                            trend={+12}
+                            info={tooltips.dashboard.buyer.generated_requests}
                         />
                         <StatCard
                             title="Cotizaciones Recibidas"
                             value={buyer_stats.received_quotes}
-                            icon={Tag}
-                            bgColor="bg-blue-50"
-                            iconColor="text-blue-600"
+                            icon={MessageSquare}
+                            trend={+5}
+                            info={tooltips.dashboard.buyer.received_quotes}
                         />
                         <StatCard
                             title="Compras Generadas"
                             value={buyer_stats.generated_purchases}
-                            icon={CheckCircle}
-                            bgColor="bg-emerald-50"
-                            iconColor="text-emerald-600"
+                            icon={ShoppingCart}
+                            trend={+8}
+                            info={tooltips.dashboard.buyer.generated_purchases}
                         />
                         <StatCard
                             title="Ahorro Estimado"
-                            value={`$${buyer_stats.estimated_savings}`}
+                            value={`$${Number(buyer_stats.estimated_savings || 0).toLocaleString()}`}
                             icon={TrendingDown}
-                            bgColor="bg-[#D2FC31]/10"
-                            iconColor="text-slate-900"
+                            trend={-15}
+                            info={tooltips.dashboard.buyer.estimated_savings}
                         />
                     </motion.div>
                 </div>
@@ -122,30 +120,30 @@ export default function StatsGrid({ stats, company }) {
                         <StatCard
                             title="Solicitudes Recibidas"
                             value={supplier_stats.received_requests}
-                            icon={Mail}
-                            bgColor="bg-orange-50"
-                            iconColor="text-orange-600"
+                            icon={FileText}
+                            trend={+20}
+                            info={tooltips.dashboard.supplier.received_requests}
                         />
                         <StatCard
                             title="Cotizaciones Creadas"
                             value={supplier_stats.created_quotes}
-                            icon={Send}
-                            bgColor="bg-sky-50"
-                            iconColor="text-sky-600"
+                            icon={MessageSquare}
+                            trend={+15}
+                            info={tooltips.dashboard.supplier.created_quotes}
                         />
                         <StatCard
                             title="Ventas Generadas"
                             value={supplier_stats.generated_sales}
-                            icon={ShoppingBag}
-                            bgColor="bg-teal-50"
-                            iconColor="text-teal-600"
+                            icon={ShoppingCart}
+                            trend={+10}
+                            info={tooltips.dashboard.supplier.generated_sales}
                         />
                         <StatCard
                             title="Ingresos Generados"
                             value={`$${Number(supplier_stats.generated_revenue || 0).toLocaleString()}`}
-                            icon={BarChart3}
-                            bgColor="bg-[#D2FC31]"
-                            iconColor="text-slate-900"
+                            icon={TrendingUp}
+                            trend={+25}
+                            info={tooltips.dashboard.supplier.generated_revenue}
                         />
                     </motion.div>
                 </div>

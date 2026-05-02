@@ -8,6 +8,8 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 export default function NotificationsTab({ formData, setFormData }) {
     return (
@@ -22,7 +24,10 @@ export default function NotificationsTab({ formData, setFormData }) {
 
                     <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
                         <div>
-                            <p className="font-medium text-foreground">Email</p>
+                            <p className="font-medium text-foreground flex items-center">
+                                Email
+                                <InfoTooltip content={tooltips.settings.notifications.email} />
+                            </p>
                             <p className="text-sm text-slate-500">Recibir notificaciones por correo</p>
                         </div>
                         <Switch

@@ -8,6 +8,8 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 export default function ContactTab({ formData, setFormData }) {
     return (
@@ -19,7 +21,10 @@ export default function ContactTab({ formData, setFormData }) {
             <CardContent className="space-y-6">
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                        <Label>Persona Encargada *</Label>
+                        <Label className="flex items-center">
+                            Persona Encargada *
+                            <InfoTooltip content={tooltips.settings.contact.person} />
+                        </Label>
                         <Input
                             value={formData.contact_person}
                             onChange={(e) =>
@@ -37,7 +42,10 @@ export default function ContactTab({ formData, setFormData }) {
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label>WhatsApp *</Label>
+                        <Label className="flex items-center">
+                            WhatsApp *
+                            <InfoTooltip content={tooltips.settings.contact.whatsapp} />
+                        </Label>
                         <Input
                             value={formData.whatsapp}
                             onChange={(e) => setFormData((prev) => ({ ...prev, whatsapp: e.target.value }))}

@@ -14,6 +14,8 @@ import { toast } from 'sonner';
 import { quoteResponsesApi } from '../services/quoteResponsesApi';
 import Pagination from '@/components/atoms/Pagination';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 const statusColors = {
     pending: 'bg-yellow-100 text-yellow-700',
@@ -91,13 +93,14 @@ export default function RequestOffersTable({
 
     // Calculate cheapest & fastest
     const minPrice = Math.min(...offers.map(o => o.total_amount_usd));
-    const minDelivery = Math.min(...offers.map(o => Number(o.delivery_time)).filter(Boolean));
+    const minDelivery = Math.min(...offers.filter(o => o.estimated_delivery_hours != null).map(o => Number(o.estimated_delivery_hours)));
 
     return (
         <Card className="border-0 shadow-sm overflow-hidden">
             <div className="px-6 pt-5 pb-3 bg-white border-b border-slate-50">
-                <h3 className="font-semibold text-foreground text-base">
+                <h3 className="font-semibold text-foreground text-base flex items-center">
                     Todas las Ofertas ({offers.length})
+                    <InfoTooltip content={tooltips.summary.offers} />
                 </h3>
             </div>
             <div className="overflow-x-auto">
@@ -117,7 +120,7 @@ export default function RequestOffersTable({
                     <tbody className="divide-y divide-slate-100">
                         {offers.map((offer) => {
                             const isCheapest = offer.total_amount_usd === minPrice;
-                            const isFastest = Number(offer.delivery_time) === minDelivery;
+                            const isFastest = offer.estimated_delivery_hours != null && Number(offer.estimated_delivery_hours) === minDelivery;
 
                             return (
                                 <tr key={offer.id} className="hover:bg-slate-50/30 transition-all duration-200 group">
@@ -128,7 +131,22 @@ export default function RequestOffersTable({
                                                 {offer.supplier?.trade_name?.charAt(0) || 'S'}
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-slate-900">{offer.supplier?.trade_name || 'Proveedor'}</p>
+                                                <div className="flex items-center gap-1.5">
+                                                    <p className="font-semibold text-slate-900">{offer.supplier?.trade_name || 'Proveedor'}</p>
+                                                    {offer.supplier?.verification?.status === 'verified' && (
+                                                        <div className="flex items-center">
+                                                            <div className="w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
+                                                                <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            </div>
+                                                            <InfoTooltip 
+                                                                content={tooltips.summary.verified} 
+                                                                className="ml-0.5"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
                                                 <div className="flex items-center gap-1 mt-0.5">
                                                     <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
                                                     <span className="text-[10px] font-bold text-slate-600">
@@ -162,9 +180,16 @@ export default function RequestOffersTable({
                                     </td>
                                     {/* Delivery */}
                                     <td className="px-4 py-5 text-center">
+                                    <div className="flex flex-col items-center">
                                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-lg text-slate-600 font-medium">
                                             {offer.delivery_time}
                                         </div>
+                                        {offer.estimated_delivery_hours != null && (
+                                            <span className="text-[10px] text-slate-400 mt-1 font-medium">
+                                                ({offer.estimated_delivery_hours}h)
+                                            </span>
+                                        )}
+                                    </div>
                                     </td>
                                     {/* Payment */}
                                     <td className="px-4 py-5 text-slate-600 max-w-[120px] truncate italic">

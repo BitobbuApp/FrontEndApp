@@ -1,6 +1,8 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Upload, X } from 'lucide-react';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 /**
  * File upload dropzone + file list pill previews.
@@ -48,7 +50,10 @@ function FilePreview({ file, onRemove }) {
 export default function FileUpload({ files, existingFiles = [], onAdd, onRemove }) {
     return (
         <div className="space-y-3">
-            <Label>Archivos Adjuntos</Label>
+            <Label className="flex items-center">
+                Archivos Adjuntos
+                <InfoTooltip content={tooltips.requests.product.attachments} />
+            </Label>
 
             <div className="border-2 border-dashed border-border rounded-xl bg-muted/50 hover:border-[#D2FC31] transition-colors">
                 <input
