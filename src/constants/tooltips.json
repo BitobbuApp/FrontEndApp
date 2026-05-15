@@ -1,0 +1,87 @@
+{
+  "dashboard": {
+    "buyer": {
+      "generated_requests": "Cantidad de listas de requerimientos o productos que has lanzado al mercado para buscar proveedores.",
+      "received_quotes": "Total de ofertas de precio y disponibilidad que has recibido por parte de los proveedores activos.",
+      "generated_purchases": "Número de órdenes que has decidido cerrar y adjudicar a un proveedor tras comparar opciones.",
+      "estimated_savings": "Diferencia monetaria en USD entre el precio promedio del mercado y el precio que lograste conseguir en Bitobbu."
+    },
+    "supplier": {
+      "received_requests": "Cantidad de pedidos que los compradores han publicado en tus categorías y que están listos para recibir tu oferta.",
+      "created_quotes": "Total de ofertas de precio que has enviado formalmente a los compradores como respuesta a sus solicitudes.",
+      "generated_sales": "Número total de negocios donde el comprador aceptó tu oferta y se confirmó la transacción.",
+      "generated_revenue": "Valor total acumulado en USD de todas tus ventas cerradas con éxito dentro de Bitobbu."
+    }
+  },
+  "requests": {
+    "product": {
+      "name": "Sé específico (ej. en lugar de 'Tubería', usa 'Tubería PVC 2 pulgadas') para recibir precios más exactos.",
+      "category": "Seleccionar el rubro correcto notifica inmediatamente a los proveedores adecuados, acelerando sus respuestas.",
+      "unit": "Indica cómo compras el producto (ej. piezas, cajas, toneladas) para evitar que te coticen en una escala equivocada.",
+      "location": "El destino final del producto. Los proveedores necesitan saber esto para calcular si hay costos extra de flete.",
+      "payment": "Indica tu preferencia (ej. Contado, crédito a 15 días, divisas). Ayuda a filtrar a los proveedores que aceptan tus términos.",
+      "deadline": "La fecha máxima en la que aceptarás propuestas. Después de este día, la solicitud se cerrará automáticamente.",
+      "description": "Usa este espacio para marcas específicas, códigos de fabricante o requerimientos técnicos indispensables.",
+      "attachments": "Sube fotos del repuesto, planos o una ficha técnica para que el proveedor sepa exactamente qué necesitas sin tener que llamarte."
+    },
+    "service": {
+      "name": "Sé específico (ej. en lugar de 'Mantenimiento', usa 'Mantenimiento preventivo de transformadores 50KVA') para recibir ofertas más exactas.",
+      "category": "Seleccionar el rubro correcto notifica inmediatamente a los proveedores adecuados, acelerando sus respuestas.",
+      "deadline": "La fecha máxima en la que aceptarás propuestas. Después de este día, la solicitud se cerrará automáticamente.",
+      "location": "La ubicación exacta donde se requiere el servicio para que el proveedor calcule viáticos o movilización.",
+      "payment": "Indica tu preferencia (ej. Contado, crédito a 15 días, divisas). Ayuda a filtrar a los proveedores que aceptan tus términos.",
+      "description": "Usa este espacio para detallar alcances técnicos, materiales disponibles o cualquier requerimiento indispensable."
+    }
+  },
+  "quotes": {
+    "unit_price": "Indica tu mejor precio por unidad. Sugerimos aclarar en las notas adicionales si este monto incluye IVA o si es base.",
+    "quantity": "Si no tienes todo el inventario que pide el cliente, ingresa solo lo que tienes disponible. Las entregas parciales también cierran ventas.",
+    "payment": "Define tus términos para este cliente (ej. 100% contra entrega, crédito a 7 días). Opciones flexibles atraen más compradores.",
+    "delivery_method": "Aclara si el comprador debe retirar la mercancía en tu local, si ofreces flete gratis, o si el envío tiene un costo adicional.",
+    "guarantee": "Las ofertas respaldadas por garantías tienen mayor tasa de aceptación. Indica el tipo y tiempo de cobertura si aplica.",
+    "delivery_time": "Sé preciso (ej. '2 días hábiles tras confirmar el pago'). Cumplir estos tiempos mejorará tu calificación como proveedor.",
+    "notes": "Espacio clave para detallar la vigencia del precio (importante por tasa de cambio), marca exacta del producto o beneficios extra de tu oferta."
+  },
+  "summary": {
+    "quantity": "El volumen total que requiere el comprador. Recuerda que puedes cotizar por una cantidad menor si no tienes el inventario completo.",
+    "deadline": "Fecha y hora límite para enviar tu propuesta. Después de este momento, la solicitud se bloqueará y el comprador tomará una decisión.",
+    "offers": "Muestra cuántos proveedores ya han enviado su cotización. Te ayuda a medir tu nivel de competencia actual.",
+    "verified": "Este usuario ha validado su identidad y datos corporativos con el equipo de Bitobbu."
+  },
+  "profile": {
+    "transactions": "Número total de negocios (compras o ventas) concretados exitosamente a través de Bitobbu.",
+    "products": "Cantidad de artículos publicados actualmente en el catálogo o vitrina de este proveedor.",
+    "rating": "Promedio de satisfacción basado en calidad, tiempos de entrega y comunicación en negocios previos.",
+    "reviews": "Opiniones reales de otras empresas que ya han cerrado transacciones con este usuario.",
+    "trust_score": "Métrica de Bitobbu que evalúa la completitud del perfil, validación de documentos y comportamiento comercial."
+  },
+  "settings": {
+    "company": {
+      "trade_name": "El nombre por el que te conocen tus clientes (ej. Capi Rosse). Es el que destacará públicamente en tu vitrina.",
+      "legal_name": "La razón social exacta que aparece en tu documento de registro mercantil. No será tu nombre principal de cara al público.",
+      "tax_id": "Dato obligatorio para validar tu identidad corporativa. Un RIF verificado aumenta hasta en un 80% la confianza del comprador.",
+      "founding_year": "Mostrar tu trayectoria y años de experiencia en el mercado es una excelente señal de respaldo para nuevos clientes.",
+      "type": "Aclara si eres fabricante, importador directo, mayorista o distribuidor para que el comprador entienda tu capacidad de volumen."
+    },
+    "location": {
+      "tax_address": "La dirección oficial de tu registro. Solo se usa para validación interna y no será visible públicamente al detalle.",
+      "national_coverage": "Actívalo solo si tienes la capacidad logística o aliados (fletes/encomiendas) para hacer llegar tu mercancía a cualquier estado del país."
+    },
+    "contact": {
+      "person": "El nombre de la persona real (ej. gerente de ventas) que gestionará las cotizaciones y chats. Humaniza el trato B2B.",
+      "whatsapp": "Asegúrate de colocar un número activo. Pronto usaremos esta vía para avisarte al instante cuando un cliente solicite tus productos."
+    },
+    "commercial": {
+      "categories": "Selecciona todos los rubros que trabajas. El sistema te emparejará automáticamente con las empresas que busquen estas categorías.",
+      "retention_agent": "Actívalo si eres Contribuyente Especial. Es un dato vital que los departamentos de compras necesitan saber para efectos de facturación.",
+      "credit": "Ofrecer plazos de pago (ej. 7, 15 o 30 días) es uno de los mayores atractivos para cerrar contratos con empresas grandes.",
+      "payment_methods": "Mientras más opciones financieras ofrezcas, más fácil será para el comprador aprobar la transacción."
+    },
+    "verification": {
+      "rejected": "Uno o más de tus documentos no pudo ser validado. Sube una imagen más nítida o asegúrate de que el documento esté vigente para obtener tu sello de confianza."
+    },
+    "notifications": {
+      "email": "Mantén esta opción encendida para asegurarte de recibir las alertas de nuevas solicitudes de compra directamente en tu bandeja de entrada."
+    }
+  }
+}

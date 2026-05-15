@@ -11,8 +11,10 @@ import {
 } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import StatusBadge from '@/components/ui/StatusBadge';
-import { FileText, Calendar, Package, Layers, Tag, Loader2, CreditCard, MapPin } from 'lucide-react';
+import { FileText, Calendar, Package, Layers, Tag, Loader2, CreditCard, MapPin, ImageIcon } from 'lucide-react';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 const unitLabels = {
     Units: 'Unidades',
@@ -60,6 +62,34 @@ export default function RequestDetailModal({ open, onOpenChange, requestId }) {
                         </div>
                     ) : req ? (
                         <div className="space-y-5">
+                            {/* Images Gallery (Conditional) */}
+                            {(() => {
+                                const images = req.files?.filter(f => 
+                                    /\.(jpg|jpeg|png|webp|gif)$/i.test(f.url) || 
+                                    /\.(jpg|jpeg|png|webp|gif)$/i.test(f.file_name)
+                                ) || [];
+                                
+                                if (images.length === 0) return null;
+
+                                return (
+                                    <div className="grid grid-cols-2 gap-2 mb-4">
+                                        {images.map((img, idx) => (
+                                            <div 
+                                                key={img.id} 
+                                                className={`relative rounded-xl overflow-hidden border border-slate-100 shadow-sm aspect-video bg-slate-50 ${images.length === 1 ? 'col-span-2 aspect-[21/9]' : ''}`}
+                                            >
+                                                <img 
+                                                    src={img.url} 
+                                                    alt={`Imagen ${idx + 1}`}
+                                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-zoom-in"
+                                                    onClick={() => window.open(img.url, '_blank')}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                );
+                            })()}
+
                             {/* Product & Status */}
                             <div className="flex items-start justify-between gap-4">
                                 <div>
@@ -80,7 +110,10 @@ export default function RequestDetailModal({ open, onOpenChange, requestId }) {
                                 <div className="bg-muted/50 rounded-xl p-4">
                                     <div className="flex items-center gap-2 text-slate-500 text-sm mb-1">
                                         <Package className="w-4 h-4" />
-                                        Cantidad
+                                        <span className="text-[10px] uppercase tracking-wider font-bold text-slate-400 flex items-center">
+                                            CANTIDAD
+                                            <InfoTooltip content={tooltips.summary.quantity} />
+                                        </span>
                                     </div>
                                     <p className="font-semibold text-foreground">
                                         {req.quantity} {unitLabels[req.unit_of_measure] || req.unit_of_measure}
@@ -90,6 +123,7 @@ export default function RequestDetailModal({ open, onOpenChange, requestId }) {
                                     <div className="flex items-center gap-2 text-slate-500 text-sm mb-1">
                                         <Layers className="w-4 h-4" />
                                         Ofertas recibidas
+                                        <InfoTooltip content="Muestra cuántos proveedores ya han enviado su cotización. Te ayuda a medir tu nivel de competencia actual." />
                                     </div>
                                     <p className="font-semibold text-foreground">
                                         {req.response_count || 0}
@@ -108,6 +142,7 @@ export default function RequestDetailModal({ open, onOpenChange, requestId }) {
                                     <div className="flex items-center gap-2 text-slate-500 text-sm mb-1">
                                         <Calendar className="w-4 h-4" />
                                         Fecha límite
+                                        <InfoTooltip content="Fecha y hora límite para enviar tu propuesta. Después de este momento, la solicitud se bloqueará y el comprador tomará una decisión." />
                                     </div>
                                     <p className="font-semibold text-foreground text-sm">
                                         {req.expiration_date

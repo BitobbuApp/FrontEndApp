@@ -17,11 +17,10 @@ export default function AuthBrandPanel({ title, subtitle }) {
     return (
         <div className="hidden lg:flex lg:w-1/2 bg-[#1E293B] flex-col justify-between p-12">
             <div>
-                <div className="flex items-center gap-3 mb-16">
-                    <div className="w-12 h-12 bg-[#D2FC31] rounded-2xl flex items-center justify-center">
-                        <span className="text-foreground font-bold text-2xl">B</span>
+                <div className="flex items-center justify-left mb-10">
+                    <div className="w-[40%] h-auto flex items-center justify-center overflow-hidden">
+                        <img src="/assets/logo-w.svg" alt="Bitobbu" className="w-full h-full object-contain" />
                     </div>
-                    <span className="text-3xl font-bold text-white tracking-tight">Bitobbu</span>
                 </div>
 
                 <motion.div

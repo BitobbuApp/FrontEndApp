@@ -18,6 +18,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 export default function CompanyTab({
     formData,
@@ -68,7 +70,10 @@ export default function CompanyTab({
 
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                        <Label>Nombre Comercial *</Label>
+                        <Label className="flex items-center">
+                            Nombre Comercial *
+                            <InfoTooltip content={tooltips.settings.company.trade_name} />
+                        </Label>
                         <Input
                             value={formData.trade_name}
                             onChange={(e) =>
@@ -78,7 +83,10 @@ export default function CompanyTab({
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label>Nombre Legal *</Label>
+                        <Label className="flex items-center">
+                            Nombre Legal *
+                            <InfoTooltip content={tooltips.settings.company.legal_name} />
+                        </Label>
                         <Input
                             value={formData.legal_name}
                             onChange={(e) =>
@@ -88,7 +96,10 @@ export default function CompanyTab({
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label>RIF *</Label>
+                        <Label className="flex items-center">
+                            RIF *
+                            <InfoTooltip content={tooltips.settings.company.tax_id} />
+                        </Label>
                         <Input
                             value={formData.tax_id}
                             onChange={(e) =>
@@ -98,7 +109,10 @@ export default function CompanyTab({
                         />
                     </div>
                     <div className="space-y-2">
-                        <Label>Año de Fundacion</Label>
+                        <Label className="flex items-center">
+                            Año de Fundacion
+                            <InfoTooltip content={tooltips.settings.company.founding_year} />
+                        </Label>
                         <Input
                             type="number"
                             value={formData.founding_year}
@@ -148,7 +162,10 @@ export default function CompanyTab({
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label>Tipo de Empresa</Label>
+                        <Label className="flex items-center">
+                            Tipo de Empresa
+                            <InfoTooltip content={tooltips.settings.company.type} />
+                        </Label>
                         <Select
                             value={formData.company_type_id}
                             onValueChange={(value) =>

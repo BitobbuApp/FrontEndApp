@@ -47,6 +47,15 @@ const INITIAL_FORM_DATA = {
     whatsapp_notifications: false,
     company_size_id: '',
     monthly_transactions_id: '',
+    social_media_links: [
+        { platform: 'instagram', url: '' },
+        { platform: 'tiktok', url: '' },
+        { platform: 'facebook', url: '' },
+        { platform: 'website', url: '' },
+        { platform: 'google_business', url: '' },
+        { platform: 'linkedin', url: '' },
+        { platform: 'twitter', url: '' },
+    ],
 };
 
 function getInterestFromCompany(company) {
@@ -144,6 +153,18 @@ export function useSettingsForm() {
                         || findOptionValueByLabel(categoryOptions, category.name || category.category);
                 })
                 .filter(Boolean),
+            social_media_links: [
+                { platform: 'instagram', url: '' },
+                { platform: 'tiktok', url: '' },
+                { platform: 'facebook', url: '' },
+                { platform: 'website', url: '' },
+                { platform: 'google_business', url: '' },
+                { platform: 'linkedin', url: '' },
+                { platform: 'twitter', url: '' },
+            ].map(defaultItem => {
+                const existing = (company.social_media || []).find(sm => sm.platform === defaultItem.platform);
+                return existing ? { platform: existing.platform, url: existing.url } : defaultItem;
+            }),
         }));
     }, [
         categoryOptions,
@@ -184,6 +205,7 @@ export function useSettingsForm() {
                 monthly_transactions_id: data.monthly_transactions_id || null,
                 payment_method_ids: toNumberIdList(data.payment_method_ids),
                 interest_category_ids: toNumberIdList(data.interest_category_ids),
+                social_media_links: (data.social_media_links || []).filter(item => item.url && item.url.trim() !== ''),
             };
 
             // If there's no logo file, keep the existing logo_url

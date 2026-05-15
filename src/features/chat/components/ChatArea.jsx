@@ -24,6 +24,7 @@ import EmptyState from '@/components/ui/EmptyState';
 import ChatActionPanel from './ChatActionPanel';
 import ReviewModal from './ReviewModal';
 import SystemMessageBubble from './SystemMessageBubble';
+import FilePreview from './FilePreview';
 import { useSocketConnectionState } from '../hooks/useSocketConnectionState';
 import { WifiOff, Loader2 } from 'lucide-react';
 
@@ -229,16 +230,11 @@ export default function ChatArea({
                                                     }`}
                                             >
                                                 {msg.archivo_adjunto_url && (
-                                                    <a
-                                                        href={msg.archivo_adjunto_url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className={`flex items-center gap-2 mb-2 text-sm ${isOwn ? 'text-[#D2FC31]' : 'text-blue-600'
-                                                            }`}
-                                                    >
-                                                        <File className="w-4 h-4" />
-                                                        {msg.file_name || 'Ver archivo adjunto'}
-                                                    </a>
+                                                    <FilePreview 
+                                                        fileUrl={msg.archivo_adjunto_url} 
+                                                        fileName={msg.file_name} 
+                                                        isOwn={isOwn}
+                                                    />
                                                 )}
                                                 <p className="text-sm whitespace-pre-wrap">
                                                     {msg.contenido}
@@ -272,14 +268,34 @@ export default function ChatArea({
             {/* Input */}
             <div className="p-4 border-t bg-white pb-8 lg:pb-4">
                 {attachedFile && (
-                    <div className="mb-3 flex items-center gap-2 bg-slate-100 rounded-lg px-3 py-2">
-                        <File className="w-4 h-4 text-slate-500" />
-                        <span className="text-sm text-slate-600 flex-1 truncate">
-                            {attachedFile.name}
-                        </span>
-                        <button onClick={() => setAttachedFile(null)}>
-                            <X className="w-4 h-4 text-slate-400 hover:text-slate-600" />
-                        </button>
+                    <div className="mb-3 inline-flex items-center gap-3 bg-slate-100 rounded-lg p-2 max-w-sm">
+                        {attachedFile.type.startsWith('image/') ? (
+                            <img 
+                                src={URL.createObjectURL(attachedFile)} 
+                                alt="Preview" 
+                                className="w-10 h-10 object-cover rounded bg-slate-200"
+                            />
+                        ) : (
+                            <div className="w-10 h-10 bg-slate-200 rounded flex items-center justify-center">
+                                <File className="w-5 h-5 text-slate-500" />
+                            </div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                            <span className="text-sm font-medium text-slate-700 block truncate">
+                                {attachedFile.name}
+                            </span>
+                            <span className="text-xs text-slate-500">
+                                {(attachedFile.size / 1024).toFixed(1)} KB
+                            </span>
+                        </div>
+                        <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8 text-slate-400 hover:text-slate-600"
+                            onClick={() => setAttachedFile(null)}
+                        >
+                            <X className="w-4 h-4" />
+                        </Button>
                     </div>
                 )}
                 <div className="flex items-center gap-2">

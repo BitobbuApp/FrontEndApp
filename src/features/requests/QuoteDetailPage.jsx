@@ -211,21 +211,6 @@ export default function QuoteDetailPage() {
                             "{quote.notes}"
                         </div>
                     </div>
-
-                    {/* Images */}
-                    <div className="space-y-4">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                            <ImageIcon className="w-4 h-4" /> Imágenes de Referencia
-                        </h4>
-                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
-                            {[1, 2, 3].map((i) => (
-                                <div key={i} className="aspect-square bg-slate-50 rounded-2xl border-2 border-dashed border-slate-100 flex flex-col items-center justify-center gap-2 group hover:border-[#D2FC31]/40 hover:bg-[#D2FC31]/5 transition-all cursor-pointer">
-                                    <ImageIcon className="w-6 h-6 text-slate-200 group-hover:text-[#D2FC31]/60 transition-colors" />
-                                    <span className="text-[10px] font-bold text-slate-300 group-hover:text-slate-400 transition-colors">Ref {i}.jpg</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                 </CardContent>
             </Card>
 

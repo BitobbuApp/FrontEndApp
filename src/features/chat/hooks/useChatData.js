@@ -93,10 +93,15 @@ export function useChatData(selectedConversationId) {
             product_service: conv.request.product_service,
             quantity: conv.request.quantity,
             unit: conv.request.unit_of_measure?.abbreviation,
+            serial_number: conv.request.serial_number,
         } : null,
         quote_response: conv.quote_response ? {
             price: conv.quote_response.unit_price_usd,
             quantity: conv.quote_response.quantity,
+            serial_number: conv.quote_response.serial_number,
+        } : null,
+        transaction: conv.transaction ? {
+            serial_number: conv.transaction.serial_number,
         } : null,
     }));
 

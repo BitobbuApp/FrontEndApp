@@ -9,7 +9,7 @@ import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 import AppMetadataBootstrap from '@/features/appMetadata/AppMetadataBootstrap';
 import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
@@ -43,16 +43,47 @@ const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, isAuthenticated } = useAuth();
   const [showRegister, setShowRegister] = useState(false);
   const { isLoading: isLoadingCompany } = useMyCompany();
+  const [minLoading, setMinLoading] = useState(true);
 
-  if (isLoadingPublicSettings || isLoadingAuth || (isAuthenticated && isLoadingCompany)) {
+  useEffect(() => {
+    if (isAuthenticated) {
+      setMinLoading(true);
+      const timer = setTimeout(() => {
+        setMinLoading(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else {
+      // Check for registration action from external landing
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('action') === 'register') {
+        setShowRegister(true);
+      }
+
+      // For initial public load, we also want it
+      const timer = setTimeout(() => {
+        setMinLoading(false);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated]);
+
+  if (minLoading || isLoadingPublicSettings || isLoadingAuth || (isAuthenticated && isLoadingCompany)) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-muted/50">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-[#D2FC31] rounded-2xl flex items-center justify-center shadow-lg">
-            <span className="text-foreground font-bold text-2xl">B</span>
+      <div className="fixed inset-0 flex items-center justify-center bg-background z-[9999]">
+        <div className="flex flex-col items-center gap-6">
+          <div className="w-20 h-20 flex items-center justify-center animate-pulse">
+            <img src="/favicon.svg" alt="Bitobbu" className="w-full h-full object-contain" />
           </div>
-          <div className="w-6 h-6 border-3 border-border border-t-[black] rounded-full animate-spin"></div>
+          <div className="w-10 h-1 border-2 border-muted overflow-hidden rounded-full relative">
+            <div className="absolute inset-0 bg-[#D2FC31] animate-[loading_1.5s_ease-in-out_infinite]"></div>
+          </div>
         </div>
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+          }
+        `}} />
       </div>
     );
   }
