@@ -5,6 +5,7 @@ import DashboardHeader from './components/DashboardHeader';
 import StatsGrid from './components/StatsGrid';
 import RecentQuotationsTable from './components/RecentQuotationsTable';
 import OffersOfInterestTable from './components/OffersOfInterestTable';
+import RecentTransactionsTable from './components/RecentTransactionsTable';
 import QuickTipBanner from './components/QuickTipBanner';
 import { useNavigate } from 'react-router-dom';
 
@@ -16,8 +17,11 @@ const containerVariants = {
 export default function DashboardPage() {
     const navigate = useNavigate();
 
-    const { user, solicitudes, loadingSolicitudes, ofertas, loadingOfertas, stats } =
-        useDashboardData();
+    const { 
+        user, company, transactions, loadingTransactions, 
+        transPage, transTotalPages, transTotalItems, setTransPage, 
+        stats 
+    } = useDashboardData();
 
     return (
         <motion.div
@@ -29,21 +33,20 @@ export default function DashboardPage() {
             <DashboardHeader
                 userName={user?.full_name?.split(' ')[0]}
                 onNewSolicitud={() => navigate('/Requests/new')}
+                canBuy={company?.can_buy}
             />
 
-            <StatsGrid stats={stats} />
+            <StatsGrid stats={stats} company={company} />
 
-            <div className="grid lg:grid-cols-2 gap-6">
-                <RecentQuotationsTable
-                    solicitudes={solicitudes}
-                    isLoading={loadingSolicitudes}
-                    onNewSolicitud={() => navigate('/Requests/new')}
-                />
-                <OffersOfInterestTable
-                    ofertas={ofertas}
-                    isLoading={loadingOfertas}
-                />
-            </div>
+            <RecentTransactionsTable
+                transactions={transactions}
+                isLoading={loadingTransactions}
+                companyId={company?.id}
+                currentPage={transPage}
+                totalPages={transTotalPages}
+                totalItems={transTotalItems}
+                onPageChange={setTransPage}
+            />
 
             <QuickTipBanner />
         </motion.div>

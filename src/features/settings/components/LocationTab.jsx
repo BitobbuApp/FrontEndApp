@@ -18,6 +18,8 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import useAppMetadata from '../../appMetadata/hooks/useAppMetadata';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 export default function LocationTab({ formData, setFormData }) {
     const { states, isLoading: isLoadingStates } = useAppMetadata();
@@ -30,7 +32,10 @@ export default function LocationTab({ formData, setFormData }) {
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-2">
-                    <Label>Dirección Fiscal *</Label>
+                    <Label className="flex items-center">
+                        Dirección Fiscal *
+                        <InfoTooltip content={tooltips.settings.location.tax_address} />
+                    </Label>
                     <Textarea
                         value={formData.tax_address}
                         onChange={(e) =>
@@ -80,7 +85,10 @@ export default function LocationTab({ formData, setFormData }) {
 
                 <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl">
                     <div>
-                        <p className="font-medium text-foreground">Cobertura Nacional</p>
+                        <p className="font-medium text-foreground flex items-center">
+                            Cobertura Nacional
+                            <InfoTooltip content={tooltips.settings.location.national_coverage} />
+                        </p>
                         <p className="text-sm text-slate-500">¿Tu empresa opera en todo el país?</p>
                     </div>
                     <Switch

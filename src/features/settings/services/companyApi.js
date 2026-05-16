@@ -17,7 +17,25 @@ export const companyApi = {
      * Updates an existing company.
      */
     async updateCompany(id, data) {
+        if (data instanceof FormData) {
+            return await apiClient.patch(`/companies/${id}`, data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+        }
         return await apiClient.patch(`/companies/${id}`, data);
+    },
+
+    /**
+     * POST /companies/:id/verification/documents
+     * Sube un documento de verificación KYB.
+     */
+    async uploadVerificationDocument(companyId, typeId, file) {
+        const fd = new FormData();
+        fd.append('type_id', String(typeId));
+        fd.append('file', file);
+        return await apiClient.post(`/companies/${companyId}/verification/documents`, fd, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
     },
 
     /**

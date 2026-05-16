@@ -11,6 +11,8 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import useAppMetadata from '../../appMetadata/hooks/useAppMetadata';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 export default function ProductRequestForm({
     form,
@@ -29,8 +31,9 @@ export default function ProductRequestForm({
     return (
         <div className="space-y-5">
             <div className="space-y-2">
-                <Label>
-                    Nombre del Producto <span className="text-red-500">*</span>
+                <Label className="flex items-center">
+                    Nombre del producto *
+                    <InfoTooltip content={tooltips.requests.product.name} />
                 </Label>
                 <Input
                     value={form.product_service}
@@ -41,7 +44,10 @@ export default function ProductRequestForm({
             </div>
 
             <div className="space-y-2">
-                <Label>Categoria / Rubro</Label>
+                <Label className="flex items-center">
+                    Categoría / Rubro *
+                    <InfoTooltip content={tooltips.requests.product.category} />
+                </Label>
                 <Select value={form.category_id} onValueChange={set('category_id')}>
                     <SelectTrigger className="h-11">
                         <SelectValue placeholder="Seleccionar categoria" />
@@ -71,7 +77,10 @@ export default function ProductRequestForm({
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-[#D2FC31] font-semibold">Unidad de Medida</Label>
+                    <Label className="flex items-center">
+                        Unidad de medida *
+                        <InfoTooltip content={tooltips.requests.product.unit} />
+                    </Label>
                     <Select value={form.unit_id} onValueChange={set('unit_id')}>
                         <SelectTrigger className="h-11">
                             <SelectValue />
@@ -100,7 +109,10 @@ export default function ProductRequestForm({
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label>Estado de Entrega</Label>
+                    <Label className="flex items-center">
+                        Estado de ejecución / Entrega *
+                        <InfoTooltip content={tooltips.requests.product.location} />
+                    </Label>
                     <Select
                         disabled={isLoadingStates}
                         value={form.state_id?.toString()}
@@ -127,7 +139,10 @@ export default function ProductRequestForm({
             </div>
 
             <div className="space-y-2">
-                <Label>Condición de Pago</Label>
+                <Label className="flex items-center">
+                    Condición de pago preferida *
+                    <InfoTooltip content={tooltips.requests.product.payment} />
+                </Label>
                 <Select value={form.payment_condition_id || ''} onValueChange={set('payment_condition_id')}>
                     <SelectTrigger className="h-11">
                         <SelectValue placeholder="Seleccionar condición" />
@@ -143,7 +158,10 @@ export default function ProductRequestForm({
             </div>
 
             <div className="space-y-2">
-                <Label>Fecha Limite</Label>
+                <Label className="flex items-center">
+                    Fecha límite de recepción de cotizaciones *
+                    <InfoTooltip content={tooltips.requests.product.deadline} />
+                </Label>
                 <div className="relative">
                     <CalendarIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 pointer-events-none text-slate-400" />
                     <Input
@@ -157,7 +175,10 @@ export default function ProductRequestForm({
             </div>
 
             <div className="space-y-2">
-                <Label>Descripcion adicional</Label>
+                <Label className="flex items-center">
+                    Descripción adicional
+                    <InfoTooltip content={tooltips.requests.product.description} />
+                </Label>
                 <Textarea
                     value={form.description}
                     onChange={set('description')}

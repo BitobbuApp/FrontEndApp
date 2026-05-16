@@ -5,8 +5,9 @@ import {
     Settings, Globe, MapPin, Package,
     Users, FileText, Plus, Box, Loader2,
     Phone, Mail, Instagram, Linkedin, ExternalLink, Music,
-    Calendar, BadgeCheck,
+    Calendar, BadgeCheck, ShieldCheck,
 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -57,6 +58,7 @@ export default function ProfilePage() {
         totalReviews,
         transactions,
         products,
+        trustScore,
     } = useProfileData();
 
     const { data: companyProducts = [], isLoading: isLoadingProducts } = useCompanyProducts(company?.id);
@@ -125,6 +127,25 @@ export default function ProfilePage() {
                 </div>
             </div>
 
+            {/* ── Trust Score ── */}
+            <Card className="mb-8 border border-border shadow-sm overflow-hidden bg-slate-50/50">
+                <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-6 h-6 text-[#a8d92a]" />
+                            <h3 className="font-semibold text-foreground text-lg">Nivel de Confianza</h3>
+                        </div>
+                        <span className="font-bold text-xl">{trustScore}%</span>
+                    </div>
+                    <Progress value={trustScore} className="h-3 mb-2" />
+                    <p className="text-sm text-slate-500">
+                        {trustScore >= 100 
+                            ? '¡Tu perfil esta completo! Tienes mayor probabilidad de cerrar negocios.' 
+                            : 'Completa tu perfil para aumentar la confianza de otros usuarios en la plataforma.'}
+                    </p>
+                </CardContent>
+            </Card>
+
             {/* ── Bio + Social — two cards side by side ── */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
 
@@ -189,75 +210,52 @@ export default function ProfilePage() {
                         <h3 className="text-base font-semibold text-foreground">Redes Sociales</h3>
 
                         {(() => {
-                            const contact = company?.contacts?.[0] || {};
-                            const links = [
-                                contact.whatsapp && {
-                                    label: 'WhatsApp',
-                                    href: `https://wa.me/${contact.whatsapp.replace(/\D/g, '')}`,
-                                    icon: Phone,
-                                    bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', iconColor: 'text-green-600',
-                                },
-                                contact.corporate_email && {
-                                    label: contact.corporate_email,
-                                    href: `mailto:${contact.corporate_email}`,
-                                    icon: Mail,
-                                    bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', iconColor: 'text-blue-500',
-                                },
-                                company?.website && {
-                                    label: 'Sitio Web',
-                                    href: company.website,
-                                    icon: Globe,
-                                    bg: 'bg-muted/50', border: 'border-border', text: 'text-slate-700', iconColor: 'text-slate-500',
-                                },
-                                company?.instagram && {
-                                    label: 'Instagram',
-                                    href: `https://instagram.com/${company.instagram.replace('@', '')}`,
-                                    icon: Instagram,
-                                    bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-700', iconColor: 'text-pink-500',
-                                },
-                                company?.linkedin && {
-                                    label: 'LinkedIn',
-                                    href: company.linkedin,
-                                    icon: Linkedin,
-                                    bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-800', iconColor: 'text-blue-700',
-                                },
-                                company?.tiktok && {
-                                    label: 'TikTok',
-                                    href: `https://tiktok.com/@${company.tiktok.replace('@', '')}`,
-                                    icon: Music,
-                                    bg: 'bg-slate-900/5', border: 'border-slate-300', text: 'text-slate-800', iconColor: 'text-slate-700',
-                                },
-                            ].filter(Boolean);
+                            const PLATFORM_CONFIG = {
+                                instagram:      { label: 'Instagram',          bg: 'bg-pink-50 dark:bg-pink-950/20',    border: 'border-pink-200 dark:border-pink-800',    text: 'text-pink-700 dark:text-pink-300',    iconColor: 'text-pink-500',    icon: Instagram },
+                                tiktok:         { label: 'TikTok',             bg: 'bg-slate-50 dark:bg-slate-900/50',  border: 'border-slate-200 dark:border-slate-700',  text: 'text-slate-800 dark:text-slate-200',  iconColor: 'text-slate-700',   icon: Music },
+                                facebook:       { label: 'Facebook',           bg: 'bg-blue-50 dark:bg-blue-950/20',    border: 'border-blue-200 dark:border-blue-800',    text: 'text-blue-800 dark:text-blue-300',    iconColor: 'text-blue-600',    icon: Globe },
+                                website:        { label: 'Sitio Web',          bg: 'bg-muted/50',                       border: 'border-border',                           text: 'text-slate-700 dark:text-slate-300',  iconColor: 'text-slate-500',   icon: Globe },
+                                google_business:{ label: 'Google My Business', bg: 'bg-red-50 dark:bg-red-950/20',      border: 'border-red-200 dark:border-red-800',      text: 'text-red-700 dark:text-red-300',      iconColor: 'text-red-500',     icon: Globe },
+                                linkedin:       { label: 'LinkedIn',           bg: 'bg-blue-50 dark:bg-blue-950/20',    border: 'border-blue-200 dark:border-blue-800',    text: 'text-blue-800 dark:text-blue-300',    iconColor: 'text-blue-700',    icon: Linkedin },
+                                twitter:        { label: 'X (Twitter)',        bg: 'bg-slate-50 dark:bg-slate-900/50',  border: 'border-slate-200 dark:border-slate-700',  text: 'text-slate-800 dark:text-slate-200',  iconColor: 'text-slate-700',   icon: Globe },
+                            };
 
-                            if (!links.length) {
+                            const socialLinks = (company?.social_media || []).filter(sm => sm?.url);
+
+                            if (!socialLinks.length) {
                                 return (
                                     <p className="text-sm text-slate-400 italic">
-                                        No hay redes sociales configuradas.{' '}
-                                        <a href="/Configuracion" className="text-blue-500 hover:underline not-italic">Agregar →</a>
+                                        No hay redes sociales configuradas.
                                     </p>
                                 );
                             }
 
                             return (
                                 <div className="space-y-2">
-                                    {links.map(({ label, href, icon: Icon, bg, border, text, iconColor }) => (
-                                        <a
-                                            key={label}
-                                            href={href}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${bg} ${border} ${text} text-sm font-medium hover:opacity-80 transition-opacity`}
-                                        >
-                                            <Icon className={`w-5 h-5 flex-shrink-0 ${iconColor}`} />
-                                            <span className="truncate">{label}</span>
-                                            <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-40" />
-                                        </a>
-                                    ))}
+                                    {socialLinks.map(({ platform, url }) => {
+                                        const config = PLATFORM_CONFIG[platform];
+                                        if (!config) return null;
+                                        const Icon = config.icon;
+                                        return (
+                                            <a
+                                                key={platform}
+                                                href={url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${config.bg} ${config.border} ${config.text} text-sm font-medium hover:opacity-80 transition-opacity`}
+                                            >
+                                                <Icon className={`w-5 h-5 flex-shrink-0 ${config.iconColor}`} />
+                                                <span className="truncate">{config.label}</span>
+                                                <ExternalLink className="w-3.5 h-3.5 ml-auto opacity-40" />
+                                            </a>
+                                        );
+                                    })}
                                 </div>
                             );
                         })()}
                     </CardContent>
                 </Card>
+
             </div>
 
             {/* ── Stats row ── */}
@@ -282,19 +280,18 @@ export default function ProfilePage() {
             <Tabs defaultValue="vitrina">
                 <TabsList className="bg-slate-100 p-1">
                     <TabsTrigger value="vitrina">Mi Vitrina</TabsTrigger>
-                    <TabsTrigger value="historial">Historial</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="vitrina" className="mt-4">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-semibold text-foreground">Mis Productos y Servicios</h3>
+                        <h3 className="font-semibold text-foreground">Mis Productos</h3>
                         <Button
                             size="sm"
                             className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] gap-1.5"
                             onClick={() => setShowAddProduct(true)}
                         >
                             <Plus className="w-4 h-4" />
-                            Agregar Producto/Servicio
+                            Agregar Producto
                         </Button>
                     </div>
 
@@ -321,20 +318,6 @@ export default function ProfilePage() {
                             </CardContent>
                         </Card>
                     )}
-                </TabsContent>
-
-                <TabsContent value="historial" className="mt-4">
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="py-16 flex flex-col items-center gap-3 text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
-                                <FileText className="w-8 h-8 text-slate-300" />
-                            </div>
-                            <p className="font-medium text-slate-600">Sin historial de transacciones</p>
-                            <p className="text-sm text-slate-400 max-w-xs">
-                                Tus transacciones completadas aparecerán aquí
-                            </p>
-                        </CardContent>
-                    </Card>
                 </TabsContent>
             </Tabs>
 

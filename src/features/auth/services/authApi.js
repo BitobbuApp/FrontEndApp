@@ -31,7 +31,9 @@ export async function registerUser({
     trade_name,
     country_id,
     state_id,
-    sector_id
+    sector_id,
+    can_buy,
+    can_sell
 }) {
     const responseBody = await apiClient.post('/users/register', {
         first_name,
@@ -41,9 +43,35 @@ export async function registerUser({
         trade_name,
         country_id,
         state_id,
-        sector_id
+        sector_id,
+        can_buy,
+        can_sell
     });
     return responseBody.data;
+}
+
+/**
+ * POST /api/v1/users/reset-password
+ */
+export async function resetPassword({ email, newPassword, confirmPassword }) {
+    const responseBody = await apiClient.post('/users/reset-password', {
+        email,
+        newPassword,
+        confirmPassword
+    });
+    return responseBody;
+}
+
+/**
+ * POST /api/v1/users/change-password
+ */
+export async function changePassword({ currentPassword, newPassword, confirmPassword }) {
+    const responseBody = await apiClient.post('/users/change-password', {
+        currentPassword,
+        newPassword,
+        confirmPassword
+    });
+    return responseBody;
 }
 
 // ─── Session helpers ──────────────────────────────────────────────────────────

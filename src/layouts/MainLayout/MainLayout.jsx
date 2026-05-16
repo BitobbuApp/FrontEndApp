@@ -3,9 +3,10 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import useLayoutData from './useLayoutData';
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
+import MobileBottomNav from './MobileBottomNav';
 
-const SIDEBAR_EXPANDED_W = 'w-64';
-const SIDEBAR_COLLAPSED_W = 'w-[68px]';
+const SIDEBAR_EXPANDED_W = 'w-[220px]';
+const SIDEBAR_COLLAPSED_W = 'w-[64px]';
 
 export default function MainLayout({ children, currentPageName }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -30,13 +31,13 @@ export default function MainLayout({ children, currentPageName }) {
     };
 
     const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED_W : SIDEBAR_EXPANDED_W;
-    const contentPadding = collapsed ? 'lg:pl-[68px]' : 'lg:pl-64';
+    const contentPadding = collapsed ? 'lg:pl-[64px]' : 'lg:pl-[220px]';
 
     return (
         <div className="min-h-screen bg-muted/50 dark:bg-slate-950">
             {/* Desktop Sidebar */}
             <aside
-                className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-background border-r border-border transition-all duration-300 overflow-visible ${sidebarWidth}`}
+                className={`hidden lg:fixed lg:inset-y-0 lg:flex lg:flex-col bg-background border-r border-border transition-all duration-300 overflow-visible z-50 ${sidebarWidth}`}
             >
                 <Sidebar
                     {...sidebarProps}
@@ -48,7 +49,7 @@ export default function MainLayout({ children, currentPageName }) {
 
             {/* Mobile Sidebar (Sheet) */}
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                <SheetContent side="left" className="p-0 w-64">
+                <SheetContent side="left" className="p-0 w-[220px]">
                     <Sidebar {...sidebarProps} onClose={() => setSidebarOpen(false)} />
                 </SheetContent>
             </Sheet>
@@ -65,8 +66,16 @@ export default function MainLayout({ children, currentPageName }) {
                 />
 
                 {/* Page Content */}
-                <main className="p-4 lg:p-8">{children}</main>
+                <main className="p-4 lg:p-8 pb-20 lg:pb-8">{children}</main>
             </div>
+
+            {/* Mobile Bottom Navigation */}
+            <MobileBottomNav 
+                currentPageName={currentPageName}
+                myCompany={myCompany}
+                mensajesCount={mensajesCount}
+                onOpenSidebar={() => setSidebarOpen(true)}
+            />
         </div>
     );
 }

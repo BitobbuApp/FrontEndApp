@@ -1,17 +1,44 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft, MapPin, Star, FileText, Package, Users, Loader2,
-    Phone, Mail, Globe, Instagram, Linkedin, ExternalLink, Music,
-    Calendar, BadgeCheck,
+    ArrowLeft,
+    MapPin,
+    Star,
+    FileText,
+    Package,
+    Users,
+    Loader2,
+    Phone,
+    Mail,
+    Globe,
+    Instagram,
+    Linkedin,
+    Music,
+    Calendar,
+    BadgeCheck,
+    ShieldCheck,
+    Info,
 } from 'lucide-react';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
+import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import Pagination from '@/components/atoms/Pagination';
 import usePublicProfileData from './hooks/usePublicProfileData';
 import useCompanyProducts from './hooks/useCompanyProducts';
 import ProductSmallCard from './components/ProductSmallCard';
+import { useSupplierReviews } from '@/features/suppliers/hooks/useSupplierReviews';
 
 function getMetadataLabel(value) {
     if (typeof value === 'string') {
@@ -43,6 +70,7 @@ export default function PublicProfilePage() {
     const {
         company,
         isLoading,
+        isMyProfile,
         initial,
         tradeName,
         sector,
@@ -52,9 +80,14 @@ export default function PublicProfilePage() {
         totalReviews,
         transactions,
         products,
+        trustScore,
     } = usePublicProfileData();
 
     const { data: companyProducts = [], isLoading: isLoadingProducts } = useCompanyProducts(company?.id);
+    
+    const [reviewPage, setReviewPage] = React.useState(1);
+    const reviewsLimit = 5;
+    const { reviews, total: totalReviewsCount, totalPages: reviewsTotalPages, loading: isLoadingReviews } = useSupplierReviews(company?.id, reviewPage, reviewsLimit);
 
     if (isLoading) {
         return (
@@ -67,15 +100,13 @@ export default function PublicProfilePage() {
     if (!company) {
         return (
             <div className="text-center py-20 text-slate-500">
-                No se encontró el perfil de la empresa.
+                No se encontro el perfil de la empresa.
             </div>
         );
     }
 
     return (
         <div className="max-w-5xl mx-auto space-y-6">
-
-            {/* Back button */}
             <div>
                 <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1.5 text-slate-500">
                     <ArrowLeft className="w-4 h-4" />
@@ -83,7 +114,6 @@ export default function PublicProfilePage() {
                 </Button>
             </div>
 
-            {/* Cover + Avatar */}
             <div className="relative">
                 <div className="h-36 w-full rounded-xl bg-gradient-to-br from-slate-800 to-slate-900" />
                 <div className="absolute -bottom-8 left-6">
@@ -97,7 +127,6 @@ export default function PublicProfilePage() {
                 </div>
             </div>
 
-            {/* Company identity */}
             <div className="pt-12 pb-5 px-1">
                 <h1 className="text-2xl font-bold text-foreground">{tradeName}</h1>
                 <div className="flex flex-wrap items-center gap-2 mt-1.5">
@@ -125,7 +154,28 @@ export default function PublicProfilePage() {
                 )}
             </div>
 
-            {/* Contact / Social card */}
+            {/* ── Trust Score ── */}
+            <Card className="border border-border shadow-sm overflow-hidden bg-slate-50/50">
+                <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <ShieldCheck className="w-6 h-6 text-[#a8d92a]" />
+                            <h3 className="font-semibold text-foreground text-lg flex items-center">
+                                Nivel de Confianza
+                                <InfoTooltip content={tooltips.profile.trust_score} />
+                            </h3>
+                        </div>
+                        <span className="font-bold text-xl">{trustScore}%</span>
+                    </div>
+                    <Progress value={trustScore} className="h-3 mb-2" />
+                    <p className="text-sm text-slate-500">
+                        {trustScore >= 100 
+                            ? 'Este perfil esta verificado y completo. Es altamente confiable.' 
+                            : 'Este perfil no esta completo. Sugerimos tomar precauciones al hacer negocios.'}
+                    </p>
+                </CardContent>
+            </Card>
+
             <Card className="border border-border shadow-sm">
                 <CardContent className="p-6 space-y-5">
                     <h3 className="text-base font-semibold text-foreground">Contacto y Redes</h3>
@@ -150,48 +200,55 @@ export default function PublicProfilePage() {
                     )}
 
                     {(() => {
-                        const contact = company.contacts?.[0] || {};
-                        const links = [
-                            company.website   && { icon: Globe,     label: 'Sitio Web',  href: company.website },
-                            company.instagram && { icon: Instagram, label: 'Instagram',  href: `https://instagram.com/${company.instagram.replace('@', '')}` },
-                            company.linkedin  && { icon: Linkedin,  label: 'LinkedIn',   href: company.linkedin },
-                            company.tiktok    && { icon: Music,     label: 'TikTok',     href: `https://tiktok.com/@${company.tiktok.replace('@', '')}` },
-                            contact.whatsapp  && { icon: Phone,     label: 'WhatsApp',   href: `https://wa.me/${contact.whatsapp.replace(/\D/g, '')}` },
-                            contact.corporate_email && { icon: Mail, label: 'Email',     href: `mailto:${contact.corporate_email}` },
-                        ].filter(Boolean);
+                        const PLATFORM_CONFIG = {
+                            instagram:       { label: 'Instagram',          icon: Instagram, color: 'text-pink-500' },
+                            tiktok:          { label: 'TikTok',             icon: Music,     color: 'text-slate-700' },
+                            facebook:        { label: 'Facebook',           icon: Globe,     color: 'text-blue-600' },
+                            website:         { label: 'Sitio Web',          icon: Globe,     color: 'text-slate-500' },
+                            google_business: { label: 'Google My Business', icon: Globe,     color: 'text-red-500'   },
+                            linkedin:        { label: 'LinkedIn',           icon: Linkedin,  color: 'text-blue-700' },
+                            twitter:         { label: 'X (Twitter)',        icon: Globe,     color: 'text-slate-700' },
+                        };
 
-                        if (!links.length) return null;
+                        const socialLinks = (company?.social_media || []).filter(sm => sm?.url);
+                        if (!socialLinks.length) return null;
 
                         return (
                             <div className="grid grid-cols-2 gap-2">
-                                {links.map(({ icon: Icon, label, href }) => (
-                                    <a
-                                        key={label}
-                                        href={href}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border text-sm text-slate-700 hover:bg-muted/50 transition-colors"
-                                    >
-                                        <Icon className="w-4 h-4 text-slate-500 flex-shrink-0" />
-                                        {label}
-                                    </a>
-                                ))}
+                                {socialLinks.map(({ platform, url }) => {
+                                    const config = PLATFORM_CONFIG[platform];
+                                    if (!config) return null;
+                                    const Icon = config.icon;
+                                    return (
+                                        <a
+                                            key={platform}
+                                            href={url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border text-sm text-slate-700 dark:text-slate-300 hover:bg-muted/50 transition-colors"
+                                        >
+                                            <Icon className={`w-4 h-4 flex-shrink-0 ${config.color}`} />
+                                            {config.label}
+                                        </a>
+                                    );
+                                })}
                             </div>
                         );
                     })()}
+
 
                     <div className="border-t border-border" />
 
                     {company.commercial_profile?.works_with_credit && (
                         <div className="flex items-center gap-2 text-sm text-blue-600">
                             <BadgeCheck className="w-4 h-4" />
-                            Trabaja con crédito
+                            Trabaja con credito
                         </div>
                     )}
 
                     {company.payment_methods?.length > 0 && (
                         <div>
-                            <p className="text-xs text-slate-400 mb-2">Métodos de pago:</p>
+                            <p className="text-xs text-slate-400 mb-2">Metodos de pago:</p>
                             <div className="flex flex-wrap gap-1.5">
                                 {company.payment_methods.map((pm) => (
                                     <span
@@ -207,26 +264,27 @@ export default function PublicProfilePage() {
                 </CardContent>
             </Card>
 
-            {/* Stats row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                    { icon: Package, label: 'Productos',     value: products,              color: 'text-blue-500' },
-                    { icon: Users,   label: 'Transacciones', value: transactions,           color: 'text-purple-500' },
-                    { icon: Star,    label: 'Calificación',  value: rating.toFixed(1),      color: 'text-amber-500' },
-                    { icon: FileText, label: 'Reseñas',      value: totalReviews,           color: 'text-slate-400' },
-                ].map(({ icon: Icon, label, value, color }) => (
+                    { icon: Package, label: 'Productos', value: products, color: 'text-blue-500', info: tooltips.profile.products },
+                    { icon: Users, label: 'Transacciones', value: transactions, color: 'text-purple-500', info: tooltips.profile.transactions },
+                    { icon: Star, label: 'Calificacion', value: rating.toFixed(1), color: 'text-amber-500', info: tooltips.profile.rating },
+                    { icon: FileText, label: 'Reseñas', value: totalReviews, color: 'text-slate-400', info: tooltips.profile.reviews },
+                ].map(({ icon: Icon, label, value, color, info }) => (
                     <Card key={label} className="border border-border shadow-sm">
                         <CardContent className="p-5 flex flex-col items-center gap-2 text-center">
                             <Icon className={`w-7 h-7 ${color}`} />
                             <p className="text-2xl font-bold text-foreground">{value}</p>
-                            <p className="text-xs text-slate-500">{label}</p>
+                            <p className="text-xs text-slate-500 flex items-center justify-center">
+                                {label}
+                                <InfoTooltip content={info} />
+                            </p>
                         </CardContent>
                     </Card>
                 ))}
             </div>
 
-            {/* Tabs — read-only */}
-            <Tabs defaultValue="vitrina">
+            <Tabs defaultValue="resenas">
                 <TabsList className="bg-slate-100 p-1">
                     <TabsTrigger value="vitrina">Vitrina</TabsTrigger>
                     <TabsTrigger value="resenas">Reseñas</TabsTrigger>
@@ -249,8 +307,8 @@ export default function PublicProfilePage() {
                                 <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
                                     <Package className="w-8 h-8 text-slate-300" />
                                 </div>
-                                <p className="font-medium text-slate-600">Vitrina vacía</p>
-                                <p className="text-sm text-slate-400">Esta empresa aún no tiene productos publicados</p>
+                                <p className="font-medium text-slate-600">Vitrina vacia</p>
+                                <p className="text-sm text-slate-400">Esta empresa aun no tiene productos publicados</p>
                             </CardContent>
                         </Card>
                     )}
@@ -258,12 +316,78 @@ export default function PublicProfilePage() {
 
                 <TabsContent value="resenas" className="mt-4">
                     <Card className="border-0 shadow-sm">
-                        <CardContent className="py-16 flex flex-col items-center gap-3 text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
-                                <Star className="w-8 h-8 text-slate-300" />
-                            </div>
-                            <p className="font-medium text-slate-600">Sin reseñas aún</p>
-                            <p className="text-sm text-slate-400">Esta empresa no ha recibido reseñas todavía</p>
+                        <CardContent className="p-6">
+                            {isLoadingReviews ? (
+                                <div className="py-12 flex justify-center">
+                                    <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
+                                </div>
+                            ) : reviews.length > 0 ? (
+                                <div className="space-y-4">
+                                    <div className="rounded-xl border border-border overflow-hidden">
+                                        <Table>
+                                            <TableHeader className="bg-slate-50/50">
+                                                <TableRow className="hover:bg-transparent">
+                                                    <TableHead className="w-[200px] text-xs font-semibold uppercase tracking-wider text-slate-500 py-4 px-6">Empresa</TableHead>
+                                                    <TableHead className="w-[120px] text-xs font-semibold uppercase tracking-wider text-slate-500 py-4 text-center">Calificación</TableHead>
+                                                    <TableHead className="text-xs font-semibold uppercase tracking-wider text-slate-500 py-4 px-6">Comentario</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {reviews.map((review, index) => (
+                                                    <TableRow key={review.id || index} className="group hover:bg-slate-50 transition-colors border-slate-100">
+                                                        <TableCell className="py-4 px-6">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-semibold text-slate-900 text-sm">
+                                                                    {review.author?.trade_name || 'Empresa anónima'}
+                                                                </span>
+                                                                <span className="text-[10px] text-slate-400 font-medium tracking-tight mt-0.5">
+                                                                    {review.created_at
+                                                                        ? new Date(review.created_at).toLocaleDateString('es-VE', {
+                                                                            day: 'numeric',
+                                                                            month: 'short',
+                                                                            year: 'numeric',
+                                                                        })
+                                                                        : 'Reciente'}
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="py-4 text-center">
+                                                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-600">
+                                                                <Star className="w-3.5 h-3.5 fill-amber-500" />
+                                                                <span className="text-xs font-bold leading-none">
+                                                                    {Number(review.rating || 0).toFixed(1)}
+                                                                </span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="py-4 px-6">
+                                                            <p className="text-sm text-slate-600 leading-relaxed italic line-clamp-2 group-hover:line-clamp-none transition-all duration-300">
+                                                                "{review.comment || 'Sin comentarios adicionales.'}"
+                                                            </p>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                        <Pagination
+                                            totalItems={totalReviewsCount}
+                                            itemsLabel="reseña"
+                                            itemsLabelPlural="reseñas"
+                                            currentPage={reviewPage}
+                                            totalPages={reviewsTotalPages}
+                                            onPageChange={setReviewPage}
+                                            className="bg-slate-50/30"
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="py-16 flex flex-col items-center gap-3 text-center">
+                                    <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
+                                        <Star className="w-8 h-8 text-slate-300" />
+                                    </div>
+                                    <p className="font-medium text-slate-600">Sin reseñas aun</p>
+                                    <p className="text-sm text-slate-400">Esta empresa no ha recibido reseñas todavia</p>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </TabsContent>

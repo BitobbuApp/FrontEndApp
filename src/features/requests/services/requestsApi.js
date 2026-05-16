@@ -5,6 +5,11 @@ export const requestsApi = {
      * POST /requests
      */
     async createRequest(data) {
+        if (data instanceof FormData) {
+            return await apiClient.post('/requests', data, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+        }
         return await apiClient.post('/requests', data);
     },
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Star, Eye, MessageSquare } from 'lucide-react';
+import { MapPin, Star, Eye, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -9,10 +9,16 @@ import { Button } from '@/components/ui/button';
  */
 export default function SupplierRow({ company, onViewProfile }) {
     const mainLocation = company.locations?.[0] || {};
-    const location = mainLocation.location_state || null;
+    const location = [
+        mainLocation.city?.name,
+        mainLocation.state?.name,
+        mainLocation.location_city,
+        mainLocation.location_state,
+    ].filter(Boolean).join(', ') || null;
     const initial = company.trade_name?.[0] || 'P';
     const rating = company.average_rating || 0;
     const isPremium = company.plan === 'Premium' || company.is_premium;
+    const transactionCount = company.transaction_count || 0;
 
     return (
         <div className="flex items-center gap-4 px-4 py-3 border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
@@ -44,6 +50,9 @@ export default function SupplierRow({ company, onViewProfile }) {
                     )}
                     <span className="flex items-center gap-1 text-amber-500 font-medium">
                         <Star className="w-3 h-3 fill-amber-400" /> {rating.toFixed(1)}
+                    </span>
+                    <span className="flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" /> {transactionCount}
                     </span>
                 </div>
             </div>

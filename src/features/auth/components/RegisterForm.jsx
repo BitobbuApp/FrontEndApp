@@ -7,6 +7,52 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { registerUser } from '../services/authApi';
 import useAppMetadata from '../../appMetadata/hooks/useAppMetadata';
+import { Check } from 'lucide-react';
+
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!#%*?&])[A-Za-z\d@$!#%*?&]{8,}$/;
+
+const PasswordStrengthMeter = ({ password }) => {
+    const checks = [
+        { label: 'Mínimo 8 caracteres', met: password.length >= 8 },
+        { label: 'Mayúsculas y minúsculas', met: /[a-z]/.test(password) && /[A-Z]/.test(password) },
+        { label: 'Al menos un número', met: /\d/.test(password) },
+        { label: 'Carácter especial (@$!#%*?&)', met: /[@$!#%*?&]/.test(password) },
+    ];
+
+    const metCount = checks.filter(c => c.met).length;
+    
+    return (
+        <div className="mt-3 space-y-3 p-3 bg-slate-50/50 rounded-xl border border-slate-100 transition-all">
+            <div className="flex gap-1 h-1">
+                {[1, 2, 3, 4].map((step) => (
+                    <div 
+                        key={step}
+                        className={`flex-1 rounded-full transition-all duration-500 ${
+                            step <= metCount 
+                                ? metCount <= 2 ? 'bg-orange-400' : metCount === 3 ? 'bg-blue-400' : 'bg-[#D2FC31]'
+                                : 'bg-slate-200'
+                        }`}
+                    />
+                ))}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+                {checks.map((check, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                        {check.met ? (
+                            <Check className="w-3.5 h-3.5 text-[#a8cc27]" />
+                        ) : (
+                            <div className="w-3.5 h-3.5 rounded-full border border-slate-300" />
+                        )}
+                        <span className={`text-[11px] leading-none ${check.met ? 'text-slate-900 font-medium' : 'text-slate-400'}`}>
+                            {check.label}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
 
 export default function RegisterForm({ onGoToLogin }) {
     const [form, setForm] = useState({
@@ -18,7 +64,7 @@ export default function RegisterForm({ onGoToLogin }) {
         country_id: '1', // Venezuela is the only default
         state_id: '',
         sector_id: '',
-        // city_id: '', // Hidden as per request
+        roleType: 'both',
     });
     
     // Geographic data cascading hook
@@ -47,15 +93,26 @@ export default function RegisterForm({ onGoToLogin }) {
             setError('Por favor completa todos los campos.');
             return;
         }
+
+        if (!PASSWORD_REGEX.test(form.password)) {
+            setError('La contraseña no cumple con los requisitos de seguridad.');
+            return;
+        }
         setIsLoading(true);
         try {
-            await registerUser(form);
+            const payload = {
+                ...form,
+                can_buy: form.roleType === 'buyer_only' || form.roleType === 'both',
+                can_sell: form.roleType === 'seller_only' || form.roleType === 'both',
+            };
+            delete payload.roleType;
+            await registerUser(payload);
             setSuccess(true);
         } catch (err) {
             if (err.details && Array.isArray(err.details)) {
-                setError(err.details.join(' · '));
+                // setError(err.details.join(' · '));
             } else {
-                setError(err.message || 'Error al registrar. Intenta de nuevo.');
+                // setError(err.message || 'Error al registrar. Intenta de nuevo.');
             }
         } finally {
             setIsLoading(false);
@@ -94,12 +151,10 @@ export default function RegisterForm({ onGoToLogin }) {
                 transition={{ duration: 0.4 }}
                 className="w-full max-w-md"
             >
-                {/* Logo mobile */}
-                <div className="flex items-center gap-2 mb-10 lg:hidden">
-                    <div className="w-10 h-10 bg-[#D2FC31] rounded-xl flex items-center justify-center">
-                        <span className="text-foreground font-bold text-lg">B</span>
+                <div className="flex items-center justify-left mb-10 lg:hidden">
+                    <div className="w-[60%] h-auto flex items-center justify-center overflow-hidden">
+                        <img src="/assets/logo-b.svg" alt="Bitobbu" className="w-full h-full object-contain" />
                     </div>
-                    <span className="text-2xl font-bold text-foreground">Bitobbu</span>
                 </div>
 
                 <div className="mb-8">
@@ -169,8 +224,14 @@ export default function RegisterForm({ onGoToLogin }) {
                                 type={showPassword ? 'text' : 'password'}
                                 value={form.password}
                                 onChange={handleChange}
-                                placeholder="Mínimo 6 caracteres"
-                                className="h-12 bg-background border-border pr-12"
+                                placeholder="Crea una contraseña segura"
+                                className={`h-12 bg-background border-border pr-12 transition-all ${
+                                    form.password && !PASSWORD_REGEX.test(form.password) 
+                                        ? 'border-orange-200 focus-visible:ring-orange-200' 
+                                        : form.password && PASSWORD_REGEX.test(form.password)
+                                        ? 'border-[#D2FC31] focus-visible:ring-[#D2FC31]'
+                                        : ''
+                                }`}
                                 autoComplete="new-password"
                                 disabled={isLoading}
                             />
@@ -182,6 +243,7 @@ export default function RegisterForm({ onGoToLogin }) {
                                 {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                             </button>
                         </div>
+                        {form.password && <PasswordStrengthMeter password={form.password} />}
                     </div>
                     
                     <div className="space-y-4 pt-2 border-t border-border mt-4">
@@ -221,6 +283,26 @@ export default function RegisterForm({ onGoToLogin }) {
                                     {categoryOptions && categoryOptions.map((cat) => (
                                         <SelectItem key={cat.id} value={cat.id.toString()}>{cat.label}</SelectItem>
                                     ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="roleType" className="text-sm font-medium text-slate-700">
+                                ¿Qué quieres hacer en Bitobbu?
+                            </Label>
+                            <Select 
+                                disabled={isLoading} 
+                                value={form.roleType} 
+                                onValueChange={(val) => handleSelectChange('roleType', val)}
+                            >
+                                <SelectTrigger className="w-full h-12 bg-background border-border">
+                                    <SelectValue placeholder="Selecciona tu interés principal" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="both">Comprar y Vender</SelectItem>
+                                    <SelectItem value="buyer_only">Solo Comprar</SelectItem>
+                                    <SelectItem value="seller_only">Solo Vender</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>

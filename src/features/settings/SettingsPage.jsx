@@ -11,6 +11,7 @@ import {
     Check,
     Loader2,
     BadgeCheck,
+    Share2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,6 +31,7 @@ import SubscriptionTab from './components/SubscriptionTab';
 import VerificationTab from './components/VerificationTab';
 import NotificationsTab from './components/NotificationsTab';
 import SecurityTab from './components/SecurityTab';
+import SocialMediaTab from './components/SocialMediaTab';
 
 export default function SettingsPage() {
     const [searchParams, setSearchParams] = useSearchParams();
@@ -43,9 +45,11 @@ export default function SettingsPage() {
         company,
         formData,
         setFormData,
+        foundingYearError,
+        setFoundingYearError,
         isLoading,
         saveMutation,
-        uploadLogoMutation,
+        logoPreview,
         handleSave,
         handleLogoChange,
         toggleCategoria,
@@ -131,14 +135,20 @@ export default function SettingsPage() {
                         <Shield className="w-4 h-4" />
                         Seguridad
                     </TabsTrigger>
+                    <TabsTrigger value="redes" className="gap-2">
+                        <Share2 className="w-4 h-4" />
+                        Redes Sociales
+                    </TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="empresa">
                     <CompanyTab
                         formData={formData}
                         setFormData={setFormData}
+                        foundingYearError={foundingYearError}
+                        setFoundingYearError={setFoundingYearError}
                         handleLogoChange={handleLogoChange}
-                        uploadLogoPending={uploadLogoMutation.isPending}
+                        uploadLogoPending={saveMutation.isPending}
                         sectorOptions={categoryOptions}
                         companyTypeOptions={companyTypeOptions}
                     />
@@ -179,6 +189,10 @@ export default function SettingsPage() {
 
                 <TabsContent value="seguridad">
                     <SecurityTab />
+                </TabsContent>
+
+                <TabsContent value="redes">
+                    <SocialMediaTab formData={formData} setFormData={setFormData} />
                 </TabsContent>
             </Tabs>
         </div>

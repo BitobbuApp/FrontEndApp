@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSuppliersData } from './hooks/useSuppliersData';
 import SuppliersFilters from './components/SuppliersFilters';
 import SuppliersTable from './components/SuppliersTable';
-import ViewToggle from './components/ViewToggle';
+import ViewToggle from '@/components/shared/ViewToggle';
 
 export default function SuppliersPage() {
     const navigate = useNavigate();

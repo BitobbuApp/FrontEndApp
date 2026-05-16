@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import ProspectMobileCard from './ProspectMobileCard';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Eye, Package, Clock, Users, Star } from 'lucide-react';
+import { Eye, Package, Clock, Users, Star, Zap } from 'lucide-react';
 import Pagination from '@/components/atoms/Pagination';
 import {
     Table,
@@ -16,7 +16,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 
 const unitLabels = {
@@ -36,9 +35,11 @@ export default function ProspectsTable({
     searchTerm,
     categoryFilter,
     handleViewDetail,
+    handleQuickQuote,
     page,
     totalPages,
     onPageChange,
+    viewMode = 'list',
 }) {
     if (isLoading) {
         return (
@@ -74,19 +75,20 @@ export default function ProspectsTable({
 
     return (
         <div className="space-y-4">
-            {/* ── Mobile grid (hidden on sm+) ── */}
-            <div className="grid grid-cols-1 gap-4 sm:hidden">
+            {/* ── Grid/Mobile view ── */}
+            <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "grid grid-cols-1 gap-4 sm:hidden"}>
                 {filteredSolicitudes.map((req) => (
                     <ProspectMobileCard
                         key={req.id}
                         req={req}
                         onViewDetail={handleViewDetail}
+                        onQuickQuote={handleQuickQuote}
                     />
                 ))}
             </div>
 
-            {/* Mobile pagination */}
-            <div className="sm:hidden">
+            {/* Mobile/Grid pagination */}
+            <div className={viewMode === 'grid' ? "block mt-2" : "sm:hidden"}>
                 <Pagination
                     totalItems={filteredSolicitudes.length}
                     itemsLabel="solicitud"
@@ -98,8 +100,8 @@ export default function ProspectsTable({
                 />
             </div>
 
-            {/* ── Desktop table (hidden on mobile) ── */}
-            <Card className="hidden sm:block border-0 shadow-sm overflow-hidden">
+            {/* ── Desktop table (hidden on mobile, and hidden if viewMode === grid) ── */}
+            <Card className={viewMode === 'grid' ? "hidden" : "hidden sm:block border-0 shadow-sm overflow-hidden"}>
             <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
@@ -204,14 +206,36 @@ export default function ProspectsTable({
                                     )}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="text-xs h-8 gap-1"
-                                        onClick={() => handleViewDetail(req)}
-                                    >
-                                        <Eye className="w-4 h-4 text-slate-400" />
-                                    </Button>
+                                    <div className="flex items-center justify-end gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 gap-1.5 text-xs"
+                                            onClick={() => handleViewDetail(req)}
+                                        >
+                                            <Eye className="w-3.5 h-3.5 text-slate-500" />
+                                            Ver Solicitud
+                                        </Button>
+                                        {req.has_responded ? (
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                className="h-8 gap-1.5 text-xs text-green-600 bg-green-50/50 cursor-default hover:bg-green-50/50"
+                                            >
+                                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                                                Oferta enviada
+                                            </Button>
+                                        ) : (
+                                            <Button
+                                                size="sm"
+                                                className="h-8 gap-1.5 text-xs bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] font-bold"
+                                                onClick={() => handleQuickQuote(req)}
+                                            >
+                                                <Zap className="w-3.5 h-3.5" />
+                                                Cotizar
+                                            </Button>
+                                        )}
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}

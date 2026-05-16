@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { RotateCcw, MoreHorizontal, MessageSquare, Flame, Zap, Eye } from 'lucide-react';
+import { RotateCcw, MoreHorizontal, MessageSquare, Flame, Zap, Eye, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -14,6 +14,8 @@ import { toast } from 'sonner';
 import { quoteResponsesApi } from '../services/quoteResponsesApi';
 import Pagination from '@/components/atoms/Pagination';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import tooltips from '@/constants/tooltips.json';
 
 const statusColors = {
     pending: 'bg-yellow-100 text-yellow-700',
@@ -58,6 +60,26 @@ export default function RequestOffersTable({
         },
     });
 
+    const startNegotiationMutation = useMutation({
+        mutationFn: async (offerId) => {
+            const res = await quoteResponsesApi.performAction(offerId, { action: 'negotiation_started' });
+            return res.data;
+        },
+        onSuccess: (data) => {
+            queryClient.invalidateQueries({ queryKey: ['quote-responses', requestId] });
+            toast.success('Negociación iniciada con éxito');
+            const conversationId = data.conversation?.id || data.conversation_id;
+            if (conversationId) {
+                navigate(`/Chat/${conversationId}`);
+            } else {
+                navigate(`/Chat`);
+            }
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Error al iniciar negociación');
+        }
+    });
+
     if (!offers.length) {
         return (
             <Card className="border-0 shadow-sm overflow-hidden">
@@ -70,14 +92,15 @@ export default function RequestOffersTable({
     }
 
     // Calculate cheapest & fastest
-    const minPrice = Math.min(...offers.map(o => o.total_amount));
-    const minDelivery = Math.min(...offers.map(o => Number(o.delivery_time)).filter(Boolean));
+    const minPrice = Math.min(...offers.map(o => o.total_amount_usd));
+    const minDelivery = Math.min(...offers.filter(o => o.estimated_delivery_hours != null).map(o => Number(o.estimated_delivery_hours)));
 
     return (
         <Card className="border-0 shadow-sm overflow-hidden">
             <div className="px-6 pt-5 pb-3 bg-white border-b border-slate-50">
-                <h3 className="font-semibold text-foreground text-base">
+                <h3 className="font-semibold text-foreground text-base flex items-center">
                     Todas las Ofertas ({offers.length})
+                    <InfoTooltip content={tooltips.summary.offers} />
                 </h3>
             </div>
             <div className="overflow-x-auto">
@@ -96,8 +119,8 @@ export default function RequestOffersTable({
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {offers.map((offer) => {
-                            const isCheapest = offer.total_amount === minPrice;
-                            const isFastest = Number(offer.delivery_time) === minDelivery;
+                            const isCheapest = offer.total_amount_usd === minPrice;
+                            const isFastest = offer.estimated_delivery_hours != null && Number(offer.estimated_delivery_hours) === minDelivery;
 
                             return (
                                 <tr key={offer.id} className="hover:bg-slate-50/30 transition-all duration-200 group">
@@ -108,7 +131,28 @@ export default function RequestOffersTable({
                                                 {offer.supplier?.trade_name?.charAt(0) || 'S'}
                                             </div>
                                             <div>
-                                                <p className="font-semibold text-slate-900">{offer.supplier?.trade_name || 'Proveedor'}</p>
+                                                <div className="flex items-center gap-1.5">
+                                                    <p className="font-semibold text-slate-900">{offer.supplier?.trade_name || 'Proveedor'}</p>
+                                                    {offer.supplier?.verification?.status === 'verified' && (
+                                                        <div className="flex items-center">
+                                                            <div className="w-3.5 h-3.5 bg-blue-500 rounded-full flex items-center justify-center shadow-sm">
+                                                                <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                            </div>
+                                                            <InfoTooltip 
+                                                                content={tooltips.summary.verified} 
+                                                                className="ml-0.5"
+                                                            />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex items-center gap-1 mt-0.5">
+                                                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                                                    <span className="text-[10px] font-bold text-slate-600">
+                                                        {Number(offer.supplier?.average_rating || 0).toFixed(1)}
+                                                    </span>
+                                                </div>
                                                 <div className="flex gap-1.5 mt-1">
                                                     {isCheapest && (
                                                         <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-green-50 text-green-600 px-2 py-0.5 rounded-md border border-green-100 transition-transform hover:scale-105">
@@ -126,19 +170,26 @@ export default function RequestOffersTable({
                                     </td>
                                     {/* Unit price */}
                                     <td className="px-4 py-5 text-right font-medium text-slate-600">
-                                        ${Number(offer.unit_price).toLocaleString()}
+                                        ${Number(offer.unit_price_usd).toLocaleString()}
                                     </td>
                                     {/* Total */}
                                     <td className="px-4 py-5 text-right">
                                         <span className="font-bold text-slate-900 text-base">
-                                            ${Number(offer.total_amount).toLocaleString()}
+                                            ${Number(offer.total_amount_usd).toLocaleString()}
                                         </span>
                                     </td>
                                     {/* Delivery */}
                                     <td className="px-4 py-5 text-center">
+                                    <div className="flex flex-col items-center">
                                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-slate-100 rounded-lg text-slate-600 font-medium">
                                             {offer.delivery_time}
                                         </div>
+                                        {offer.estimated_delivery_hours != null && (
+                                            <span className="text-[10px] text-slate-400 mt-1 font-medium">
+                                                ({offer.estimated_delivery_hours}h)
+                                            </span>
+                                        )}
+                                    </div>
                                     </td>
                                     {/* Payment */}
                                     <td className="px-4 py-5 text-slate-600 max-w-[120px] truncate italic">
@@ -184,7 +235,8 @@ export default function RequestOffersTable({
                                                 </DropdownMenuItem>
                                                 <DropdownMenuItem 
                                                     className="flex items-center gap-2 py-2 cursor-pointer text-slate-600 focus:text-slate-700 focus:bg-slate-50 font-medium"
-                                                    onClick={() => {/* Negociar: No action for now */}}
+                                                    disabled={startNegotiationMutation.isPending}
+                                                    onClick={() => startNegotiationMutation.mutate(offer.id)}
                                                 >
                                                     <MessageSquare className="w-4 h-4" />
                                                     Negociar

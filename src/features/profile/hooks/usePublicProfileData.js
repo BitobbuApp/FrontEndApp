@@ -4,6 +4,16 @@ import { companyApi } from '@/features/settings/services/companyApi';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
 
+function getLocationLabel(company) {
+    const mainLocation = company?.locations?.[0];
+    return [
+        mainLocation?.city?.name,
+        mainLocation?.state?.name,
+        mainLocation?.location_city,
+        mainLocation?.location_state,
+    ].filter(Boolean).join(', ') || company?.ubicacion_ciudad || '';
+}
+
 /**
  * Fetches a company's public profile by ID (from route param).
  * Used exclusively in PublicProfilePage (read-only view for other companies).
@@ -34,19 +44,32 @@ export default function usePublicProfileData() {
     const tradeName = company?.trade_name || company?.nombre_comercial || 'Empresa';
     const sector = company?.sector || '';
     const companyType = company?.company_type || company?.tipo_empresa || '';
-    const location = [
-        company?.locations?.[0]?.location_city,
-        company?.locations?.[0]?.location_state,
-    ].filter(Boolean).join(', ') || company?.ubicacion_ciudad || '';
+    const location = getLocationLabel(company);
     const rating = company?.average_rating ?? 0;
-    const totalReviews = company?.total_reviews ?? 0;
-    const transactions = company?.total_transactions ?? 0;
+    const totalReviews = company?.review_count ?? company?.total_reviews ?? 0;
+    const transactions = company?.transaction_count ?? company?.total_transactions ?? 0;
     const products = company?.products_count ?? 0;
+
+    let trustScore = 0;
+    if (company) {
+        if (company.verification_info?.status === 'verified' || company.is_verified) trustScore += 40;
+        if (company.logo_url) trustScore += 10;
+        if (company.trade_name || company.nombre_comercial) trustScore += 5;
+        if (company.sector) trustScore += 5;
+        if (company.company_type || company.tipo_empresa) trustScore += 5;
+        if (company.locations?.length > 0) trustScore += 5;
+        if (company.bio) trustScore += 5;
+        if (company.founding_year) trustScore += 5;
+        if (company.contacts?.length > 0 && (company.contacts[0].whatsapp || company.contacts[0].corporate_email)) trustScore += 10;
+        if (company.payment_methods?.length > 0) trustScore += 5;
+        if (company.website || company.linkedin || company.instagram) trustScore += 5;
+    }
 
     return {
         id,
         company,
         isLoading,
+        isMyProfile,
         // Derived display values
         initial,
         tradeName,
@@ -57,5 +80,6 @@ export default function usePublicProfileData() {
         totalReviews,
         transactions,
         products,
+        trustScore,
     };
 }

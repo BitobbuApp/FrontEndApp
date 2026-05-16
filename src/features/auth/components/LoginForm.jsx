@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export default function LoginForm({ onGoToRegister }) {
+export default function LoginForm({ onGoToRegister, onGoToResetPassword }) {
     const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -25,7 +25,7 @@ export default function LoginForm({ onGoToRegister }) {
         try {
             await login(email, password);
         } catch (err) {
-            setError(err.message || 'Error al iniciar sesión.');
+            //setError(err.message || 'Error al iniciar sesión.');
         } finally {
             setIsLoading(false);
         }
@@ -40,11 +40,10 @@ export default function LoginForm({ onGoToRegister }) {
                 className="w-full max-w-md"
             >
                 {/* Logo mobile */}
-                <div className="flex items-center gap-2 mb-10 lg:hidden">
-                    <div className="w-10 h-10 bg-[#D2FC31] rounded-xl flex items-center justify-center">
-                        <span className="text-foreground font-bold text-lg">B</span>
+                <div className="flex items-center justify-center mb-10 lg:hidden">
+                    <div className="w-[60%] h-auto flex items-center justify-center overflow-hidden">
+                        <img src="/assets/logo-b.svg" alt="Bitobbu" className="w-full h-full object-contain" />
                     </div>
-                    <span className="text-2xl font-bold text-foreground">Bitobbu</span>
                 </div>
 
                 <div className="mb-8">
@@ -70,9 +69,18 @@ export default function LoginForm({ onGoToRegister }) {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="password" className="text-sm font-medium text-slate-700">
-                            Contraseña
-                        </Label>
+                        <div className="flex items-center justify-between">
+                            <Label htmlFor="password" className="text-sm font-medium text-slate-700">
+                                Contraseña
+                            </Label>
+                            <button
+                                type="button"
+                                onClick={onGoToResetPassword}
+                                className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
+                            >
+                                ¿Olvidaste tu contraseña?
+                            </button>
+                        </div>
                         <div className="relative">
                             <Input
                                 id="password"
