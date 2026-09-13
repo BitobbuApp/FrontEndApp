@@ -9,7 +9,12 @@ export const productsApi = {
      * Creates a new product or service linked to the authenticated company.
      */
     async createProduct(data) {
-        return await apiClient.post('/company-offers', data);
+        const isFormData = data instanceof FormData;
+        return await apiClient.post('/company-offers', data, isFormData ? {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        } : {});
     },
 
     /**
@@ -24,7 +29,12 @@ export const productsApi = {
      * PATCH /company-offers/:id
      */
     async updateProduct(id, data) {
-        return await apiClient.patch(`/company-offers/${id}`, data);
+        const isFormData = data instanceof FormData;
+        return await apiClient.patch(`/company-offers/${id}`, data, isFormData ? {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        } : {});
     },
 
     /**
