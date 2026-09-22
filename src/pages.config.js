@@ -50,7 +50,7 @@
 import Chat from './features/chat/ChatPage';
 import Configuracion from './features/settings/SettingsPage';
 import Dashboard from './features/dashboard/DashboardPage';
-// import Marketplace from './features/marketplace/MarketplacePage';
+import Marketplace from './features/marketplace/MarketplacePage';
 import Requests from './features/requests/RequestsPage';
 import RequestFormPage from './features/requests/RequestFormPage';
 import RequestSummaryPage from './features/requests/RequestSummaryPage';
@@ -67,7 +67,7 @@ export const PAGES = {
     "Chat": Chat,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
-    //"Marketplace": Marketplace,
+    "Marketplace": Marketplace,
     "Requests": Requests,
     "Requests/new": RequestFormPage,
     "Requests/:id/edit": RequestFormPage,
@@ -82,7 +82,7 @@ export const PAGES = {
 }
 
 export const pagesConfig = {
-    mainPage: "Dashboard",
+    mainPage: "Marketplace",
     Pages: PAGES,
     Layout: __Layout,
 };

@@ -39,10 +39,10 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                 <TableCell>
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
-                                            {product.fotos_urls?.[0] ? (
+                                            {product.photos?.[0] ? (
                                                 <img
-                                                    src={product.fotos_urls[0]}
-                                                    alt={product.nombre}
+                                                    src={product.photos[0]}
+                                                    alt={product.name}
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
@@ -52,10 +52,10 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                             )}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-foreground">{product.nombre}</p>
-                                            {product.descripcion && (
+                                            <p className="font-semibold text-foreground">{product.name}</p>
+                                            {product.description && (
                                                 <p className="text-xs text-slate-500 line-clamp-1">
-                                                    {product.descripcion}
+                                                    {product.description}
                                                 </p>
                                             )}
                                         </div>
@@ -65,23 +65,23 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                     <div className="flex items-center gap-2">
                                         <Building2 className="w-4 h-4 text-slate-400" />
                                         <span className="text-slate-600">
-                                            {product.proveedor_nombre || 'Proveedor'}
+                                            {product.company?.trade_name || 'Proveedor'}
                                         </span>
                                     </div>
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="secondary" className="text-xs">
-                                        {product.categoria}
+                                        {product.category?.name_es || 'Categoría'}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="font-bold text-foreground">
-                                    ${product.precio?.toLocaleString()}
+                                    ${product.base_price_usd?.toLocaleString()}
                                 </TableCell>
                                 <TableCell className="text-slate-600">
                                     {product.moq} unidades
                                 </TableCell>
                                 <TableCell>
-                                    <RatingStars rating={product.calificacion || 0} size="sm" />
+                                    <RatingStars rating={product.rating || 0} size="sm" />
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex items-center justify-end gap-2">
@@ -96,7 +96,7 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                         <Link
                                             to={
                                                 createPageUrl('Chat') +
-                                                `?proveedor=${product.proveedor_id}`
+                                                `?proveedor=${product.company_id}`
                                             }
                                         >
                                             <Button

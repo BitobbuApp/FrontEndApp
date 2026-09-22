@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/ui/EmptyState';
 import { useNavigate } from 'react-router-dom';
 
@@ -11,22 +12,26 @@ import ProductTable from './components/ProductTable';
 import ProductDetailModal from './components/ProductDetailModal';
 
 export default function MarketplacePage() {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('Todas');
-    const [typeFilter, setTypeFilter] = useState('Todos');
-    const [viewMode, setViewMode] = useState('grid');
+    const [filters, setFilters] = useState({
+        searchTerm: '',
+        categoryId: '',
+        countryId: '',
+        stateId: '',
+        minPrice: '',
+        maxPrice: '',
+        sortBy: 'newest',
+        page: 1,
+        limit: 12
+    });
 
+    const [viewMode, setViewMode] = useState('grid');
     const [detailModalOpen, setDetailModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     const navigate = useNavigate();
 
-    const { filteredProducts, isLoading } = useMarketplaceData(
-        searchTerm,
-        categoryFilter,
-        typeFilter
-    );
+    const { productos, total, isLoading } = useMarketplaceData(filters);
 
     const handleViewDetail = (product) => {
         setSelectedProduct(product);
@@ -39,6 +44,8 @@ export default function MarketplacePage() {
         setDetailModalOpen(false);
         navigate('/Requests/new', { state: { product: product.name } });
     };
+
+    const totalPages = Math.ceil(total / filters.limit) || 1;
 
     return (
         <div className="space-y-6">
@@ -54,12 +61,8 @@ export default function MarketplacePage() {
 
             {/* Filters */}
             <MarketplaceFilters
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
-                categoryFilter={categoryFilter}
-                setCategoryFilter={setCategoryFilter}
-                typeFilter={typeFilter}
-                setTypeFilter={setTypeFilter}
+                filters={filters}
+                setFilters={setFilters}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
             />
@@ -75,30 +78,66 @@ export default function MarketplacePage() {
                         </div>
                     </CardContent>
                 </Card>
-            ) : filteredProducts.length === 0 ? (
+            ) : productos.length === 0 ? (
                 <Card className="border-0 shadow-sm">
                     <CardContent className="p-6">
                         <EmptyState
                             icon={ShoppingBag}
                             title="Sin productos"
                             description={
-                                searchTerm || categoryFilter !== 'Todas'
+                                filters.searchTerm || filters.categoryId
                                     ? 'No se encontraron productos con esos criterios'
                                     : 'Los productos del marketplace aparecerán aquí'
                             }
                         />
                     </CardContent>
                 </Card>
-            ) : viewMode === 'grid' ? (
-                <ProductGrid
-                    filteredProducts={filteredProducts}
-                    handleViewDetail={handleViewDetail}
-                />
             ) : (
-                <ProductTable
-                    filteredProducts={filteredProducts}
-                    handleViewDetail={handleViewDetail}
-                />
+                <>
+                    {viewMode === 'grid' ? (
+                        <ProductGrid
+                            filteredProducts={productos}
+                            handleViewDetail={handleViewDetail}
+                        />
+                    ) : (
+                        <ProductTable
+                            filteredProducts={productos}
+                            handleViewDetail={handleViewDetail}
+                        />
+                    )}
+
+                    {/* Pagination */}
+                    {total > 0 && (
+                        <div className="flex items-center justify-between mt-6">
+                            <p className="text-sm text-slate-500">
+                                Mostrando {((filters.page - 1) * filters.limit) + 1} a {Math.min(filters.page * filters.limit, total)} de {total} productos
+                            </p>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setFilters(prev => ({ ...prev, page: prev.page - 1 }))}
+                                    disabled={filters.page === 1}
+                                >
+                                    <ChevronLeft className="w-4 h-4 mr-1" />
+                                    Anterior
+                                </Button>
+                                <div className="flex items-center px-4 text-sm font-medium">
+                                    Página {filters.page} de {totalPages}
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setFilters(prev => ({ ...prev, page: prev.page + 1 }))}
+                                    disabled={filters.page >= totalPages}
+                                >
+                                    Siguiente
+                                    <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
 
             {/* Detail Modal */}
