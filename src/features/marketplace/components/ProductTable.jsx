@@ -15,6 +15,17 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import RatingStars from '@/components/ui/RatingStars';
 
+const getDisplayPrice = (product) => {
+    if (product.pricing_tiers?.length > 0) {
+        const prices = product.pricing_tiers.map(t => Number(t.price_usd));
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        if (minPrice === maxPrice) return `$${minPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        return `$${minPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - $${maxPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `$${Number(product.base_price_usd || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
+
 export default function ProductTable({ filteredProducts, handleViewDetail }) {
     return (
         <Card className="border-0 shadow-sm overflow-hidden">
@@ -39,10 +50,10 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                 <TableCell>
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
-                                            {product.fotos_urls?.[0] ? (
+                                            {product.photos?.[0]?.url ? (
                                                 <img
-                                                    src={product.fotos_urls[0]}
-                                                    alt={product.nombre}
+                                                    src={product.photos[0].url}
+                                                    alt={product.name}
                                                     className="w-full h-full object-cover"
                                                 />
                                             ) : (
@@ -52,10 +63,10 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                             )}
                                         </div>
                                         <div>
-                                            <p className="font-semibold text-foreground">{product.nombre}</p>
-                                            {product.descripcion && (
+                                            <p className="font-semibold text-foreground">{product.name}</p>
+                                            {product.description && (
                                                 <p className="text-xs text-slate-500 line-clamp-1">
-                                                    {product.descripcion}
+                                                    {product.description}
                                                 </p>
                                             )}
                                         </div>
@@ -65,23 +76,23 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                     <div className="flex items-center gap-2">
                                         <Building2 className="w-4 h-4 text-slate-400" />
                                         <span className="text-slate-600">
-                                            {product.proveedor_nombre || 'Proveedor'}
+                                            {product.company_details?.trade_name || 'Proveedor'}
                                         </span>
                                     </div>
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="secondary" className="text-xs">
-                                        {product.categoria}
+                                        {product.category || 'Categoría'}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="font-bold text-foreground">
-                                    ${product.precio?.toLocaleString()}
+                                    {getDisplayPrice(product)}
                                 </TableCell>
                                 <TableCell className="text-slate-600">
-                                    {product.moq} unidades
+                                    {product.moq} {product.unit_of_measure}
                                 </TableCell>
                                 <TableCell>
-                                    <RatingStars rating={product.calificacion || 0} size="sm" />
+                                    <RatingStars rating={product.company_details?.average_rating || 0} size="sm" />
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex items-center justify-end gap-2">
@@ -96,7 +107,7 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                         <Link
                                             to={
                                                 createPageUrl('Chat') +
-                                                `?proveedor=${product.proveedor_id}`
+                                                `?proveedor=${product.company_id}`
                                             }
                                         >
                                             <Button
