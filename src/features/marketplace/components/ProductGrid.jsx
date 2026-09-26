@@ -33,10 +33,10 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                         onClick={() => handleViewDetail(product)}
                     >
                         <div className="aspect-square bg-slate-100 relative overflow-hidden">
-                            {product.fotos_urls?.[0] ? (
+                            {product.photos?.[0] ? (
                                 <img
-                                    src={product.fotos_urls[0]}
-                                    alt={product.nombre}
+                                    src={product.photos[0]}
+                                    alt={product.name}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 />
                             ) : (
@@ -44,9 +44,9 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                                     <Package className="w-16 h-16 text-slate-300" />
                                 </div>
                             )}
-                            {product.tipo_proveedor && (
+                            {product.company?.company_type && (
                                 <Badge className="absolute top-3 left-3 bg-[#1E293B]/80 text-white">
-                                    {product.tipo_proveedor}
+                                    {product.company.company_type}
                                 </Badge>
                             )}
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
@@ -54,26 +54,26 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                         <CardContent className="p-4">
                             <div className="space-y-2">
                                 <h3 className="font-semibold text-foreground line-clamp-1">
-                                    {product.nombre}
+                                    {product.name}
                                 </h3>
                                 <div className="flex items-center gap-2 text-sm text-slate-500">
                                     <Building2 className="w-4 h-4" />
                                     <span className="line-clamp-1">
-                                        {product.proveedor_nombre || 'Proveedor'}
+                                        {product.company?.trade_name || 'Proveedor'}
                                     </span>
                                 </div>
-                                <RatingStars rating={product.calificacion || 0} size="sm" />
+                                <RatingStars rating={product.rating || 0} size="sm" />
                                 <div className="flex items-center justify-between pt-2">
                                     <div>
                                         <p className="text-xl font-bold text-foreground">
-                                            ${product.precio?.toLocaleString()}
+                                            ${product.base_price_usd?.toLocaleString()}
                                         </p>
                                         <p className="text-xs text-slate-500">
                                             MOQ: {product.moq} unidades
                                         </p>
                                     </div>
-                                    <Badge variant="secondary" className="text-xs">
-                                        {product.categoria}
+                                    <Badge variant="secondary" className="text-xs max-w-[50%] truncate">
+                                        {product.category?.name_es || 'Categoría'}
                                     </Badge>
                                 </div>
                             </div>

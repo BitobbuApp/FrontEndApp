@@ -31,10 +31,10 @@ export default function ProductDetailModal({
                 <div className="space-y-6">
                     <div className="space-y-3">
                         <div className="aspect-video bg-slate-100 rounded-xl overflow-hidden">
-                            {selectedProduct.fotos_urls?.[selectedImageIndex] ? (
+                            {selectedProduct.photos?.[selectedImageIndex] ? (
                                 <img
-                                    src={selectedProduct.fotos_urls[selectedImageIndex]}
-                                    alt={selectedProduct.nombre}
+                                    src={selectedProduct.photos[selectedImageIndex]}
+                                    alt={selectedProduct.name}
                                     className="w-full h-full object-contain"
                                 />
                             ) : (
@@ -43,9 +43,9 @@ export default function ProductDetailModal({
                                 </div>
                             )}
                         </div>
-                        {selectedProduct.fotos_urls?.length > 1 && (
+                        {selectedProduct.photos?.length > 1 && (
                             <div className="flex gap-2 overflow-x-auto pb-2">
-                                {selectedProduct.fotos_urls.map((url, index) => (
+                                {selectedProduct.photos.map((url, index) => (
                                     <button
                                         key={index}
                                         onClick={() => setSelectedImageIndex(index)}
@@ -65,20 +65,20 @@ export default function ProductDetailModal({
                         <div className="flex items-start justify-between">
                             <div>
                                 <h2 className="text-xl font-bold text-foreground">
-                                    {selectedProduct.nombre}
+                                    {selectedProduct.name}
                                 </h2>
                                 <div className="flex items-center gap-2 mt-1">
-                                    <Badge variant="secondary">{selectedProduct.categoria}</Badge>
-                                    {selectedProduct.tipo_proveedor && (
+                                    <Badge variant="secondary">{selectedProduct.category?.name_es}</Badge>
+                                    {selectedProduct.company?.company_type && (
                                         <Badge variant="outline">
-                                            {selectedProduct.tipo_proveedor}
+                                            {selectedProduct.company.company_type}
                                         </Badge>
                                     )}
                                 </div>
                             </div>
                             <div className="text-right">
                                 <p className="text-2xl font-bold text-foreground">
-                                    ${selectedProduct.precio?.toLocaleString()}
+                                    ${selectedProduct.base_price_usd?.toLocaleString()}
                                 </p>
                                 <p className="text-sm text-slate-500">por unidad</p>
                             </div>
@@ -86,13 +86,13 @@ export default function ProductDetailModal({
 
                         <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl">
                             <div className="w-12 h-12 rounded-lg bg-[#D2FC31] flex items-center justify-center text-lg font-bold text-slate-900">
-                                {selectedProduct.proveedor_nombre?.[0] || 'P'}
+                                {selectedProduct.company?.trade_name?.[0] || 'P'}
                             </div>
                             <div className="flex-1">
                                 <p className="font-semibold text-foreground">
-                                    {selectedProduct.proveedor_nombre || 'Proveedor'}
+                                    {selectedProduct.company?.trade_name || 'Proveedor'}
                                 </p>
-                                <RatingStars rating={selectedProduct.calificacion || 0} size="sm" />
+                                <RatingStars rating={selectedProduct.rating || 0} size="sm" />
                             </div>
                         </div>
 
@@ -102,10 +102,10 @@ export default function ProductDetailModal({
                             </p>
                         </div>
 
-                        {selectedProduct.descripcion && (
+                        {selectedProduct.description && (
                             <div>
                                 <h4 className="font-semibold text-foreground mb-2">Descripción</h4>
-                                <p className="text-slate-600">{selectedProduct.descripcion}</p>
+                                <p className="text-slate-600">{selectedProduct.description}</p>
                             </div>
                         )}
 
@@ -135,7 +135,7 @@ export default function ProductDetailModal({
                             Solicitar Cotización
                         </Button>
                         <Link
-                            to={createPageUrl('Chat') + `?proveedor=${selectedProduct.proveedor_id}`}
+                            to={createPageUrl('Chat') + `?proveedor=${selectedProduct.company_id}`}
                             className="flex-1"
                         >
                             <Button className="w-full bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]">

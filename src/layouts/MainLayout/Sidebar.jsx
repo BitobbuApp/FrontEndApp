@@ -6,6 +6,7 @@ import {
     FileText,
     Users,
     Store,
+    ShoppingBag,
     MessageSquare,
     ChevronLeft,
     ChevronRight,
@@ -17,6 +18,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
 const MENU_ITEMS = [
+    { name: 'Marketplace', icon: ShoppingBag, page: 'Marketplace', roles: ['buyer', 'supplier', 'public'] },
     { name: 'Resumen', icon: LayoutDashboard, page: 'Dashboard', roles: ['buyer', 'supplier'] },
     { name: 'Mis Solicitudes', icon: FileText, page: 'Requests', roles: ['buyer'] },
     { name: 'Posibles Clientes', icon: Users, page: 'PosiblesClientes', roles: ['supplier'] },
@@ -65,6 +67,7 @@ export default function Sidebar({
     }
 
     const filteredItems = MENU_ITEMS.filter(item => {
+        if (item.roles.includes('public')) return true;
         const hasBuyerRole = item.roles.includes('buyer') && myCompany?.can_buy;
         const hasSupplierRole = item.roles.includes('supplier') && myCompany?.can_sell;
         return hasBuyerRole || hasSupplierRole;
