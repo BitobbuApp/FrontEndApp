@@ -12,10 +12,23 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import useProfileData from './hooks/useProfileData';
 import useCompanyProducts from './hooks/useCompanyProducts';
 import ProductSmallCard from './components/ProductSmallCard';
 import AddProductModal from './components/AddProductModal';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { productsApi } from './services/productsApi';
+import { toast } from 'sonner';
 
 function getMetadataLabel(value) {
     if (typeof value === 'string') {
@@ -43,7 +56,20 @@ function getMetadataLabel(value) {
 
 export default function ProfilePage() {
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const [showAddProduct, setShowAddProduct] = useState(false);
+    const [productToEdit, setProductToEdit] = useState(null);
+    const [productToDelete, setProductToDelete] = useState(null);
+
+    const deleteMutation = useMutation({
+        mutationFn: (id) => productsApi.deleteProduct(id),
+        onSuccess: () => {
+            toast.success('Producto eliminado');
+            queryClient.invalidateQueries({ queryKey: ['companyProducts'] });
+            setProductToDelete(null);
+        },
+        onError: () => toast.error('Error al eliminar producto')
+    });
 
     const {
         user,
@@ -288,7 +314,10 @@ export default function ProfilePage() {
                         <Button
                             size="sm"
                             className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] gap-1.5"
-                            onClick={() => setShowAddProduct(true)}
+                            onClick={() => {
+                                setProductToEdit(null);
+                                setShowAddProduct(true);
+                            }}
                         >
                             <Plus className="w-4 h-4" />
                             Agregar Producto
@@ -302,7 +331,15 @@ export default function ProfilePage() {
                     ) : companyProducts.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                             {companyProducts.map((p) => (
-                                <ProductSmallCard key={p.id} product={p} />
+                                <ProductSmallCard 
+                                    key={p.id} 
+                                    product={p} 
+                                    onEdit={(prod) => {
+                                        setProductToEdit(prod);
+                                        setShowAddProduct(true);
+                                    }}
+                                    onDelete={(prod) => setProductToDelete(prod)}
+                                />
                             ))}
                         </div>
                     ) : (
@@ -323,8 +360,36 @@ export default function ProfilePage() {
 
             <AddProductModal
                 open={showAddProduct}
-                onOpenChange={setShowAddProduct}
+                onOpenChange={(isOpen) => {
+                    setShowAddProduct(isOpen);
+                    if (!isOpen) setProductToEdit(null);
+                }}
+                initialData={productToEdit}
             />
+
+            <AlertDialog open={!!productToDelete} onOpenChange={(isOpen) => !isOpen && setProductToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta acción eliminará el producto "{productToDelete?.name}" de tu vitrina.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleteMutation.isPending}>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                deleteMutation.mutate(productToDelete.id);
+                            }}
+                            disabled={deleteMutation.isPending}
+                            className="bg-red-600 hover:bg-red-700 text-white"
+                        >
+                            {deleteMutation.isPending ? 'Eliminando...' : 'Sí, eliminar'}
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
