@@ -15,6 +15,17 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import RatingStars from '@/components/ui/RatingStars';
 
+const getDisplayPrice = (product) => {
+    if (product.pricing_tiers?.length > 0) {
+        const prices = product.pricing_tiers.map(t => Number(t.price_usd));
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        if (minPrice === maxPrice) return `$${minPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        return `$${minPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - $${maxPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `$${Number(product.base_price_usd || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
+
 export default function ProductTable({ filteredProducts, handleViewDetail }) {
     return (
         <Card className="border-0 shadow-sm overflow-hidden">
@@ -75,7 +86,7 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="font-bold text-foreground">
-                                    ${product.base_price_usd?.toLocaleString()}
+                                    {getDisplayPrice(product)}
                                 </TableCell>
                                 <TableCell className="text-slate-600">
                                     {product.moq} {product.unit_of_measure}

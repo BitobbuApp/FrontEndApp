@@ -18,6 +18,17 @@ const itemVariants = {
     visible: { opacity: 1, y: 0 },
 };
 
+const getDisplayPrice = (product) => {
+    if (product.pricing_tiers?.length > 0) {
+        const prices = product.pricing_tiers.map(t => Number(t.price_usd));
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        if (minPrice === maxPrice) return `$${minPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        return `$${minPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - $${maxPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `$${Number(product.base_price_usd || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
+
 export default function ProductGrid({ filteredProducts, handleViewDetail }) {
     return (
         <motion.div
@@ -66,7 +77,7 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                                 <div className="flex items-center justify-between pt-2">
                                     <div>
                                         <p className="text-xl font-bold text-foreground">
-                                            ${product.base_price_usd?.toLocaleString()}
+                                            {getDisplayPrice(product)}
                                         </p>
                                         <p className="text-xs text-slate-500">
                                             MOQ: {product.moq} {product.unit_of_measure}

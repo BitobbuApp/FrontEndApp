@@ -12,6 +12,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import RatingStars from '@/components/ui/RatingStars';
 
+const getDisplayPrice = (product) => {
+    if (product.pricing_tiers?.length > 0) {
+        const prices = product.pricing_tiers.map(t => Number(t.price_usd));
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        if (minPrice === maxPrice) return `$${minPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        return `$${minPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} - $${maxPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+    return `$${Number(product.base_price_usd || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
+
 export default function ProductDetailModal({
     open,
     onOpenChange,
@@ -78,7 +89,7 @@ export default function ProductDetailModal({
                             </div>
                             <div className="text-right">
                                 <p className="text-2xl font-bold text-foreground">
-                                    ${selectedProduct.base_price_usd?.toLocaleString()}
+                                    {getDisplayPrice(selectedProduct)}
                                 </p>
                                 <p className="text-sm text-slate-500">por {selectedProduct.unit_of_measure || 'unidad'}</p>
                             </div>
@@ -101,6 +112,36 @@ export default function ProductDetailModal({
                                 Cantidad Mínima de Orden (MOQ): {selectedProduct.moq} {selectedProduct.unit_of_measure}
                             </p>
                         </div>
+
+                        {selectedProduct.pricing_tiers?.length > 0 && (
+                            <div>
+                                <h4 className="font-semibold text-foreground mb-2">Precios por Volumen</h4>
+                                <div className="bg-muted/30 rounded-lg overflow-hidden border border-border">
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-muted/50">
+                                            <tr>
+                                                <th className="px-4 py-2 text-left font-medium text-slate-500">Rango de Cantidad</th>
+                                                <th className="px-4 py-2 text-right font-medium text-slate-500">Precio Unitario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-border">
+                                            {[...selectedProduct.pricing_tiers]
+                                                .sort((a, b) => a.min_quantity - b.min_quantity)
+                                                .map((tier, index) => (
+                                                <tr key={tier.id || index}>
+                                                    <td className="px-4 py-2">
+                                                        {tier.min_quantity} {tier.max_quantity ? `- ${tier.max_quantity}` : 'o más'} {selectedProduct.unit_of_measure || 'unidades'}
+                                                    </td>
+                                                    <td className="px-4 py-2 text-right font-semibold text-foreground">
+                                                        ${Number(tier.price_usd).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
 
                         {selectedProduct.description && (
                             <div>
