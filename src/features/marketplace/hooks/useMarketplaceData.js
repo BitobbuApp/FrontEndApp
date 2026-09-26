@@ -51,8 +51,9 @@ export function useMarketplaceData(filters) {
     });
 
     return {
-        productos: data?.data || [],
-        total: data?.total || 0,
+        productos: data?.data?.data || [],
+        total: data?.data?.total || 0,
+        priceRange: data?.data?.priceRange || { min: 0, max: 0 },
         isLoading,
         error,
     };

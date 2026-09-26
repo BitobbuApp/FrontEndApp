@@ -31,7 +31,7 @@ export default function MarketplacePage() {
 
     const navigate = useNavigate();
 
-    const { productos, total, isLoading } = useMarketplaceData(filters);
+    const { productos, total, priceRange, isLoading } = useMarketplaceData(filters);
 
     const handleViewDetail = (product) => {
         setSelectedProduct(product);
@@ -65,6 +65,7 @@ export default function MarketplacePage() {
                 setFilters={setFilters}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
+                priceRange={priceRange}
             />
 
             {/* Products */}

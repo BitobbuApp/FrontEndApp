@@ -31,9 +31,9 @@ export default function ProductDetailModal({
                 <div className="space-y-6">
                     <div className="space-y-3">
                         <div className="aspect-video bg-slate-100 rounded-xl overflow-hidden">
-                            {selectedProduct.photos?.[selectedImageIndex] ? (
+                            {selectedProduct.photos?.[selectedImageIndex]?.url ? (
                                 <img
-                                    src={selectedProduct.photos[selectedImageIndex]}
+                                    src={selectedProduct.photos[selectedImageIndex].url}
                                     alt={selectedProduct.name}
                                     className="w-full h-full object-contain"
                                 />
@@ -45,7 +45,7 @@ export default function ProductDetailModal({
                         </div>
                         {selectedProduct.photos?.length > 1 && (
                             <div className="flex gap-2 overflow-x-auto pb-2">
-                                {selectedProduct.photos.map((url, index) => (
+                                {selectedProduct.photos.map((photo, index) => (
                                     <button
                                         key={index}
                                         onClick={() => setSelectedImageIndex(index)}
@@ -54,7 +54,7 @@ export default function ProductDetailModal({
                                                 : 'border-transparent'
                                             }`}
                                     >
-                                        <img src={url} alt="" className="w-full h-full object-cover" />
+                                        <img src={photo.url} alt="" className="w-full h-full object-cover" />
                                     </button>
                                 ))}
                             </div>
@@ -68,10 +68,10 @@ export default function ProductDetailModal({
                                     {selectedProduct.name}
                                 </h2>
                                 <div className="flex items-center gap-2 mt-1">
-                                    <Badge variant="secondary">{selectedProduct.category?.name_es}</Badge>
-                                    {selectedProduct.company?.company_type && (
+                                    <Badge variant="secondary">{selectedProduct.category}</Badge>
+                                    {selectedProduct.supplier_type && (
                                         <Badge variant="outline">
-                                            {selectedProduct.company.company_type}
+                                            {selectedProduct.supplier_type}
                                         </Badge>
                                     )}
                                 </div>
@@ -80,25 +80,25 @@ export default function ProductDetailModal({
                                 <p className="text-2xl font-bold text-foreground">
                                     ${selectedProduct.base_price_usd?.toLocaleString()}
                                 </p>
-                                <p className="text-sm text-slate-500">por unidad</p>
+                                <p className="text-sm text-slate-500">por {selectedProduct.unit_of_measure || 'unidad'}</p>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl">
                             <div className="w-12 h-12 rounded-lg bg-[#D2FC31] flex items-center justify-center text-lg font-bold text-slate-900">
-                                {selectedProduct.company?.trade_name?.[0] || 'P'}
+                                {selectedProduct.company_details?.trade_name?.[0] || 'P'}
                             </div>
                             <div className="flex-1">
                                 <p className="font-semibold text-foreground">
-                                    {selectedProduct.company?.trade_name || 'Proveedor'}
+                                    {selectedProduct.company_details?.trade_name || 'Proveedor'}
                                 </p>
-                                <RatingStars rating={selectedProduct.rating || 0} size="sm" />
+                                <RatingStars rating={selectedProduct.company_details?.average_rating || 0} size="sm" />
                             </div>
                         </div>
 
                         <div className="bg-amber-50 p-4 rounded-xl">
                             <p className="text-sm text-amber-700 font-medium">
-                                Cantidad Mínima de Orden (MOQ): {selectedProduct.moq} unidades
+                                Cantidad Mínima de Orden (MOQ): {selectedProduct.moq} {selectedProduct.unit_of_measure}
                             </p>
                         </div>
 

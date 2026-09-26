@@ -39,9 +39,9 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                 <TableCell>
                                     <div className="flex items-center gap-3">
                                         <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden flex-shrink-0">
-                                            {product.photos?.[0] ? (
+                                            {product.photos?.[0]?.url ? (
                                                 <img
-                                                    src={product.photos[0]}
+                                                    src={product.photos[0].url}
                                                     alt={product.name}
                                                     className="w-full h-full object-cover"
                                                 />
@@ -65,23 +65,23 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                     <div className="flex items-center gap-2">
                                         <Building2 className="w-4 h-4 text-slate-400" />
                                         <span className="text-slate-600">
-                                            {product.company?.trade_name || 'Proveedor'}
+                                            {product.company_details?.trade_name || 'Proveedor'}
                                         </span>
                                     </div>
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="secondary" className="text-xs">
-                                        {product.category?.name_es || 'Categoría'}
+                                        {product.category || 'Categoría'}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="font-bold text-foreground">
                                     ${product.base_price_usd?.toLocaleString()}
                                 </TableCell>
                                 <TableCell className="text-slate-600">
-                                    {product.moq} unidades
+                                    {product.moq} {product.unit_of_measure}
                                 </TableCell>
                                 <TableCell>
-                                    <RatingStars rating={product.rating || 0} size="sm" />
+                                    <RatingStars rating={product.company_details?.average_rating || 0} size="sm" />
                                 </TableCell>
                                 <TableCell className="text-right">
                                     <div className="flex items-center justify-end gap-2">
