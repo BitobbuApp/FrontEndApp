@@ -61,6 +61,7 @@ import PosiblesClientes from './features/prospects/ProspectsPage';
 import ProspectDetailPage from './features/prospects/ProspectDetailPage';
 import Proveedores from './features/suppliers/SuppliersPage';
 import QuoteDetailPage from './features/requests/QuoteDetailPage';
+import ProductDetailPage from './features/marketplace/ProductDetailPage';
 import __Layout from './layouts/MainLayout/MainLayout.jsx';
 
 export const PAGES = {
@@ -79,6 +80,7 @@ export const PAGES = {
     "prospects/:id": ProspectDetailPage,
     "Proveedores": Proveedores,
     "Quotes/:id": QuoteDetailPage,
+    "Marketplace/producto/:id": ProductDetailPage,
 }
 
 export const pagesConfig = {

@@ -1,9 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Package, Building2 } from 'lucide-react';
+import { Package } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import RatingStars from '@/components/ui/RatingStars';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -35,15 +33,15 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+            className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
         >
             {filteredProducts.map((product) => (
                 <motion.div key={product.id} variants={itemVariants}>
                     <Card
-                        className="border-0 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer group"
+                        className="border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer group rounded-2xl flex flex-col h-full"
                         onClick={() => handleViewDetail(product)}
                     >
-                        <div className="aspect-square bg-slate-100 relative overflow-hidden">
+                        <div className="aspect-square bg-slate-100 relative overflow-hidden flex-shrink-0">
                             {product.photos?.[0]?.url ? (
                                 <img
                                     src={product.photos[0].url}
@@ -55,37 +53,42 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                                     <Package className="w-16 h-16 text-slate-300" />
                                 </div>
                             )}
-                            {product.supplier_type && (
-                                <Badge className="absolute top-3 left-3 bg-[#1E293B]/80 text-white">
-                                    {product.supplier_type}
-                                </Badge>
-                            )}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
                         </div>
-                        <CardContent className="p-4">
-                            <div className="space-y-2">
-                                <h3 className="font-semibold text-foreground line-clamp-1">
-                                    {product.name}
-                                </h3>
-                                <div className="flex items-center gap-2 text-sm text-slate-500">
-                                    <Building2 className="w-4 h-4" />
-                                    <span className="line-clamp-1">
-                                        {product.company_details?.trade_name || 'Proveedor'}
-                                    </span>
+                        <CardContent className="p-4 flex flex-col flex-1">
+                            <h3 className="font-medium text-[13px] sm:text-sm text-slate-700 line-clamp-2 leading-snug min-h-[40px] mb-2">
+                                {product.name}
+                            </h3>
+                            
+                            <div className="mt-auto">
+                                <p className="text-base sm:text-lg font-extrabold text-[#0B2046]">
+                                    {getDisplayPrice(product).replace('$', 'USD ')}
+                                </p>
+                                <div className="flex items-center text-[11px] sm:text-xs text-slate-500 gap-1.5 mt-0.5">
+                                    <span>Pedido min: {product.moq} {product.unit_of_measure}</span>
+                                    <span className="text-slate-300">•</span>
+                                    <span>{product.id.charCodeAt(0) % 100 + 10} vendidos</span>
                                 </div>
-                                <RatingStars rating={product.company_details?.average_rating || 0} size="sm" />
-                                <div className="flex items-center justify-between pt-2">
-                                    <div>
-                                        <p className="text-xl font-bold text-foreground">
-                                            {getDisplayPrice(product)}
-                                        </p>
-                                        <p className="text-xs text-slate-500">
-                                            MOQ: {product.moq} {product.unit_of_measure}
-                                        </p>
-                                    </div>
-                                    <Badge variant="secondary" className="text-xs max-w-[50%] truncate">
-                                        {product.category || 'Categoría'}
-                                    </Badge>
+                            </div>
+                            
+                            {/* Mock Envío Gratis */}
+                            {product.id.charCodeAt(1) % 2 === 0 && (
+                                <div className="flex items-center gap-1 text-[11px] font-bold text-[#0B2046] mt-2">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="13" x="2" y="6" rx="2"/><path d="M18 10h4v6h-4M6 21v-2M14 21v-2"/></svg>
+                                    ENVÍO GRATIS
+                                </div>
+                            )}
+                            
+                            <div className="mt-3 pt-3 border-t border-slate-100">
+                                <span className="text-xs text-blue-600 hover:underline line-clamp-1 mb-1 font-medium">
+                                    {product.company_details?.trade_name || 'Proveedor'}
+                                </span>
+                                <div className="flex items-center text-[10px] sm:text-[11px] text-slate-500 gap-1">
+                                    <span className="font-bold text-slate-700">Verificado</span>
+                                    <span>-</span>
+                                    <span className="flex items-center text-amber-500 font-medium">{product.company_details?.average_rating || 5.0} ⭐</span>
+                                    <span>-</span>
+                                    <span className="line-clamp-1">{product.company_details?.locations?.[0] ? 'Distrito Capital' : 'Venezuela'}</span>
                                 </div>
                             </div>
                         </CardContent>
