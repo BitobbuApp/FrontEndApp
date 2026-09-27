@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { useAuth } from '../AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export default function LoginForm({ onGoToRegister, onGoToResetPassword }) {
+export default function LoginForm({ onGoToResetPassword }) {
     const { login } = useAuth();
+    const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -134,7 +136,8 @@ export default function LoginForm({ onGoToRegister, onGoToResetPassword }) {
                 <p className="mt-6 text-center text-sm text-slate-500">
                     ¿No tienes cuenta?{' '}
                     <button
-                        onClick={onGoToRegister}
+                        onClick={() => navigate('/register')}
+                        type="button"
                         className="text-foreground font-semibold hover:underline"
                     >
                         Regístrate gratis

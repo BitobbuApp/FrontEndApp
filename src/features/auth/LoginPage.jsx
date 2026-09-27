@@ -3,7 +3,7 @@ import AuthBrandPanel from './components/AuthBrandPanel';
 import LoginForm from './components/LoginForm';
 import ResetPasswordForm from './components/ResetPasswordForm';
 
-export default function LoginPage({ onGoToRegister }) {
+export default function LoginPage() {
     const [view, setView] = useState('login'); // 'login' | 'reset'
     return (
         <div className="min-h-screen flex">
@@ -19,7 +19,6 @@ export default function LoginPage({ onGoToRegister }) {
             />
             {view === 'login' ? (
                 <LoginForm 
-                    onGoToRegister={onGoToRegister} 
                     onGoToResetPassword={() => setView('reset')} 
                 />
             ) : (

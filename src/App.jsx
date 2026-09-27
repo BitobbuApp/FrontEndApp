@@ -19,15 +19,25 @@ const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
+const LayoutWrapper = ({ children, currentPageName }) => {
+  const { isAuthenticated } = useAuth();
+  
+  // Use PublicLayout only if on a public route AND not authenticated
+  if (PUBLIC_ROUTES.includes(currentPageName) && !isAuthenticated) {
+    return <PublicLayout currentPageName={currentPageName}>{children}</PublicLayout>;
+  }
+  
+  // Otherwise use the standard MainLayout (which includes the Sidebar)
+  return Layout ? <Layout currentPageName={currentPageName}>{children}</Layout> : <>{children}</>;
+};
 
 import RoleGuard from '@/components/shared/RoleGuard';
 import ProtectedRoute from '@/components/shared/ProtectedRoute';
+import PublicLayout from '@/layouts/PublicLayout/PublicLayout';
 
 const PUBLIC_ROUTES = [
-  "Marketplace"
+  "Marketplace",
+  "Marketplace/producto/:id"
 ];
 
 const BUYER_ROUTES = [
@@ -101,7 +111,7 @@ const AuthenticatedApp = () => {
     <Routes>
       <Route path="/login" element={
         !isAuthenticated ? (
-          <LoginPage onGoToRegister={() => setShowRegister(true)} />
+          <LoginPage />
         ) : (
           <Navigate to={`/${mainPageKey}`} replace />
         )
@@ -109,7 +119,7 @@ const AuthenticatedApp = () => {
 
       <Route path="/register" element={
         !isAuthenticated ? (
-          <RegisterPage onGoToLogin={() => setShowRegister(false)} />
+          <RegisterPage />
         ) : (
           <Navigate to={`/${mainPageKey}`} replace />
         )

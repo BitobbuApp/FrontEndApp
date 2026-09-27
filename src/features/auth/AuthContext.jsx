@@ -54,6 +54,20 @@ export const AuthProvider = ({ children }) => {
         return loggedUser;
     };
 
+    const register = async (userData) => {
+        const registeredUser = await authApi.registerUser(userData);
+        authApi.saveSession(registeredUser);
+
+        setUser(registeredUser);
+        setIsAuthenticated(true);
+        setAuthError(null);
+        connectSocket();
+        
+        queryClientInstance.invalidateQueries({ queryKey: [APP_METADATA_QUERY_KEY] });
+
+        return registeredUser;
+    };
+
     const logout = () => {
         setUser(null);
         setIsAuthenticated(false);
@@ -63,8 +77,8 @@ export const AuthProvider = ({ children }) => {
         // Invalidate metadata on logout so it re-fetches public version (without private methods)
         queryClientInstance.invalidateQueries({ queryKey: [APP_METADATA_QUERY_KEY] });
 
-        // Redirect to login page
-        window.location.href = '/login';
+        // Redirect to marketplace/root
+        window.location.href = '/';
     };
 
     const updateSession = (updates) => {
@@ -94,6 +108,7 @@ export const AuthProvider = ({ children }) => {
             authError,
             appPublicSettings,
             login,
+            register,
             logout,
             updateSession,
             navigateToLogin,

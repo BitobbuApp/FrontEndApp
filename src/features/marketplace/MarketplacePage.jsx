@@ -9,7 +9,10 @@ import { useMarketplaceData } from './hooks/useMarketplaceData';
 import MarketplaceFilters from './components/MarketplaceFilters';
 import ProductGrid from './components/ProductGrid';
 import ProductTable from './components/ProductTable';
-import ProductDetailModal from './components/ProductDetailModal';
+import HeroSection from './components/HeroSection';
+import MarketplaceCTA from './components/MarketplaceCTA';
+import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import { useAuth } from '@/features/auth/AuthContext';
 
 export default function MarketplacePage() {
     const [filters, setFilters] = useState({
@@ -25,37 +28,32 @@ export default function MarketplacePage() {
     });
 
     const [viewMode, setViewMode] = useState('grid');
-    const [detailModalOpen, setDetailModalOpen] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState(null);
-    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-
     const navigate = useNavigate();
-
     const { productos, total, priceRange, isLoading } = useMarketplaceData(filters);
-
     const handleViewDetail = (product) => {
-        setSelectedProduct(product);
-        setSelectedImageIndex(0);
-        setDetailModalOpen(true);
+        navigate(`/Marketplace/producto/${product.id}`);
     };
 
     const handleRequestQuote = (product) => {
-        setSelectedProduct(product);
-        setDetailModalOpen(false);
         navigate('/Requests/new', { state: { product: product.name } });
     };
 
+    const { categories } = useAppMetadata();
+    const { isAuthenticated } = useAuth();
     const totalPages = Math.ceil(total / filters.limit) || 1;
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div>
-                <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-                    Marketplace Mayorista
-                </h1>
+            {/* Hero Section */}
+            {!isAuthenticated && <HeroSection categories={categories} />}
+
+            {/* Section Header */}
+            <div id="productos-section" className={`pt-4 scroll-mt-24 ${!isAuthenticated ? 'mt-8' : ''}`}>
+                <h2 className="text-2xl lg:text-3xl font-extrabold text-[#0B2046]">
+                    Explora Productos
+                </h2>
                 <p className="text-slate-500 mt-1">
-                    Explora productos de proveedores verificados
+                    Encuentra insumos y materiales al por mayor.
                 </p>
             </div>
 
@@ -141,15 +139,8 @@ export default function MarketplacePage() {
                 </>
             )}
 
-            {/* Detail Modal */}
-            <ProductDetailModal
-                open={detailModalOpen}
-                onOpenChange={setDetailModalOpen}
-                selectedProduct={selectedProduct}
-                selectedImageIndex={selectedImageIndex}
-                setSelectedImageIndex={setSelectedImageIndex}
-                handleRequestQuote={handleRequestQuote}
-            />
+            {/* CTA Section for guests */}
+            {!isAuthenticated && <MarketplaceCTA />}
         </div>
     );
 }
