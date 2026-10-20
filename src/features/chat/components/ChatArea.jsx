@@ -26,6 +26,8 @@ import ReviewModal from './ReviewModal';
 import SystemMessageBubble from './SystemMessageBubble';
 import FilePreview from './FilePreview';
 import { useSocketConnectionState } from '../hooks/useSocketConnectionState';
+import { useTypingIndicator } from '../hooks/useTypingIndicator';
+import TypingBubble from './TypingBubble';
 import { WifiOff, Loader2 } from 'lucide-react';
 
 export default function ChatArea({
@@ -44,13 +46,22 @@ export default function ChatArea({
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
     const connectionStatus = useSocketConnectionState();
+    const { isOtherTyping, notifyTyping, stopTyping } = useTypingIndicator(selectedConversation?.id, user?.email);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [mensajes]);
+    }, [mensajes, isOtherTyping]);
+
+    const handleMessageChange = (e) => {
+        const value = e.target.value;
+        setMessageText(value);
+        if (value.trim()) notifyTyping();
+        else stopTyping();
+    };
 
     const handleSend = () => {
         if (!messageText.trim() && !attachedFile) return;
+        stopTyping();
         sendMutation.mutate(
             { contenido: messageText, archivo: attachedFile, selectedConversation },
             {
@@ -132,7 +143,11 @@ export default function ChatArea({
                                 </Badge>
                             )}
                         </div>
-                        <p className="text-xs text-slate-500">En línea</p>
+                        {isOtherTyping ? (
+                            <p className="text-xs text-[#059669] font-medium">escribiendo…</p>
+                        ) : (
+                            <p className="text-xs text-slate-500">En línea</p>
+                        )}
                     </div>
                 </div>
                 <Button variant="ghost" size="icon">
@@ -257,6 +272,9 @@ export default function ChatArea({
                                 </React.Fragment>
                             );
                         })}
+                        {isOtherTyping && (
+                            <TypingBubble name={otherParticipant.nombre} />
+                        )}
                         <div ref={messagesEndRef} />
                     </div>
                 )}
@@ -311,7 +329,7 @@ export default function ChatArea({
                     <Input
                         placeholder="Escribe un mensaje..."
                         value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
+                        onChange={handleMessageChange}
                         onKeyPress={handleKeyPress}
                         className="flex-1 h-11"
                     />

@@ -26,6 +26,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
 
@@ -172,6 +173,7 @@ export default function RequestsTable({
                                                             {req.category}
                                                         </Badge>
                                                     )}
+                                                    <DirectRequestBadge request={req} className="mt-1 ml-1" />
                                                 </div>
                                             </div>
                                         </TableCell>

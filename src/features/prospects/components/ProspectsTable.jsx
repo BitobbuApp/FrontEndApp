@@ -16,6 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import EmptyState from '@/components/ui/EmptyState';
 
 const unitLabels = {
@@ -127,6 +128,7 @@ export default function ProspectsTable({
                                         <p className="font-semibold text-foreground">
                                             {req.product_service}
                                         </p>
+                                        <DirectRequestBadge request={req} perspective="supplier" />
                                         <Badge 
                                             variant="outline" 
                                             className={cn(

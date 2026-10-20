@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { toast } from 'sonner';
@@ -123,6 +124,7 @@ export default function RequestSummaryPage() {
                             {req.category && (
                                 <Badge variant="secondary" className="mt-1.5 text-xs">{req.category}</Badge>
                             )}
+                            <DirectRequestBadge request={req} className="mt-1.5 ml-1" />
                         </div>
                         <StatusBadge status={req.status} />
                     </div>

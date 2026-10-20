@@ -3,6 +3,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Package, Clock, Eye, Pause, Play, Trash2, ImageOff } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { useNavigate } from 'react-router-dom';
@@ -58,6 +59,7 @@ export default function RequestMobileCard({ req, onTogglePause, onDelete }) {
                     {req.category && (
                         <Badge variant="secondary" className="text-[10px] mt-1">{req.category}</Badge>
                     )}
+                    <DirectRequestBadge request={req} className="mt-1 ml-1" />
                 </div>
 
                 <div className="flex flex-wrap gap-3 text-xs text-slate-500">

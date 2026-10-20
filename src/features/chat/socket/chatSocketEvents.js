@@ -6,6 +6,8 @@ export const CHAT_SOCKET_EVENTS = {
     SEND_MESSAGE: 'send_message',
     RECEIVE_MESSAGE: 'receive_message',
     CONVERSATION_READ: 'conversation_read',
+    TYPING: 'typing',
+    USER_TYPING: 'user_typing',
 
     // Business states
     STATE_EVENTS: [

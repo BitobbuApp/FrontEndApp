@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export default function LoginModal({ open, onOpenChange }) {
+export default function LoginModal({ open, onOpenChange, onSuccess }) {
     const { login } = useAuth();
     const navigate = useNavigate();
 
@@ -27,6 +27,8 @@ export default function LoginModal({ open, onOpenChange }) {
         try {
             await login(email, password);
             onOpenChange(false);
+            // Resume the action that required authentication (e.g. request a quote)
+            onSuccess?.();
         } catch (err) {
             // Error is handled by context/toaster, but we can set local if needed
         } finally {

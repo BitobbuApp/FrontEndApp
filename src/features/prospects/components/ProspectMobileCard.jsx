@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Package, Clock, Star, Eye, ImageOff, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/ui/StatusBadge';
 
@@ -63,6 +64,7 @@ export default function ProspectMobileCard({ req, onViewDetail, onQuickQuote }) 
                     <p className="font-semibold text-foreground text-sm leading-tight line-clamp-2 flex-1">
                         {req.product_service}
                     </p>
+                    <DirectRequestBadge request={req} perspective="supplier" />
                     <Badge 
                         variant="outline" 
                         className={cn(
