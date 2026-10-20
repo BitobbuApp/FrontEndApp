@@ -66,6 +66,7 @@ import __Layout from './layouts/MainLayout/MainLayout.jsx';
 
 export const PAGES = {
     "Chat": Chat,
+    "Chat/:id": Chat,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
     "Marketplace": Marketplace,

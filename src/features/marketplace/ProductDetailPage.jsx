@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight, Star, User, Building, MapPin, Truck, Package, Package2, Lock, MessageCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import LoginModal from '@/features/auth/components/LoginModal';
+import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
 
 export default function ProductDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const { isAuthenticated } = useAuth();
+    const { data: myCompany } = useMyCompany();
     const { product, isLoading, error } = useMarketplaceProduct(id);
 
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
@@ -53,11 +55,34 @@ export default function ProductDetailPage() {
     const allPhotos = photos?.length > 0 ? photos.sort((a, b) => a.sort_order - b.sort_order) : [{ url: 'https://via.placeholder.com/600' }];
     const mainPhotoUrl = allPhotos[selectedImageIndex]?.url;
 
+    // Direct RFQ: the request form receives the offer so it goes only to this supplier
+    const goToDirectRequest = () => {
+        navigate('/Requests/new', {
+            state: {
+                offer: {
+                    id: product.id,
+                    name,
+                    company_id: product.company_id,
+                    category_id: product.category_id,
+                    unit_id: product.unit_id,
+                    unit_of_measure: product.unit_of_measure,
+                    moq,
+                    base_price_usd: product.base_price_usd,
+                    pricing_tiers: pricing_tiers || [],
+                    trade_name: company_details?.trade_name,
+                }
+            }
+        });
+    };
+
+    const isOwnProduct = !!myCompany && myCompany.id === product.company_id;
+    const cannotBuy = !!myCompany && !myCompany.can_buy;
+
     const handleRequestQuote = () => {
         if (!isAuthenticated) {
             setAuthModalOpen(true);
         } else {
-            navigate('/Requests/new', { state: { product: name } });
+            goToDirectRequest();
         }
     };
 
@@ -177,12 +202,24 @@ export default function ProductDetailPage() {
                             Solicita una cotización formal para obtener el precio real basado en tu volumen y ubicación.
                         </p>
                         
-                        <Button 
+                        <Button
                             onClick={handleRequestQuote}
+                            disabled={isOwnProduct || cannotBuy}
                             className="w-full bg-[#D2FC31] hover:bg-[#c4ed2d] text-[#0B2046] font-bold text-base h-12 rounded-xl shadow-lg shadow-[#D2FC31]/20 mb-3"
                         >
                             Solicitar Cotización <ChevronRight className="w-4 h-4 ml-1" />
                         </Button>
+                        {isOwnProduct && (
+                            <p className="text-xs text-slate-500 text-center">Este producto pertenece a tu empresa.</p>
+                        )}
+                        {!isOwnProduct && cannotBuy && (
+                            <p className="text-xs text-slate-500 text-center">Tu empresa no tiene habilitado el rol de comprador.</p>
+                        )}
+                        {!isOwnProduct && !cannotBuy && company_details?.trade_name && (
+                            <p className="text-xs text-slate-500 text-center">
+                                La solicitud llegará directamente a <span className="font-semibold">{company_details.trade_name}</span>.
+                            </p>
+                        )}
 
                         <div className="flex gap-2 mt-6 p-3 bg-green-50 text-green-700 rounded-lg text-xs leading-relaxed">
                             <Lock className="w-4 h-4 flex-shrink-0 mt-0.5" />
@@ -316,9 +353,10 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Modals */}
-            <LoginModal 
-                open={authModalOpen} 
-                onOpenChange={setAuthModalOpen} 
+            <LoginModal
+                open={authModalOpen}
+                onOpenChange={setAuthModalOpen}
+                onSuccess={goToDirectRequest}
             />
 
         </div>

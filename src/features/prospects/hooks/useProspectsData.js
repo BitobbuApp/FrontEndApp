@@ -31,7 +31,9 @@ export function useProspectsData(searchTerm, categoryFilter) {
         const matchesCategory =
             categoryFilter === 'Todas' || req.category === categoryFilter;
         return matchesSearch && matchesCategory;
-    });
+    })
+        // Direct RFQs (addressed only to this supplier) first
+        .sort((a, b) => Number(!!b.is_direct) - Number(!!a.is_direct));
 
     return {
         user,

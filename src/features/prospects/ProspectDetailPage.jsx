@@ -16,6 +16,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import EmptyState from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
@@ -163,6 +164,7 @@ export default function ProspectDetailPage() {
                                 <h2 className="text-2xl font-bold tracking-tight text-slate-950 leading-tight">
                                     {prospect.product_service}
                                 </h2>
+                                <DirectRequestBadge request={prospect} perspective="supplier" className="mt-2" />
                             </div>
 
                             {/* Metrics Grid */}

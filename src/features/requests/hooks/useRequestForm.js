@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { requestsApi } from '../services/requestsApi';
 import { toast } from 'sonner';
@@ -45,6 +45,11 @@ export default function useRequestForm() {
     const [files, setFiles] = useState([]);
     const [existingFiles, setExistingFiles] = useState([]);
 
+    // Direct RFQ: offer sent from a marketplace product (ProductDetailPage)
+    const location = useLocation();
+    const [directOffer, setDirectOffer] = useState(() => (isEditing ? null : location.state?.offer || null));
+    const directOfferPrefilled = useRef(false);
+
     const {
         categoryOptions,
         unitOptions,
@@ -72,6 +77,24 @@ export default function useRequestForm() {
                 : { ...prev, unit_id: defaultUnitOption.value }
         ));
     }, [defaultUnitOption?.value, isEditing]);
+
+    // Prefill the product form from the marketplace offer once metadata is available
+    useEffect(() => {
+        if (!directOffer || directOfferPrefilled.current || isLoadingMetadata) {
+            return;
+        }
+        directOfferPrefilled.current = true;
+
+        setProductForm((prev) => ({
+            ...prev,
+            product_service: directOffer.name || prev.product_service,
+            category_id: findOptionValueById(categoryOptions, directOffer.category_id) || prev.category_id,
+            unit_id: findOptionValueById(unitOptions, directOffer.unit_id) || prev.unit_id,
+            quantity: prev.quantity || directOffer.moq || '',
+        }));
+    }, [directOffer, isLoadingMetadata, categoryOptions, unitOptions]);
+
+    const clearDirectOffer = () => setDirectOffer(null);
 
     useEffect(() => {
         if (!isEditing || !requestData) {
@@ -161,7 +184,13 @@ export default function useRequestForm() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['requests'] });
-            toast.success(isEditing ? 'Solicitud actualizada' : 'Solicitud publicada');
+            if (isEditing) {
+                toast.success('Solicitud actualizada');
+            } else if (directOffer) {
+                toast.success(`Solicitud enviada directamente a ${directOffer.trade_name || 'el proveedor'}`);
+            } else {
+                toast.success('Solicitud publicada');
+            }
             navigate('/Requests');
         },
         onError: (err) => {
@@ -228,6 +257,7 @@ export default function useRequestForm() {
                 country_id: productForm.country_id ? Number(productForm.country_id) : 1, // Defaulting to VENEZUELA_ID if tracking allows
                 state_id: productForm.state_id ? Number(productForm.state_id) : null,
                 city_id: productForm.city_id ? Number(productForm.city_id) : null,
+                company_offer_id: directOffer?.id || null,
                 raw_files_payload: files
             });
             return;
@@ -261,6 +291,8 @@ export default function useRequestForm() {
         handleFileChange,
         removeFile,
         handleSubmit,
+        directOffer,
+        clearDirectOffer,
         isPending: mutation.isPending,
         isLoadingMetadata,
         categoryOptions,

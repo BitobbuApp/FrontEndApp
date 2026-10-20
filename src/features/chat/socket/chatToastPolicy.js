@@ -13,8 +13,14 @@ export const showToastForEvent = (payload, myCompanyId) => {
 
     // High-priority global toasts for the recipient when a negotiation or order starts
     if (action === 'negotiation_started') {
-        toast.info(`🛒 ¡Un cliente inició una negociación!`, {
-            description: `Revisa la bandeja de entrada para responder.`,
+        // Direct RFQs: the supplier opens the negotiation, so the recipient is the buyer
+        const startedBySupplier = payload.actor_role === 'supplier';
+        toast.info(startedBySupplier
+            ? `📦 ¡Un proveedor respondió tu solicitud directa!`
+            : `🛒 ¡Un cliente inició una negociación!`, {
+            description: startedBySupplier
+                ? `Ya puedes negociar con él en el chat.`
+                : `Revisa la bandeja de entrada para responder.`,
             duration: 6000,
         });
     } else if (action === 'accepted') {

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useChatData } from './hooks/useChatData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import ConversationList from './components/ConversationList';
@@ -30,6 +31,14 @@ export default function ChatPage() {
     useEffect(() => {
         if (!selectedConversation) setShowMobileChat(false);
     }, [selectedConversation]);
+
+    // Deep link /Chat/:id (e.g. right after a negotiation is opened): preselect that conversation
+    const { id: conversationIdParam } = useParams();
+    useEffect(() => {
+        if (!conversationIdParam || selectedConversation?.id === conversationIdParam) return;
+        const target = conversaciones.find(c => c.id === conversationIdParam);
+        if (target) handleSelectConversation(target);
+    }, [conversationIdParam, conversaciones]);
 
     // Derived state: find the latest version of the selected conversation in the current list
     const currentConversation = conversaciones.find(c => c.id === selectedConversation?.id) || selectedConversation;

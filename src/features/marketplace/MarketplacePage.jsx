@@ -34,10 +34,6 @@ export default function MarketplacePage() {
         navigate(`/Marketplace/producto/${product.id}`);
     };
 
-    const handleRequestQuote = (product) => {
-        navigate('/Requests/new', { state: { product: product.name } });
-    };
-
     const { categories } = useAppMetadata();
     const { isAuthenticated } = useAuth();
     const totalPages = Math.ceil(total / filters.limit) || 1;
