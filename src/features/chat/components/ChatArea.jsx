@@ -52,14 +52,18 @@ export default function ChatArea({
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [mensajes, isOtherTyping]);
 
+    // Closed negotiation (e.g. the buyer rejected the quote): history only, no new messages
+    const isClosed = selectedConversation?.status === 'cancelled';
+
     const handleMessageChange = (e) => {
         const value = e.target.value;
         setMessageText(value);
-        if (value.trim()) notifyTyping();
+        if (value.trim() && !isClosed) notifyTyping();
         else stopTyping();
     };
 
     const handleSend = () => {
+        if (isClosed) return;
         if (!messageText.trim() && !attachedFile) return;
         stopTyping();
         sendMutation.mutate(
@@ -323,19 +327,20 @@ export default function ChatArea({
                         className="hidden"
                         onChange={handleFileSelect}
                     />
-                    <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
+                    <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} disabled={isClosed}>
                         <Paperclip className="w-5 h-5 text-slate-400" />
                     </Button>
                     <Input
-                        placeholder="Escribe un mensaje..."
+                        placeholder={isClosed ? 'Esta negociación fue cerrada' : 'Escribe un mensaje...'}
                         value={messageText}
                         onChange={handleMessageChange}
                         onKeyPress={handleKeyPress}
+                        disabled={isClosed}
                         className="flex-1 h-11"
                     />
                     <Button
                         onClick={handleSend}
-                        disabled={(!messageText.trim() && !attachedFile) || sendMutation.isPending || connectionStatus === 'offline'}
+                        disabled={isClosed || (!messageText.trim() && !attachedFile) || sendMutation.isPending || connectionStatus === 'offline'}
                         className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] h-11 px-4 disabled:opacity-50"
                     >
                         <Send className="w-5 h-5" />

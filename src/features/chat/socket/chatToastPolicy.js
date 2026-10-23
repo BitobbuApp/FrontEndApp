@@ -23,6 +23,16 @@ export const showToastForEvent = (payload, myCompanyId) => {
                 : `Revisa la bandeja de entrada para responder.`,
             duration: 6000,
         });
+    } else if (action === 'rejected') {
+        toast.error(`❌ Tu oferta fue rechazada`, {
+            description: `El comprador cerró la negociación. Revisa el motivo en el chat.`,
+            duration: 6000,
+        });
+    } else if (action === 'canceled') {
+        toast.info(`El proveedor retiró su oferta`, {
+            description: `La negociación quedó cerrada; el chat se conserva como historial.`,
+            duration: 6000,
+        });
     } else if (action === 'accepted') {
         toast.success(`🎉 ¡Cotización Aceptada!`, {
             description: `El cliente ha cerrado la negociación. Revisa la de logística.`,

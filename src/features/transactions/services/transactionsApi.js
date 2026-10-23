@@ -1,10 +1,7 @@
 import apiClient from '@/api/axiosClient';
 
 export const transactionsApi = {
-  createTransaction: async (data) => {
-    const response = await apiClient.post('/transactions', data);
-    return response.data;
-  },
+  // Transactions are created by the backend when the buyer accepts the formal quote (no create endpoint)
   getTransactionById: async (id) => {
     const response = await apiClient.get(`/transactions/${id}`);
     return response.data;

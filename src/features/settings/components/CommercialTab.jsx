@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     Card,
     CardContent,
@@ -18,14 +18,56 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import GroupedMultiCombobox from '@/components/shared/GroupedMultiCombobox';
 import tooltips from '@/constants/tooltips.json';
+
+/**
+ * Autocomplete over ALL subcategories, grouped by category (the company's categories first).
+ * Picking a subcategory of an unselected category selects that category too (toggleSubcategoria).
+ */
+function SubcategoriesPicker({ formData, categoryOptions, getSubcategoryOptions, toggleSubcategoria }) {
+    const groups = useMemo(() => {
+        const selectedCategories = new Set(formData.interest_category_ids || []);
+        const all = categoryOptions
+            .map((category) => ({
+                value: category.value,
+                label: category.label,
+                options: getSubcategoryOptions(category.value),
+                isSelected: selectedCategories.has(category.value),
+            }))
+            .filter((group) => group.options.length > 0);
+        return [...all.filter((group) => group.isSelected), ...all.filter((group) => !group.isSelected)];
+    }, [categoryOptions, getSubcategoryOptions, formData.interest_category_ids]);
+
+    if (groups.length === 0) return null;
+
+    return (
+        <div className="space-y-3">
+            <Label className="flex items-center">
+                Subcategorías con las que trabajas
+                <InfoTooltip content={tooltips.settings.commercial.subcategories} />
+            </Label>
+            <GroupedMultiCombobox
+                groups={groups}
+                selectedValues={formData.interest_subcategory_ids || []}
+                onToggle={toggleSubcategoria}
+                placeholder="Buscar y agregar subcategorías…"
+                searchPlaceholder="Ej: lácteos, repuestos, nómina…"
+                emptyText="No encontramos esa subcategoría"
+                emptySelectionText="Aún no agregaste subcategorías. Búscalas arriba para precisar con qué trabajas."
+            />
+        </div>
+    );
+}
 
 export default function CommercialTab({
     formData,
     setFormData,
     toggleCategoria,
+    toggleSubcategoria,
     toggleMetodoPago,
     categoryOptions = [],
+    getSubcategoryOptions = () => [],
     paymentMethodOptions = [],
     companySizeOptions = [],
     estimatedMonthlyTransactionOptions = [],
@@ -82,6 +124,12 @@ export default function CommercialTab({
                         ))}
                     </div>
                 </div>
+                <SubcategoriesPicker
+                    formData={formData}
+                    categoryOptions={categoryOptions}
+                    getSubcategoryOptions={getSubcategoryOptions}
+                    toggleSubcategoria={toggleSubcategoria}
+                />
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>Tamaño de la Empresa</Label>

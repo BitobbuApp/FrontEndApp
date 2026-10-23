@@ -26,9 +26,14 @@ const SYSTEM_MESSAGES_DICTIONARY = {
     'quote.accepted': (payload, isMe) => 
         isMe ? 'Has aceptado la cotización. La transacción ha iniciado.' 
              : 'La cotización ha sido aceptada. La transacción ha iniciado.',
-    'quote.canceled': (payload, isMe) => 
-        isMe ? 'Has cancelado la cotización.' 
-             : 'La cotización ha sido cancelada.',
+    'quote.canceled': (payload, isMe) =>
+        isMe ? 'Has retirado tu oferta. La negociación fue cerrada.'
+             : 'El proveedor retiró su oferta. La negociación fue cerrada.',
+    'quote.rejected': (payload, isMe) => {
+        const base = isMe ? 'Has rechazado la oferta. La negociación fue cerrada.'
+                          : 'El comprador rechazó la oferta. La negociación fue cerrada.';
+        return payload?.reason ? `${base} Motivo: ${payload.reason}` : base;
+    },
     'quote.expired': () => 'La cotización ha expirado.',
 
     'transaction.payment_uploaded': (payload, isMe) => 

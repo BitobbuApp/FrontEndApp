@@ -73,6 +73,7 @@
     },
     "commercial": {
       "categories": "Selecciona todos los rubros que trabajas. El sistema te emparejará automáticamente con las empresas que busquen estas categorías.",
+      "subcategories": "Busca y agrega las subcategorías con las que trabajas; su categoría se marca automáticamente.",
       "retention_agent": "Actívalo si eres Contribuyente Especial. Es un dato vital que los departamentos de compras necesitan saber para efectos de facturación.",
       "credit": "Ofrecer plazos de pago (ej. 7, 15 o 30 días) es uno de los mayores atractivos para cerrar contratos con empresas grandes.",
       "payment_methods": "Mientras más opciones financieras ofrezcas, más fácil será para el comprador aprobar la transacción."
