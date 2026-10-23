@@ -53,8 +53,10 @@ export default function SettingsPage() {
         handleSave,
         handleLogoChange,
         toggleCategoria,
+        toggleSubcategoria,
         toggleMetodoPago,
         categoryOptions,
+        getSubcategoryOptions,
         companyTypeOptions,
         paymentMethodOptions,
         companySizeOptions,
@@ -167,8 +169,10 @@ export default function SettingsPage() {
                         formData={formData}
                         setFormData={setFormData}
                         toggleCategoria={toggleCategoria}
+                        toggleSubcategoria={toggleSubcategoria}
                         toggleMetodoPago={toggleMetodoPago}
                         categoryOptions={categoryOptions}
+                        getSubcategoryOptions={getSubcategoryOptions}
                         paymentMethodOptions={paymentMethodOptions}
                         companySizeOptions={companySizeOptions}
                         estimatedMonthlyTransactionOptions={estimatedMonthlyTransactionOptions}

@@ -38,6 +38,7 @@ import Pagination from '@/components/atoms/Pagination';
 import usePublicProfileData from './hooks/usePublicProfileData';
 import useCompanyProducts from './hooks/useCompanyProducts';
 import ProductSmallCard from './components/ProductSmallCard';
+import CompanySubcategories from './components/CompanySubcategories';
 import { useSupplierReviews } from '@/features/suppliers/hooks/useSupplierReviews';
 
 function getMetadataLabel(value) {
@@ -133,6 +134,11 @@ export default function PublicProfilePage() {
                     {companyType && <Badge variant="secondary" className="text-xs">{companyType}</Badge>}
                     {sector && <Badge variant="outline" className="text-xs">{sector}</Badge>}
                 </div>
+                <CompanySubcategories
+                    subcategories={company?.subcategories_of_interest}
+                    editable={isMyProfile}
+                    className="mt-3"
+                />
                 <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 mt-2">
                     {location && (
                         <span className="flex items-center gap-1">

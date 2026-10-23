@@ -20,12 +20,61 @@ import { Switch } from '@/components/ui/switch';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
 import tooltips from '@/constants/tooltips.json';
 
+/** For every selected category, the subcategories the company works with. */
+function SubcategoriesPicker({ formData, categoryOptions, getSubcategoryOptions, toggleSubcategoria }) {
+    const selectedCategories = categoryOptions
+        .filter((category) => formData.interest_category_ids?.includes(category.value))
+        .map((category) => ({ category, subcategories: getSubcategoryOptions(category.value) }))
+        .filter(({ subcategories }) => subcategories.length > 0);
+
+    if (selectedCategories.length === 0) return null;
+
+    return (
+        <div className="space-y-3">
+            <Label className="flex items-center">
+                Subcategorías con las que trabajas
+                <InfoTooltip content={tooltips.settings.commercial.subcategories} />
+            </Label>
+            <div className="space-y-4">
+                {selectedCategories.map(({ category, subcategories }) => (
+                    <div key={category.id} className="rounded-lg border border-slate-100 bg-slate-50/50 p-3">
+                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                            {category.label}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            {subcategories.map((subcategory) => {
+                                const isSelected = formData.interest_subcategory_ids?.includes(subcategory.value);
+                                return (
+                                    <Badge
+                                        key={subcategory.id}
+                                        variant={isSelected ? 'default' : 'outline'}
+                                        className={`cursor-pointer transition-colors ${
+                                            isSelected
+                                                ? 'bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]'
+                                                : 'bg-white hover:bg-slate-100'
+                                        }`}
+                                        onClick={() => toggleSubcategoria(subcategory.value)}
+                                    >
+                                        {subcategory.label}
+                                    </Badge>
+                                );
+                            })}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 export default function CommercialTab({
     formData,
     setFormData,
     toggleCategoria,
+    toggleSubcategoria,
     toggleMetodoPago,
     categoryOptions = [],
+    getSubcategoryOptions = () => [],
     paymentMethodOptions = [],
     companySizeOptions = [],
     estimatedMonthlyTransactionOptions = [],
@@ -82,6 +131,12 @@ export default function CommercialTab({
                         ))}
                     </div>
                 </div>
+                <SubcategoriesPicker
+                    formData={formData}
+                    categoryOptions={categoryOptions}
+                    getSubcategoryOptions={getSubcategoryOptions}
+                    toggleSubcategoria={toggleSubcategoria}
+                />
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                         <Label>Tamaño de la Empresa</Label>

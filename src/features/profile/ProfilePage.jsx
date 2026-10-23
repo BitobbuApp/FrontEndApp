@@ -23,6 +23,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import useProfileData from './hooks/useProfileData';
+import CompanySubcategories from './components/CompanySubcategories';
 import useCompanyProducts from './hooks/useCompanyProducts';
 import ProductSmallCard from './components/ProductSmallCard';
 import AddProductModal from './components/AddProductModal';
@@ -132,6 +133,11 @@ export default function ProfilePage() {
                             <Badge variant="outline" className="text-xs">{sector}</Badge>
                         )}
                     </div>
+                    <CompanySubcategories
+                        subcategories={company?.subcategories_of_interest}
+                        editable
+                        className="pt-2"
+                    />
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
                     <Button variant="outline" size="sm" className="gap-1.5" asChild>

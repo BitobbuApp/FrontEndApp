@@ -109,6 +109,7 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
     // ── Raw lists ────────────────────────────────────────────────────────────
     const {
         categories,
+        subcategories,
         companyTypes,
         notificationTypes,
         paymentMethods,
@@ -124,7 +125,9 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
     } = useMemo(() => {
         return {
             categories:                   normalizeList(metadata.categories),
-            companyTypes:                 normalizeList(metadata.company_types),
+            // Active subcategories only (flat list, each one has category_id)
+            subcategories:                normalizeList(metadata.subcategories),
+            companyTypes:                normalizeList(metadata.company_types),
             notificationTypes:            normalizeList(metadata.notification_types),
             paymentMethods:               normalizeList(metadata.payment_methods),
             unitsOfMeasure:               normalizeList(metadata.units_of_measure),
@@ -219,12 +222,32 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
         language,
     ]);
 
+    // ── Subcategories (grouped by their parent category) ─────────────────────
+    const { subcategoryOptions, subcategoriesByCategory } = useMemo(() => {
+        const options = [...subcategories]
+            .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))
+            .map((item) => ({
+                ...toSelectOption(item, getLocalizedLabel(item, language)),
+                categoryId: Number(item.category_id),
+                categoryValue: String(item.category_id),
+            }));
+
+        const byCategory = new Map();
+        options.forEach((option) => {
+            if (!byCategory.has(option.categoryValue)) byCategory.set(option.categoryValue, []);
+            byCategory.get(option.categoryValue).push(option);
+        });
+
+        return { subcategoryOptions: options, subcategoriesByCategory: byCategory };
+    }, [subcategories, language]);
+
     return {
         ...query,
         metadata,
 
         // Raw lists
         categories,
+        subcategories,
         companyTypes,
         notificationTypes,
         paymentMethods,
@@ -239,6 +262,9 @@ export default function useAppMetadata({ language = DEFAULT_LANGUAGE, enabled = 
 
         // Select options
         categoryOptions,
+        subcategoryOptions,
+        subcategoriesByCategory,
+        getSubcategoryOptions: (categoryValue) => subcategoriesByCategory.get(String(categoryValue)) || [],
         companyTypeOptions,
         paymentMethodOptions,
         unitOptions,
