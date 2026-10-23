@@ -45,21 +45,6 @@ export default function RequestOffersTable({
     const queryClient = useQueryClient();
     const { paymentConditionOptions } = useAppMetadata();
 
-    const updateOfferMutation = useMutation({
-        mutationFn: async ({ offerId, status }) => {
-            const response = await quoteResponsesApi.updateQuoteResponse(offerId, { status });
-            return response.data;
-        },
-        onSuccess: (_, { status }) => {
-            queryClient.invalidateQueries({ queryKey: ['quote-responses', requestId] });
-            queryClient.invalidateQueries({ queryKey: ['requestDetail', requestId] });
-            toast.success(`Oferta ${status === 'accepted' ? 'aceptada' : status === 'negotiating' ? 'en negociación' : 'rechazada'} exitosamente`);
-        },
-        onError: (error) => {
-            toast.error(error?.response?.data?.message || 'Error al actualizar la oferta');
-        },
-    });
-
     const startNegotiationMutation = useMutation({
         mutationFn: async (offerId) => {
             const res = await quoteResponsesApi.performAction(offerId, { action: 'negotiation_started' });
@@ -220,7 +205,7 @@ export default function RequestOffersTable({
                                                     variant="ghost" 
                                                     size="sm" 
                                                     className="h-8 w-8 p-0 hover:bg-slate-100"
-                                                    disabled={updateOfferMutation.isPending}
+                                                    disabled={startNegotiationMutation.isPending}
                                                 >
                                                     <MoreHorizontal className="h-4 w-4 text-slate-500" />
                                                 </Button>
