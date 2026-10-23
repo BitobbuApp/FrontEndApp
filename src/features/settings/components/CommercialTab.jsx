@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     Card,
     CardContent,
@@ -18,16 +18,28 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import GroupedMultiCombobox from '@/components/shared/GroupedMultiCombobox';
 import tooltips from '@/constants/tooltips.json';
 
-/** For every selected category, the subcategories the company works with. */
+/**
+ * Autocomplete over ALL subcategories, grouped by category (the company's categories first).
+ * Picking a subcategory of an unselected category selects that category too (toggleSubcategoria).
+ */
 function SubcategoriesPicker({ formData, categoryOptions, getSubcategoryOptions, toggleSubcategoria }) {
-    const selectedCategories = categoryOptions
-        .filter((category) => formData.interest_category_ids?.includes(category.value))
-        .map((category) => ({ category, subcategories: getSubcategoryOptions(category.value) }))
-        .filter(({ subcategories }) => subcategories.length > 0);
+    const groups = useMemo(() => {
+        const selectedCategories = new Set(formData.interest_category_ids || []);
+        const all = categoryOptions
+            .map((category) => ({
+                value: category.value,
+                label: category.label,
+                options: getSubcategoryOptions(category.value),
+                isSelected: selectedCategories.has(category.value),
+            }))
+            .filter((group) => group.options.length > 0);
+        return [...all.filter((group) => group.isSelected), ...all.filter((group) => !group.isSelected)];
+    }, [categoryOptions, getSubcategoryOptions, formData.interest_category_ids]);
 
-    if (selectedCategories.length === 0) return null;
+    if (groups.length === 0) return null;
 
     return (
         <div className="space-y-3">
@@ -35,34 +47,15 @@ function SubcategoriesPicker({ formData, categoryOptions, getSubcategoryOptions,
                 Subcategorías con las que trabajas
                 <InfoTooltip content={tooltips.settings.commercial.subcategories} />
             </Label>
-            <div className="space-y-4">
-                {selectedCategories.map(({ category, subcategories }) => (
-                    <div key={category.id} className="rounded-lg border border-slate-100 bg-slate-50/50 p-3">
-                        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                            {category.label}
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            {subcategories.map((subcategory) => {
-                                const isSelected = formData.interest_subcategory_ids?.includes(subcategory.value);
-                                return (
-                                    <Badge
-                                        key={subcategory.id}
-                                        variant={isSelected ? 'default' : 'outline'}
-                                        className={`cursor-pointer transition-colors ${
-                                            isSelected
-                                                ? 'bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d]'
-                                                : 'bg-white hover:bg-slate-100'
-                                        }`}
-                                        onClick={() => toggleSubcategoria(subcategory.value)}
-                                    >
-                                        {subcategory.label}
-                                    </Badge>
-                                );
-                            })}
-                        </div>
-                    </div>
-                ))}
-            </div>
+            <GroupedMultiCombobox
+                groups={groups}
+                selectedValues={formData.interest_subcategory_ids || []}
+                onToggle={toggleSubcategoria}
+                placeholder="Buscar y agregar subcategorías…"
+                searchPlaceholder="Ej: lácteos, repuestos, nómina…"
+                emptyText="No encontramos esa subcategoría"
+                emptySelectionText="Aún no agregaste subcategorías. Búscalas arriba para precisar con qué trabajas."
+            />
         </div>
     );
 }
