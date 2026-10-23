@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
 import { transactionsApi } from '@/features/transactions/services/transactionsApi';
+import RejectQuoteDialog from '@/features/requests/components/RejectQuoteDialog';
 
 const StatusBadge = ({ label, bgColor, textColor }) => (
     <span className={`px-2.5 py-1 text-xs font-bold rounded-full ${bgColor} ${textColor} border border-white border-opacity-20`}>
@@ -30,14 +31,33 @@ export default function ChatActionPanel({ selectedConversation, user }) {
     // Detect if we are in Phase 1 (Quote) or Phase 2 (Transaction)
     const isQuotePhase = (selectedConversation?.status === 'active' || selectedConversation?.status === 'completed') && !selectedConversation?.transaction_id;
     const isTransactionPhase = (selectedConversation?.status === 'active' || selectedConversation?.status === 'completed') && !!selectedConversation?.transaction_id;
-    
+    // Negotiation closed before a transaction (e.g. the buyer rejected the quote): read-only chat
+    const isClosedQuote = selectedConversation?.status === 'cancelled' && !selectedConversation?.transaction_id;
+    const [isRejectOpen, setIsRejectOpen] = useState(false);
+    const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
+
     // Auto-fetch Quote Response detail if in quote phase
     const { data: quoteResponse } = useQuery({
         queryKey: ['quote-response-detail', selectedConversation?.quote_response_id],
         queryFn: () => quoteResponsesApi.getQuoteResponseWithSupplier(selectedConversation.quote_response_id),
-        enabled: isQuotePhase && !!selectedConversation?.quote_response_id,
+        enabled: (isQuotePhase || isClosedQuote) && !!selectedConversation?.quote_response_id,
     });
     const quoteData = quoteResponse?.data;
+
+    // Buyer's definitive rejection (different from rejecting only the formal PDF)
+    const rejectQuoteButton = (
+        <Button size="sm" variant="destructive" className="bg-red-50 text-red-600 border-red-100 hover:bg-red-100 hover:text-red-700"
+                onClick={() => setIsRejectOpen(true)}>
+            <XCircle className="w-4 h-4 mr-1.5" /> Rechazar oferta
+        </Button>
+    );
+    const rejectQuoteDialog = (
+        <RejectQuoteDialog
+            open={isRejectOpen}
+            onOpenChange={setIsRejectOpen}
+            quoteId={selectedConversation?.quote_response_id}
+        />
+    );
 
     // Auto-fetch Transaction detail if in transaction phase
     const { data: transaction } = useQuery({
@@ -122,6 +142,27 @@ export default function ChatActionPanel({ selectedConversation, user }) {
     };
 
     // Render logic per phase
+    // Rejected by the buyer or withdrawn by the supplier: the chat is kept only as history
+    if (isClosedQuote) {
+        return (
+            <div className="bg-slate-100 border-b border-slate-200 p-4 shrink-0">
+                <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 text-slate-500">
+                        <XCircle className="w-5 h-5" />
+                    </div>
+                    <div className="min-w-0">
+                        <h4 className="font-bold text-slate-700 text-sm">Negociación cerrada · solo lectura</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                            {quoteData?.rejection_reason
+                                ? <>Motivo: <span className="font-medium text-slate-600">{quoteData.rejection_reason}</span></>
+                                : 'La negociación fue cerrada. El historial queda disponible en modo lectura.'}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (isQuotePhase && quoteData) {
         const isSupplier = quoteData.supplier_id === myId;
         const isBuyer = !isSupplier; // Only 2 actors
@@ -179,11 +220,17 @@ export default function ChatActionPanel({ selectedConversation, user }) {
                                             <Button size="sm" variant="outline" className="bg-white" onClick={() => setActionForm('quantity')}><Package className="w-3 h-3 mr-1"/> Cantidad</Button>
                                             <Button size="sm" variant="outline" className="bg-white" onClick={() => setActionForm('terms')}><FileText className="w-3 h-3 mr-1"/> Specs</Button>
                                             <Button size="sm" variant="destructive" className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-100 sm:ml-auto" 
-                                                    onClick={() => quoteMutation.mutate({ action: 'canceled' })} disabled={quoteMutation.isPending}>
+                                                    onClick={() => setIsWithdrawOpen(true)} disabled={quoteMutation.isPending}>
                                                 Retirar Oferta
                                             </Button>
                                         </div>
                                     )}
+                                    <RejectQuoteDialog
+                                        mode="withdraw"
+                                        open={isWithdrawOpen}
+                                        onOpenChange={setIsWithdrawOpen}
+                                        quoteId={selectedConversation?.quote_response_id}
+                                    />
                                 </>
                             )}
                             {isBuyer && (
@@ -192,6 +239,8 @@ export default function ChatActionPanel({ selectedConversation, user }) {
                                             onClick={() => quoteMutation.mutate({ action: 'formal_quote_requested' })} disabled={quoteMutation.isPending}>
                                         <FileText className="w-4 h-4 mr-1.5" /> Solicitar PDF Formal
                                     </Button>
+                                    {rejectQuoteButton}
+                                    {rejectQuoteDialog}
                                      {/* <Button size="sm" className="bg-[#D2FC31] hover:bg-[#c4ee2a] text-slate-900 border border-[#D2FC31] shadow-none"
                                             onClick={() => quoteMutation.mutate({ action: 'accepted' })} disabled={quoteMutation.isPending}>
                                         <CheckCircle className="w-4 h-4 mr-1.5" /> Aceptar Cotización
@@ -239,10 +288,14 @@ export default function ChatActionPanel({ selectedConversation, user }) {
                                     </Button>
                                 </>
                             ) : (
-                                <div className="flex items-center gap-2 text-amber-600">
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                    <span className="text-xs font-medium">Pendiente</span>
-                                </div>
+                                <>
+                                    <div className="flex items-center gap-2 text-amber-600">
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        <span className="text-xs font-medium">Pendiente</span>
+                                    </div>
+                                    {rejectQuoteButton}
+                                    {rejectQuoteDialog}
+                                </>
                             )}
                         </div>
                     </div>
@@ -275,10 +328,12 @@ export default function ChatActionPanel({ selectedConversation, user }) {
                                         <FileText className="w-4 h-4 mr-1.5" /> Ver PDF
                                     </Button>
                                     <Button size="sm" variant="destructive" className="bg-red-50 text-red-600 border-red-100 hover:bg-red-100"
-                                            onClick={() => quoteMutation.mutate({ action: 'formal_quote_rejected' })} 
+                                            onClick={() => quoteMutation.mutate({ action: 'formal_quote_rejected' })}
                                             disabled={quoteMutation.isPending}>
-                                        Rechazar
+                                        Rechazar PDF
                                     </Button>
+                                    {rejectQuoteButton}
+                                    {rejectQuoteDialog}
                                     <Button size="sm" className="bg-[#D2FC31] hover:bg-[#c4ee2a] text-slate-900 border border-[#D2FC31]"
                                             onClick={() => quoteMutation.mutate({ action: 'accepted' })} 
                                             disabled={quoteMutation.isPending}>
