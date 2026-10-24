@@ -19,6 +19,7 @@ import {
 import { Switch } from '@/components/ui/switch';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
 import GroupedMultiCombobox from '@/components/shared/GroupedMultiCombobox';
+import { buildSubcategoryGroups } from '@/features/appMetadata/utils/subcategoryGroups';
 import tooltips from '@/constants/tooltips.json';
 
 /**
@@ -26,18 +27,12 @@ import tooltips from '@/constants/tooltips.json';
  * Picking a subcategory of an unselected category selects that category too (toggleSubcategoria).
  */
 function SubcategoriesPicker({ formData, categoryOptions, getSubcategoryOptions, toggleSubcategoria }) {
-    const groups = useMemo(() => {
-        const selectedCategories = new Set(formData.interest_category_ids || []);
-        const all = categoryOptions
-            .map((category) => ({
-                value: category.value,
-                label: category.label,
-                options: getSubcategoryOptions(category.value),
-                isSelected: selectedCategories.has(category.value),
-            }))
-            .filter((group) => group.options.length > 0);
-        return [...all.filter((group) => group.isSelected), ...all.filter((group) => !group.isSelected)];
-    }, [categoryOptions, getSubcategoryOptions, formData.interest_category_ids]);
+    const groups = useMemo(
+        () => buildSubcategoryGroups(categoryOptions, getSubcategoryOptions, {
+            priorityCategoryValues: formData.interest_category_ids,
+        }),
+        [categoryOptions, getSubcategoryOptions, formData.interest_category_ids]
+    );
 
     if (groups.length === 0) return null;
 

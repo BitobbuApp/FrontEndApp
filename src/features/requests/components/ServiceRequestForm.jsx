@@ -13,6 +13,8 @@ import { Textarea } from '@/components/ui/textarea';
 import useAppMetadata from '../../appMetadata/hooks/useAppMetadata';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
 import tooltips from '@/constants/tooltips.json';
+import SubcategorySelect from '@/features/appMetadata/components/SubcategorySelect';
+import { useCategorySubcategoryHandlers } from '@/features/appMetadata/hooks/useCategorySubcategoryHandlers';
 
 export default function ServiceRequestForm({
     form,
@@ -26,6 +28,7 @@ export default function ServiceRequestForm({
 
     const set = (key) => (e) =>
         setForm((prev) => ({ ...prev, [key]: typeof e === 'string' ? e : e.target.value }));
+    const { onCategoryChange, onSubcategoryChange } = useCategorySubcategoryHandlers(setForm);
 
     return (
         <div className="space-y-5">
@@ -47,7 +50,7 @@ export default function ServiceRequestForm({
                     Categoría / Rubro *
                     <InfoTooltip content={tooltips.requests.service.category} />
                 </Label>
-                <Select value={form.category_id} onValueChange={set('category_id')}>
+                <Select value={form.category_id} onValueChange={onCategoryChange}>
                     <SelectTrigger className="h-11">
                         <SelectValue placeholder="Seleccionar categoria" />
                     </SelectTrigger>
@@ -59,6 +62,18 @@ export default function ServiceRequestForm({
                         ))}
                     </SelectContent>
                 </Select>
+            </div>
+
+            <div className="space-y-2">
+                <Label className="flex items-center">
+                    Subcategoría
+                    <InfoTooltip content={tooltips.requests.subcategory} />
+                </Label>
+                <SubcategorySelect
+                    categoryValue={form.category_id}
+                    value={form.subcategory_id}
+                    onChange={onSubcategoryChange}
+                />
             </div>
 
             <div className="grid grid-cols-2 gap-4">

@@ -10,18 +10,7 @@ import {
     CommandList,
 } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
-
-/** "Lácteos" → "lacteos": search ignores accents and case. */
-const normalize = (text) => String(text ?? '')
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase();
-
-// cmdk filter: every word typed must appear in the option or group label (keywords)
-const accentInsensitiveFilter = (_value, search, keywords = []) => {
-    const haystack = normalize(keywords.join(' '));
-    return normalize(search).split(/\s+/).filter(Boolean).every((term) => haystack.includes(term)) ? 1 : 0;
-};
+import { accentInsensitiveFilter } from './comboboxSearch';
 
 /**
  * Multi-select with autocomplete, grouped by sections (e.g. subcategories grouped by category).

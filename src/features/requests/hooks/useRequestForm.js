@@ -11,6 +11,7 @@ import useAppMetadata, {
 const DEFAULT_PRODUCT_FORM = {
     product_service: '',
     category_id: '',
+    subcategory_id: '',
     quantity: '',
     unit_id: '',
     country_id: '',
@@ -24,6 +25,7 @@ const DEFAULT_PRODUCT_FORM = {
 const DEFAULT_SERVICE_FORM = {
     product_service: '',
     category_id: '',
+    subcategory_id: '',
     description: '',
     execution_date: '',
     reach_service: '',
@@ -52,6 +54,7 @@ export default function useRequestForm() {
 
     const {
         categoryOptions,
+        subcategoryOptions,
         unitOptions,
         defaultUnitOption,
         paymentConditionOptions,
@@ -89,10 +92,11 @@ export default function useRequestForm() {
             ...prev,
             product_service: directOffer.name || prev.product_service,
             category_id: findOptionValueById(categoryOptions, directOffer.category_id) || prev.category_id,
+            subcategory_id: findOptionValueById(subcategoryOptions, directOffer.subcategory_id) || prev.subcategory_id,
             unit_id: findOptionValueById(unitOptions, directOffer.unit_id) || prev.unit_id,
             quantity: prev.quantity || directOffer.moq || '',
         }));
-    }, [directOffer, isLoadingMetadata, categoryOptions, unitOptions]);
+    }, [directOffer, isLoadingMetadata, categoryOptions, subcategoryOptions, unitOptions]);
 
     const clearDirectOffer = () => setDirectOffer(null);
 
@@ -114,6 +118,7 @@ export default function useRequestForm() {
                 category_id: findOptionValueById(categoryOptions, requestData.category_id)
                     || findOptionValueByLabel(categoryOptions, requestData.category)
                     || '',
+                subcategory_id: findOptionValueById(subcategoryOptions, requestData.subcategory_id) || '',
                 description: requestData.description || '',
                 execution_date: requestData.expiration_date
                     ? new Date(requestData.expiration_date).toISOString().split('T')[0]
@@ -135,6 +140,7 @@ export default function useRequestForm() {
             category_id: findOptionValueById(categoryOptions, requestData.category_id)
                 || findOptionValueByLabel(categoryOptions, requestData.category)
                 || '',
+            subcategory_id: findOptionValueById(subcategoryOptions, requestData.subcategory_id) || '',
             quantity: requestData.quantity || '',
             unit_id: findOptionValueById(unitOptions, requestData.unit_id)
                 || findOptionValueByLabel(unitOptions, requestData.unit_of_measure)
@@ -152,6 +158,7 @@ export default function useRequestForm() {
     }, [
         defaultUnitOption?.value,
         categoryOptions,
+        subcategoryOptions,
         isEditing,
         requestData,
         unitOptions,
@@ -162,6 +169,8 @@ export default function useRequestForm() {
             const { raw_files_payload, ...data } = payload;
 
             Object.keys(data).forEach((key) => {
+                // On edit, a null subcategory must reach the backend to clear it
+                if (isEditing && key === 'subcategory_id' && data[key] === null) return;
                 if (data[key] === '' || data[key] === null || data[key] === undefined) {
                     delete data[key];
                 }
@@ -243,6 +252,7 @@ export default function useRequestForm() {
         const commonPayload = {
             product_service: form.product_service.trim(),
             category_id: form.category_id ? Number(form.category_id) : null,
+            subcategory_id: form.subcategory_id ? Number(form.subcategory_id) : null,
             expiration_date: form.expiration_date || null,
             description: form.description?.trim() || null,
         };

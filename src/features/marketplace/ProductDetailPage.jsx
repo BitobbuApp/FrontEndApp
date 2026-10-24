@@ -64,6 +64,7 @@ export default function ProductDetailPage() {
                     name,
                     company_id: product.company_id,
                     category_id: product.category_id,
+                    subcategory_id: product.subcategory_id,
                     unit_id: product.unit_id,
                     unit_of_measure: product.unit_of_measure,
                     moq,
@@ -93,6 +94,12 @@ export default function ProductDetailPage() {
                 <button onClick={() => navigate('/Marketplace')} className="hover:text-[#0B2046]">Marketplace</button>
                 <ChevronRight className="w-4 h-4" />
                 <span className="truncate max-w-[200px]">{category || 'Categoría'}</span>
+                {product.subcategory && (
+                    <>
+                        <ChevronRight className="w-4 h-4" />
+                        <span className="truncate max-w-[200px]">{product.subcategory}</span>
+                    </>
+                )}
                 <ChevronRight className="w-4 h-4" />
                 <span className="font-semibold text-slate-800 truncate max-w-[200px]">{name}</span>
             </div>
@@ -259,6 +266,12 @@ export default function ProductDetailPage() {
                                     <div className="col-span-1 bg-slate-50 p-4 font-semibold text-slate-700 text-sm">Categoría</div>
                                     <div className="col-span-2 p-4 text-sm text-slate-600 bg-white">{category || '-'}</div>
                                 </div>
+                                {product.subcategory && (
+                                    <div className="grid grid-cols-3 border-b border-slate-200">
+                                        <div className="col-span-1 bg-slate-50 p-4 font-semibold text-slate-700 text-sm">Subcategoría</div>
+                                        <div className="col-span-2 p-4 text-sm text-slate-600 bg-white">{product.subcategory}</div>
+                                    </div>
+                                )}
                                 <div className="grid grid-cols-3">
                                     <div className="col-span-1 bg-slate-50 p-4 font-semibold text-slate-700 text-sm">Estado</div>
                                     <div className="col-span-2 p-4 text-sm text-slate-600 bg-white">Nuevo</div>
