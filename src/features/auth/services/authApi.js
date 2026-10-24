@@ -10,18 +10,28 @@ const TOKEN_KEY = 'bitobbu_token';
 
 /**
  * POST /api/v1/users/login
- * Returns: { id, first_name, last_name, email, is_active, last_access, token }
+ * Returns one of:
+ *  - a full session (has `token`)
+ *  - { mfa_required: true, mfa_token }: the user has 2FA, ask for a code (verifyLogin2Fa)
+ *  - { two_factor_enrollment_required: true, enrollment_token }: the company requires 2FA and the user has none yet
  */
 export async function loginUser(email, password) {
-    // apiClient already maps response to response.data (which represents the body)
-    // and expects the body to have { data: {...} } based on our backend responses.
     const responseBody = await apiClient.post('/users/login', { email, password });
     return responseBody.data;
 }
 
 /**
+ * POST /api/v1/auth/login/2fa
+ * Completes login challenge with TOTP code or recovery code
+ */
+export async function verifyLogin2Fa({ mfa_token, code }) {
+    const responseBody = await apiClient.post('/auth/login/2fa', { mfa_token, code }, { silent: true });
+    return responseBody.data;
+}
+
+/**
  * POST /api/v1/users/register
- * Returns: { id, first_name, last_name, email }
+ * Returns: { id, first_name, last_name, email, token }
  */
 export async function registerUser({
     first_name,
@@ -51,27 +61,104 @@ export async function registerUser({
 }
 
 /**
- * POST /api/v1/users/reset-password
+ * POST /api/v1/auth/password/forgot
+ * Requests reset email (always returns generic 202 message)
  */
-export async function resetPassword({ email, newPassword, confirmPassword }) {
-    const responseBody = await apiClient.post('/users/reset-password', {
-        email,
-        newPassword,
-        confirmPassword
-    });
+export async function requestPasswordReset(email) {
+    const responseBody = await apiClient.post('/auth/password/forgot', { email }, { silent: true });
     return responseBody;
 }
 
 /**
+ * POST /api/v1/auth/password/reset/validate
+ * Validates token without consuming it
+ */
+export async function validateResetToken(token) {
+    const responseBody = await apiClient.post('/auth/password/reset/validate', { token }, { silent: true });
+    return responseBody.data;
+}
+
+/**
+ * POST /api/v1/auth/password/reset
+ * Consumes token, checks TOTP if required, enforces 5-history, changes password
+ */
+export async function resetPasswordWithToken({
+    token,
+    new_password,
+    confirm_password,
+    totp_code,
+    recovery_code
+}) {
+    const responseBody = await apiClient.post('/auth/password/reset', {
+        token,
+        new_password,
+        confirm_password,
+        totp_code,
+        recovery_code
+    }, { silent: true });
+    return responseBody.data;
+}
+
+/**
  * POST /api/v1/users/change-password
+ * Updates the password; returns { token } (the current session must adopt it: AuthContext.refreshToken)
  */
 export async function changePassword({ currentPassword, newPassword, confirmPassword }) {
     const responseBody = await apiClient.post('/users/change-password', {
         currentPassword,
         newPassword,
         confirmPassword
-    });
-    return responseBody;
+    }, { silent: true });
+    return responseBody.data;
+}
+
+// ─── 2FA Management ──────────────────────────────────────────────────────────
+
+/** Bearer override for the enrollment token a user gets at login when the company requires 2FA */
+const withToken = (token) => (token ? { headers: { Authorization: `Bearer ${token}` } } : {});
+
+/**
+ * GET /api/v1/auth/2fa/status
+ * { enabled, enabled_at, recovery_codes_remaining, company_requires_2fa, password_changed_at }
+ */
+export async function getTwoFactorStatus() {
+    const responseBody = await apiClient.get('/auth/2fa/status');
+    return responseBody.data;
+}
+
+/**
+ * POST /api/v1/auth/2fa/setup
+ * Returns { secret, otpauth_url }. Pass { token } to use an enrollment token instead of the session.
+ */
+export async function setup2Fa({ token } = {}) {
+    const responseBody = await apiClient.post('/auth/2fa/setup', undefined, { silent: true, ...withToken(token) });
+    return responseBody.data;
+}
+
+/**
+ * POST /api/v1/auth/2fa/enable
+ * Returns { recovery_codes, session }: `session` is a fresh login (enabling 2FA revokes the previous token).
+ */
+export async function enable2Fa(code, { token } = {}) {
+    const responseBody = await apiClient.post('/auth/2fa/enable', { code }, { silent: true, ...withToken(token) });
+    return responseBody.data;
+}
+
+/**
+ * POST /api/v1/auth/2fa/disable
+ * Returns { token } (fresh token for the current session: AuthContext.refreshToken)
+ */
+export async function disable2Fa({ password, code }) {
+    const responseBody = await apiClient.post('/auth/2fa/disable', { password, code }, { silent: true });
+    return responseBody.data;
+}
+
+/**
+ * POST /api/v1/auth/2fa/recovery-codes
+ */
+export async function regenerateRecoveryCodes(code) {
+    const responseBody = await apiClient.post('/auth/2fa/recovery-codes', { code }, { silent: true });
+    return responseBody.data;
 }
 
 // ─── Session helpers ──────────────────────────────────────────────────────────
@@ -80,6 +167,11 @@ export async function changePassword({ currentPassword, newPassword, confirmPass
 export function saveSession(userData) {
     const { token, ...user } = userData;
     localStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+}
+
+/** Replace only the JWT (the session user is unchanged), e.g. after a password or 2FA change */
+export function saveToken(token) {
     if (token) localStorage.setItem(TOKEN_KEY, token);
 }
 
