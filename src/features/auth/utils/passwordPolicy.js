@@ -15,10 +15,14 @@ export function evaluatePassword(password, confirmation) {
 
 export const isPasswordValid = (checks) => Object.values(checks).every(Boolean);
 
+// The real limit is 72 bytes: a few accented letters or symbols take more than one, so a password slightly
+// under 72 characters can still be too long. Shown only when that happens.
+export const TOO_LONG_HINT = 'Es demasiado larga: acórtala un poco.';
+
 export const PASSWORD_REQUIREMENT_LABELS = [
     ['minLength', 'Al menos 10 caracteres'],
     ['hasLetter', 'Una letra'],
     ['hasNumber', 'Un número'],
-    ['withinMaxBytes', 'No más de 72 bytes (los acentos y símbolos ocupan más de uno)'],
+    ['withinMaxBytes', 'Máximo 72 caracteres'],
     ['matches', 'Las contraseñas coinciden'],
 ];

@@ -168,7 +168,7 @@ export default function ResetPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
                 <PasswordField id="new-password" label="Nueva contraseña" value={password} onChange={setPassword} autoComplete="new-password" disabled={isLoading} />
                 <PasswordField id="confirm-password" label="Confirmar contraseña" value={confirmation} onChange={setConfirmation} autoComplete="new-password" disabled={isLoading} />
-                <PasswordRequirements checks={checks} />
+                <PasswordRequirements checks={checks} password={password} />
 
                 {requiresTwoFactor && (
                     <div className="space-y-3 pt-2 border-t border-border">

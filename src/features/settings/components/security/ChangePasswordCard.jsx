@@ -66,7 +66,7 @@ export default function ChangePasswordCard() {
                     </div>
 
                     <div className="p-4 bg-muted/50 rounded-lg border border-border">
-                        <PasswordRequirements checks={checks} />
+                        <PasswordRequirements checks={checks} password={next} />
                     </div>
 
                     {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
