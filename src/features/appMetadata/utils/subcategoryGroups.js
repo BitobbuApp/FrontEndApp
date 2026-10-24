@@ -25,3 +25,9 @@ export function buildSubcategoryGroups(categoryOptions = [], getSubcategoryOptio
 export function findSubcategoryCategory(subcategoryOptions = [], subcategoryValue) {
     return subcategoryOptions.find((option) => option.value === String(subcategoryValue))?.categoryValue || '';
 }
+
+/** "Alimentos · Lácteos" (or just the category when there is no subcategory). */
+export function formatCategory(category, subcategory) {
+    if (!category) return subcategory || '';
+    return subcategory ? `${category} · ${subcategory}` : category;
+}

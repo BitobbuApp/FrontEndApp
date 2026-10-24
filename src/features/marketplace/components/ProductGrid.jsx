@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Package } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 const containerVariants = {
     hidden: { opacity: 0 },
@@ -59,7 +60,12 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                             <h3 className="font-medium text-[13px] sm:text-sm text-slate-700 line-clamp-2 leading-snug min-h-[40px] mb-2">
                                 {product.name}
                             </h3>
-                            
+                            {product.category && (
+                                <p className="text-[11px] text-slate-500 line-clamp-1 -mt-1 mb-2">
+                                    {formatCategory(product.category, product.subcategory)}
+                                </p>
+                            )}
+
                             <div className="mt-auto">
                                 <p className="text-base sm:text-lg font-extrabold text-[#0B2046]">
                                     {getDisplayPrice(product).replace('$', 'USD ')}

@@ -7,6 +7,7 @@ import DirectRequestBadge from '@/features/requests/components/DirectRequestBadg
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { useNavigate } from 'react-router-dom';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 const unitLabels = {
     Units: 'Unidades', Kg: 'Kg', Liters: 'Litros', Meters: 'Metros',
@@ -57,7 +58,7 @@ export default function RequestMobileCard({ req, onTogglePause, onDelete }) {
                 <div>
                     <p className="font-semibold text-foreground text-sm leading-tight">{req.product_service}</p>
                     {req.category && (
-                        <Badge variant="secondary" className="text-[10px] mt-1">{req.category}</Badge>
+                        <Badge variant="secondary" className="text-[10px] mt-1">{formatCategory(req.category, req.subcategory)}</Badge>
                     )}
                     <DirectRequestBadge request={req} className="mt-1 ml-1" />
                 </div>

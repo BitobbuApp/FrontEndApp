@@ -19,6 +19,7 @@ import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesAp
 import RequestOffersTable from './components/RequestOffersTable';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
 import tooltips from '@/constants/tooltips.json';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 // Unit labels map
 const unitLabels = {
@@ -122,7 +123,7 @@ export default function RequestSummaryPage() {
                         <div>
                             <h2 className="text-xl font-bold text-foreground">{req.product_service}</h2>
                             {req.category && (
-                                <Badge variant="secondary" className="mt-1.5 text-xs">{req.category}</Badge>
+                                <Badge variant="secondary" className="mt-1.5 text-xs">{formatCategory(req.category, req.subcategory)}</Badge>
                             )}
                             <DirectRequestBadge request={req} className="mt-1.5 ml-1" />
                         </div>

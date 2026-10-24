@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/ui/StatusBadge';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 const unitLabels = {
     Units: 'Unidades', Kg: 'Kg', Liters: 'Litros', Meters: 'Metros',
@@ -51,7 +52,7 @@ export default function ProspectMobileCard({ req, onViewDetail, onQuickQuote }) 
                 {req.category && (
                     <div className="absolute bottom-2 left-2">
                         <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-background/90 text-slate-700 shadow-sm">
-                            {req.category}
+                            {formatCategory(req.category, req.subcategory)}
                         </span>
                     </div>
                 )}

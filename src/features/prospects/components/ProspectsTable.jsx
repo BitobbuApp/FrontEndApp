@@ -18,6 +18,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import EmptyState from '@/components/ui/EmptyState';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 const unitLabels = {
     Units: 'Unidades',
@@ -186,7 +187,7 @@ export default function ProspectsTable({
                                 <TableCell>
                                     {req.category ? (
                                         <Badge variant="secondary" className="text-xs">
-                                            {req.category}
+                                            {formatCategory(req.category, req.subcategory)}
                                         </Badge>
                                     ) : (
                                         <span className="text-slate-400">-</span>

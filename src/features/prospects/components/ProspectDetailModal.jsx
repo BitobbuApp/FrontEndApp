@@ -12,6 +12,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import StatusBadge from '@/components/ui/StatusBadge';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 const unitLabels = {
     Units: 'Unidades',
@@ -107,7 +108,7 @@ export default function ProspectDetailModal({
                         <div className="bg-muted/50 p-4 rounded-xl">
                             <p className="text-sm text-slate-500">Categoría</p>
                             <p className="font-semibold text-foreground">
-                                {req.category || 'General'}
+                                {formatCategory(req.category, req.subcategory) || 'General'}
                             </p>
                         </div>
                         <div className="bg-muted/50 p-4 rounded-xl">

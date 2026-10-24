@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Package, Tag, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 export default function ProductSmallCard({ product, onEdit, onDelete }) {
     const imageUrl = product.photos?.[0]?.url;
@@ -48,7 +49,7 @@ export default function ProductSmallCard({ product, onEdit, onDelete }) {
                 )}
                 <div className="absolute top-2 left-2">
                     <Badge className="bg-[#D2FC31] text-slate-900 hover:bg-[#D2FC31] border-0 text-[10px] px-2">
-                        {product.category || 'General'}
+                        {formatCategory(product.category, product.subcategory) || 'General'}
                     </Badge>
                 </div>
             </div>

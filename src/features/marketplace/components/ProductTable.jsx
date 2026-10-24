@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import RatingStars from '@/components/ui/RatingStars';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 const getDisplayPrice = (product) => {
     if (product.pricing_tiers?.length > 0) {
@@ -82,7 +83,7 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                 </TableCell>
                                 <TableCell>
                                     <Badge variant="secondary" className="text-xs">
-                                        {product.category || 'Categoría'}
+                                        {formatCategory(product.category, product.subcategory) || 'Categoría'}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="font-bold text-foreground">
