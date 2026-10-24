@@ -11,13 +11,13 @@ import ProductGrid from './components/ProductGrid';
 import ProductTable from './components/ProductTable';
 import HeroSection from './components/HeroSection';
 import MarketplaceCTA from './components/MarketplaceCTA';
-import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 import { useAuth } from '@/features/auth/AuthContext';
 
 export default function MarketplacePage() {
     const [filters, setFilters] = useState({
         searchTerm: '',
         categoryId: '',
+        subcategoryId: '',
         countryId: '',
         stateId: '',
         minPrice: '',
@@ -34,14 +34,31 @@ export default function MarketplacePage() {
         navigate(`/Marketplace/producto/${product.id}`);
     };
 
-    const { categories } = useAppMetadata();
     const { isAuthenticated } = useAuth();
     const totalPages = Math.ceil(total / filters.limit) || 1;
+
+    // Categories panel of the hero: filter the products and scroll to them
+    const scrollToProducts = () => document.getElementById('productos-section')?.scrollIntoView({ behavior: 'smooth' });
+    const handleSelectCategory = (categoryId) => {
+        setFilters((prev) => ({ ...prev, categoryId, subcategoryId: '', page: 1 }));
+        scrollToProducts();
+    };
+    const handleSelectSubcategory = (subcategoryId, categoryId) => {
+        setFilters((prev) => ({ ...prev, categoryId, subcategoryId, page: 1 }));
+        scrollToProducts();
+    };
 
     return (
         <div className="space-y-6">
             {/* Hero Section */}
-            {!isAuthenticated && <HeroSection categories={categories} />}
+            {!isAuthenticated && (
+                <HeroSection
+                    selectedCategoryId={filters.categoryId}
+                    selectedSubcategoryId={filters.subcategoryId}
+                    onSelectCategory={handleSelectCategory}
+                    onSelectSubcategory={handleSelectSubcategory}
+                />
+            )}
 
             {/* Section Header */}
             <div id="productos-section" className={`pt-4 scroll-mt-24 ${!isAuthenticated ? 'mt-8' : ''}`}>
@@ -80,8 +97,8 @@ export default function MarketplacePage() {
                             icon={ShoppingBag}
                             title="Sin productos"
                             description={
-                                filters.searchTerm || filters.categoryId
-                                    ? 'No se encontraron productos con esos criterios'
+                                filters.searchTerm || filters.categoryId || filters.subcategoryId
+                                    ?'No se encontraron productos con esos criterios'
                                     : 'Los productos del marketplace aparecerán aquí'
                             }
                         />

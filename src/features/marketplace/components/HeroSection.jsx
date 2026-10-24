@@ -1,33 +1,111 @@
-import React from 'react';
-import { ChevronRight, Package, Truck, ShieldCheck, Zap, PackageCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronDown, ChevronRight, Package, Truck, ShieldCheck, Zap, PackageCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import { cn } from '@/lib/utils';
 
-export default function HeroSection({ categories }) {
+const VISIBLE_CATEGORIES = 7;
+
+/**
+ * Navigable categories panel: a category expands its subcategories;
+ * clicking "Todo en …" or a subcategory filters the products below.
+ */
+function CategoriesPanel({ selectedCategoryId, selectedSubcategoryId, onSelectCategory, onSelectSubcategory }) {
+    const { categoryOptions, getSubcategoryOptions } = useAppMetadata();
+    const [expanded, setExpanded] = useState(selectedCategoryId || '');
+    const [showAll, setShowAll] = useState(false);
+
+    const visible = showAll ? categoryOptions : categoryOptions.slice(0, VISIBLE_CATEGORIES);
+
+    return (
+        <div className="hidden lg:flex lg:flex-col lg:col-span-3 bg-white rounded-2xl p-4 shadow-sm border border-slate-100 max-h-[560px]">
+            <h3 className="font-bold text-lg mb-4 text-[#0B2046]">Categorías</h3>
+            <div className="space-y-1 overflow-y-auto pr-1">
+                {visible.map((category) => {
+                    const subcategories = getSubcategoryOptions(category.value);
+                    const isExpanded = expanded === category.value;
+                    const isActive = selectedCategoryId === category.value;
+                    return (
+                        <div key={category.id}>
+                            <button
+                                type="button"
+                                onClick={() => (subcategories.length > 0
+                                    ? setExpanded(isExpanded ? '' : category.value)
+                                    : onSelectCategory(category.value))}
+                                aria-expanded={subcategories.length > 0 ? isExpanded : undefined}
+                                className={cn(
+                                    'w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 text-slate-700 hover:text-[#0B2046] transition-colors group',
+                                    isActive && 'bg-slate-50 text-[#0B2046]'
+                                )}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={cn('text-slate-400 group-hover:text-[#D2FC31]', isActive && 'text-[#0B2046]')}>
+                                        <Package className="w-5 h-5" />
+                                    </div>
+                                    <span className="font-medium text-sm text-left">{category.label}</span>
+                                </div>
+                                {subcategories.length > 0 && isExpanded
+                                    ? <ChevronDown className="w-4 h-4 text-[#0B2046]" />
+                                    : <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#0B2046]" />}
+                            </button>
+
+                            {isExpanded && subcategories.length > 0 && (
+                                <div className="ml-11 mb-2 mt-1 space-y-0.5 border-l border-slate-100 pl-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => onSelectCategory(category.value)}
+                                        className={cn(
+                                            'block w-full text-left text-xs font-semibold py-1.5 text-[#0B2046] hover:underline',
+                                            isActive && !selectedSubcategoryId && 'underline'
+                                        )}
+                                    >
+                                        Todo en {category.label}
+                                    </button>
+                                    {subcategories.map((subcategory) => (
+                                        <button
+                                            key={subcategory.id}
+                                            type="button"
+                                            onClick={() => onSelectSubcategory(subcategory.value, category.value)}
+                                            className={cn(
+                                                'block w-full text-left text-xs py-1.5 text-slate-600 hover:text-[#0B2046]',
+                                                selectedSubcategoryId === subcategory.value && 'font-semibold text-[#0B2046]'
+                                            )}
+                                        >
+                                            {subcategory.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+            {categoryOptions.length > VISIBLE_CATEGORIES && (
+                <button
+                    type="button"
+                    onClick={() => setShowAll((value) => !value)}
+                    className="w-full mt-4 p-3 text-sm font-bold text-[#0B2046] hover:bg-slate-50 rounded-lg flex items-center justify-center gap-2"
+                >
+                    {showAll ? 'Ver menos categorías' : 'Ver todas las categorías'}
+                    <ChevronRight className={cn('w-4 h-4 transition-transform', showAll && '-rotate-90')} />
+                </button>
+            )}
+        </div>
+    );
+}
+
+export default function HeroSection({ selectedCategoryId, selectedSubcategoryId, onSelectCategory, onSelectSubcategory }) {
     return (
         <div className="w-full mb-10 pt-4">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                
-                {/* Left Column: Categories Sidebar */}
-                <div className="hidden lg:block lg:col-span-3 bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
-                    <h3 className="font-bold text-lg mb-4 text-[#0B2046]">Categorías</h3>
-                    <div className="space-y-1">
-                        {categories?.slice(0, 7).map((cat) => (
-                            <button key={cat.id} className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 text-slate-700 hover:text-[#0B2046] transition-colors group">
-                                <div className="flex items-center gap-3">
-                                    <div className="text-slate-400 group-hover:text-[#D2FC31]">
-                                        {/* Mock icon */}
-                                        <Package className="w-5 h-5" />
-                                    </div>
-                                    <span className="font-medium text-sm">{cat.name_es || cat.name_en}</span>
-                                </div>
-                                <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#0B2046]" />
-                            </button>
-                        ))}
-                    </div>
-                    <button className="w-full mt-4 p-3 text-sm font-bold text-[#0B2046] hover:bg-slate-50 rounded-lg flex items-center justify-center gap-2">
-                        Ver todas las categorías <ChevronRight className="w-4 h-4" />
-                    </button>
-                </div>
+
+                {/* Left Column: navigable categories / subcategories */}
+                <CategoriesPanel
+                    selectedCategoryId={selectedCategoryId}
+                    selectedSubcategoryId={selectedSubcategoryId}
+                    onSelectCategory={onSelectCategory}
+                    onSelectSubcategory={onSelectSubcategory}
+                />
 
                 {/* Center Column: Hero Carousel & Features */}
                 <div className="lg:col-span-6 flex flex-col gap-6">

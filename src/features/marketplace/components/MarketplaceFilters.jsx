@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import SubcategorySelect from '@/features/appMetadata/components/SubcategorySelect';
+import { findSubcategoryCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 export default function MarketplaceFilters({
     filters,
@@ -20,7 +22,8 @@ export default function MarketplaceFilters({
     setViewMode,
 }) {
     const {
-        categories,
+        categoryOptions,
+        subcategoryOptions,
         countries,
         states,
     } = useAppMetadata();
@@ -30,6 +33,29 @@ export default function MarketplaceFilters({
             ...prev,
             [key]: value === 'Todos' ? '' : value,
             page: 1 // Reset page when filters change
+        }));
+    };
+
+    // Changing the category clears a subcategory of another category
+    const handleCategoryChange = (value) => {
+        const categoryId = value === 'Todos' ? '' : value;
+        setFilters(prev => ({
+            ...prev,
+            categoryId,
+            subcategoryId: prev.subcategoryId && findSubcategoryCategory(subcategoryOptions, prev.subcategoryId) === categoryId
+                ? prev.subcategoryId
+                : '',
+            page: 1,
+        }));
+    };
+
+    // Picking a subcategory also sets its category
+    const handleSubcategoryChange = (subcategoryId, categoryId) => {
+        setFilters(prev => ({
+            ...prev,
+            subcategoryId,
+            ...(subcategoryId && categoryId && { categoryId }),
+            page: 1,
         }));
     };
 
@@ -65,24 +91,32 @@ export default function MarketplaceFilters({
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     {/* Category Filter */}
                     <Select
                         value={filters.categoryId || 'Todos'}
-                        onValueChange={(val) => handleFilterChange('categoryId', val)}
+                        onValueChange={handleCategoryChange}
                     >
                         <SelectTrigger className="h-11">
                             <SelectValue placeholder="Categoría" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="Todos">Todas las Categorías</SelectItem>
-                            {categories?.map((cat) => (
-                                <SelectItem key={cat.id} value={String(cat.id)}>
-                                    {cat.name_es || cat.name}
+                            {categoryOptions.map((category) => (
+                                <SelectItem key={category.id} value={category.value}>
+                                    {category.label}
                                 </SelectItem>
                             ))}
                         </SelectContent>
                     </Select>
+
+                    {/* Subcategory Filter (autocomplete; depends on the category) */}
+                    <SubcategorySelect
+                        categoryValue={filters.categoryId}
+                        value={filters.subcategoryId}
+                        onChange={handleSubcategoryChange}
+                        placeholder={filters.categoryId ? 'Todas las subcategorías' : 'Buscar subcategoría'}
+                    />
 
                     {/* Country Filter */}
                     <Select
@@ -140,7 +174,7 @@ export default function MarketplaceFilters({
                             <SelectItem value="newest">Más recientes</SelectItem>
                             <SelectItem value="price_asc">Precio: Menor a Mayor</SelectItem>
                             <SelectItem value="price_desc">Precio: Mayor a Menor</SelectItem>
-                            <SelectItem value="rating">Mejor calificados</SelectItem>
+                            <SelectItem value="rating_desc">Mejor calificados</SelectItem>
                         </SelectContent>
                     </Select>
 

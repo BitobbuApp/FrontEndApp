@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { marketplaceApi } from '../services/marketplaceApi';
 import useDebounce from '@/hooks/useDebounce';
 
@@ -6,6 +6,7 @@ export function useMarketplaceData(filters) {
     const {
         searchTerm,
         categoryId,
+        subcategoryId,
         countryId,
         stateId,
         minPrice,
@@ -23,6 +24,7 @@ export function useMarketplaceData(filters) {
             'marketplace-products',
             debouncedSearchTerm,
             categoryId,
+            subcategoryId,
             countryId,
             stateId,
             minPrice,
@@ -35,6 +37,7 @@ export function useMarketplaceData(filters) {
             const params = {
                 searchTerm: debouncedSearchTerm || undefined,
                 categoryId: categoryId || undefined,
+                subcategoryId: subcategoryId || undefined,
                 countryId: countryId || undefined,
                 stateId: stateId || undefined,
                 minPrice: minPrice || undefined,
@@ -47,7 +50,8 @@ export function useMarketplaceData(filters) {
             const response = await marketplaceApi.getMarketplaceOffers(params);
             return response; // { data: [...], total: X }
         },
-        keepPreviousData: true,
+        // v5: keep showing the previous page while the next one loads (no flicker)
+        placeholderData: keepPreviousData,
     });
 
     return {
