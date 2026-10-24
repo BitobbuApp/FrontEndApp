@@ -39,6 +39,7 @@ export default function ChatArea({
     sendMutation,
     isMobile = false,
     onBack = () => { },
+    onLeave = () => { },
     className = "",
 }) {
     const [messageText, setMessageText] = useState('');
@@ -110,7 +111,7 @@ export default function ChatArea({
     return (
         <Card className={`flex-1 border-0 shadow-sm flex flex-col overflow-hidden relative ${className}`}>
             {/* Review Overlay */}
-            <ReviewModal selectedConversation={selectedConversation} user={user} />
+            <ReviewModal selectedConversation={selectedConversation} user={user} onDone={onLeave} />
 
             {/* Chat Header */}
             <div className="p-3 lg:p-4 border-b flex items-center justify-between bg-white sticky top-0 z-10">

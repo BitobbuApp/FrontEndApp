@@ -34,7 +34,7 @@ const StarRater = ({ label, value, onChange }) => {
     );
 };
 
-export default function ReviewModal({ selectedConversation, user }) {
+export default function ReviewModal({ selectedConversation, user, onDone }) {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
     
@@ -90,13 +90,14 @@ export default function ReviewModal({ selectedConversation, user }) {
     });
 
     useEffect(() => {
-        if (submitMutation.isSuccess && isMobile) {
-            const timer = setTimeout(() => {
-                navigate('/dashboard');
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
-    }, [submitMutation.isSuccess, navigate, isMobile]);
+        if (!submitMutation.isSuccess) return;
+        // After the thank-you screen the reviewer leaves the chat (mobile: dashboard, desktop: back to the list)
+        const timer = setTimeout(() => {
+            if (isMobile) navigate('/dashboard');
+            else onDone?.();
+        }, 3000);
+        return () => clearTimeout(timer);
+    }, [submitMutation.isSuccess, navigate, isMobile, onDone]);
 
     if (!isVisible) return null;
 
