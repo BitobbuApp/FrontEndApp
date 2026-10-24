@@ -34,8 +34,7 @@ const unitLabels = {
 export default function ProspectsTable({
     filteredSolicitudes,
     isLoading,
-    searchTerm,
-    categoryFilter,
+    hasFilters = false,
     handleViewDetail,
     handleQuickQuote,
     page,
@@ -65,7 +64,7 @@ export default function ProspectsTable({
                         icon={Users}
                         title="Sin leads disponibles"
                         description={
-                            searchTerm || categoryFilter !== 'Todas'
+                            hasFilters
                                 ? 'No se encontraron solicitudes con esos criterios'
                                 : 'Las solicitudes de potenciales clientes aparecerán aquí'
                         }
