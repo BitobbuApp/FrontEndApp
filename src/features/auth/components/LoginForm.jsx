@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export default function LoginForm({ onGoToResetPassword }) {
+export default function LoginForm() {
     const { login } = useAuth();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -77,7 +77,7 @@ export default function LoginForm({ onGoToResetPassword }) {
                             </Label>
                             <button
                                 type="button"
-                                onClick={onGoToResetPassword}
+                                onClick={() => navigate('/forgot-password')}
                                 className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
                             >
                                 ¿Olvidaste tu contraseña?

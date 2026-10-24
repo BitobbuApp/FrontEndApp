@@ -43,7 +43,7 @@ export default function LoginModal({ open, onOpenChange, onSuccess }) {
 
     const handleForgotPasswordClick = () => {
         onOpenChange(false);
-        // navigate('/forgot-password');
+        navigate('/forgot-password');
     };
 
     return (
