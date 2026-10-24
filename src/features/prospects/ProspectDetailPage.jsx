@@ -31,6 +31,7 @@ import QuoteResponseModal from './components/QuoteResponseModal';
 import ReviewModal from '@/features/suppliers/components/ReviewModal';
 import { useProspectDetail } from './hooks/useProspectDetail';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 const unitLabels = {
     Units: 'Unidades',
@@ -157,7 +158,7 @@ export default function ProspectDetailPage() {
                                     </Badge>
                                     {prospect.category && (
                                         <Badge className="bg-slate-900 text-slate-50 border-0 rounded-full px-3 py-1 font-bold text-[10px]">
-                                            {prospect.category}
+                                            {formatCategory(prospect.category, prospect.subcategory)}
                                         </Badge>
                                     )}
                                 </div>

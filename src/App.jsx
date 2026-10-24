@@ -9,6 +9,8 @@ import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
+import ForgotPasswordPage from '@/features/auth/ForgotPasswordPage';
+import ResetPasswordPage from '@/features/auth/ResetPasswordPage';
 import { useState, useEffect } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 import AppMetadataBootstrap from '@/features/appMetadata/AppMetadataBootstrap';
@@ -116,6 +118,10 @@ const AuthenticatedApp = () => {
           <Navigate to={`/${mainPageKey}`} replace />
         )
       } />
+
+      {/* Recovery pages stay reachable while logged in: the link may belong to another account */}
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
       <Route path="/register" element={
         !isAuthenticated ? (

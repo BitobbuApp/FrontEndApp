@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import AuthBrandPanel from './components/AuthBrandPanel';
 import LoginForm from './components/LoginForm';
-import ResetPasswordForm from './components/ResetPasswordForm';
 
 export default function LoginPage() {
-    const [view, setView] = useState('login'); // 'login' | 'reset'
     return (
         <div className="min-h-screen flex">
             <AuthBrandPanel
@@ -17,15 +15,7 @@ export default function LoginPage() {
                 }
                 subtitle="Cotiza, negocia y cierra negocios en minutos."
             />
-            {view === 'login' ? (
-                <LoginForm 
-                    onGoToResetPassword={() => setView('reset')} 
-                />
-            ) : (
-                <ResetPasswordForm 
-                    onGoToLogin={() => setView('login')} 
-                />
-            )}
+            <LoginForm />
         </div>
     );
 }

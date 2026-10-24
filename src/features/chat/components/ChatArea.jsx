@@ -23,6 +23,7 @@ import { toast } from 'sonner';
 import EmptyState from '@/components/ui/EmptyState';
 import ChatActionPanel from './ChatActionPanel';
 import ReviewModal from './ReviewModal';
+import { useReviewState } from '../hooks/useReviewState';
 import SystemMessageBubble from './SystemMessageBubble';
 import FilePreview from './FilePreview';
 import { useSocketConnectionState } from '../hooks/useSocketConnectionState';
@@ -39,6 +40,7 @@ export default function ChatArea({
     sendMutation,
     isMobile = false,
     onBack = () => { },
+    onLeave = () => { },
     className = "",
 }) {
     const [messageText, setMessageText] = useState('');
@@ -53,7 +55,9 @@ export default function ChatArea({
     }, [mensajes, isOtherTyping]);
 
     // Closed negotiation (e.g. the buyer rejected the quote): history only, no new messages
-    const isClosed = selectedConversation?.status === 'cancelled';
+    // Also read-only for the party that already reviewed while the other side is still pending
+    const { alreadyReviewed } = useReviewState(selectedConversation, user);
+    const isClosed = selectedConversation?.status === 'cancelled' || alreadyReviewed;
 
     const handleMessageChange = (e) => {
         const value = e.target.value;
@@ -110,7 +114,7 @@ export default function ChatArea({
     return (
         <Card className={`flex-1 border-0 shadow-sm flex flex-col overflow-hidden relative ${className}`}>
             {/* Review Overlay */}
-            <ReviewModal selectedConversation={selectedConversation} user={user} />
+            <ReviewModal selectedConversation={selectedConversation} user={user} onDone={onLeave} />
 
             {/* Chat Header */}
             <div className="p-3 lg:p-4 border-b flex items-center justify-between bg-white sticky top-0 z-10">
@@ -331,7 +335,7 @@ export default function ChatArea({
                         <Paperclip className="w-5 h-5 text-slate-400" />
                     </Button>
                     <Input
-                        placeholder={isClosed ? 'Esta negociación fue cerrada' : 'Escribe un mensaje...'}
+                        placeholder={isClosed ? (alreadyReviewed ? 'Ya calificaste: el chat quedó solo como historial' : 'Esta negociación fue cerrada') : 'Escribe un mensaje...'}
                         value={messageText}
                         onChange={handleMessageChange}
                         onKeyPress={handleKeyPress}

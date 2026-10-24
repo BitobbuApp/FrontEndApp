@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useChatData } from './hooks/useChatData';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -43,6 +43,17 @@ export default function ChatPage() {
     // Derived state: find the latest version of the selected conversation in the current list
     const currentConversation = conversaciones.find(c => c.id === selectedConversation?.id) || selectedConversation;
 
+    // Stable reference: ReviewModal restarts its exit timer whenever this changes
+    const leaveConversation = useCallback(() => setSelectedConversation(null), []);
+
+    // Both parties reviewed (status 'completed'): the chat is over, so leave it once the thank-you screen has shown
+    const isCompleted = currentConversation?.status === 'completed';
+    useEffect(() => {
+        if (!isCompleted) return;
+        const timer = setTimeout(() => setSelectedConversation(null), 3000);
+        return () => clearTimeout(timer);
+    }, [isCompleted]);
+
     return (
         <div className="h-[calc(100vh-8rem)] flex flex-col lg:flex-row gap-0 lg:gap-4 overflow-hidden min-h-0">
             {(!isMobile || !showMobileChat) && (
@@ -69,6 +80,7 @@ export default function ChatPage() {
                     sendMutation={sendMutation}
                     isMobile={isMobile}
                     onBack={() => setShowMobileChat(false)}
+                    onLeave={leaveConversation}
                     className={`flex-1 min-w-0 ${
                         isMobile && showMobileChat ? 'fixed inset-0 z-[100] h-full w-full bg-background rounded-none border-none' : ''
                     }`}

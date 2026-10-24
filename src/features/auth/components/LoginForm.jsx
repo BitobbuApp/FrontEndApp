@@ -6,8 +6,9 @@ import { Eye, EyeOff, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import LoginSecondStep from './LoginSecondStep';
 
-export default function LoginForm({ onGoToResetPassword }) {
+export default function LoginForm() {
     const { login } = useAuth();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ export default function LoginForm({ onGoToResetPassword }) {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [secondStep, setSecondStep] = useState(null); // mfa_required | enrollment_required
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,13 +27,27 @@ export default function LoginForm({ onGoToResetPassword }) {
         setIsLoading(true);
         setError('');
         try {
-            await login(email, password);
+            const result = await login(email, password);
+            if (result.status !== 'authenticated') setSecondStep(result);
         } catch (err) {
             //setError(err.message || 'Error al iniciar sesión.');
         } finally {
             setIsLoading(false);
         }
     };
+
+    if (secondStep) {
+        return (
+            <div className="flex-1 flex items-center justify-center bg-muted/50 p-6">
+                <div className="w-full max-w-md">
+                    <LoginSecondStep
+                        step={secondStep}
+                        onBack={(message) => { setSecondStep(null); setPassword(''); if (message) setError(message); }}
+                    />
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex-1 flex items-center justify-center bg-muted/50 p-6">
@@ -77,7 +93,7 @@ export default function LoginForm({ onGoToResetPassword }) {
                             </Label>
                             <button
                                 type="button"
-                                onClick={onGoToResetPassword}
+                                onClick={() => navigate('/forgot-password')}
                                 className="text-sm font-semibold text-slate-600 hover:text-slate-900 transition-colors"
                             >
                                 ¿Olvidaste tu contraseña?

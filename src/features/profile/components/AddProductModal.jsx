@@ -22,11 +22,14 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { productsApi } from '../services/productsApi';
+import SubcategorySelect from '@/features/appMetadata/components/SubcategorySelect';
+import { useCategorySubcategoryHandlers } from '@/features/appMetadata/hooks/useCategorySubcategoryHandlers';
 
 const DISPONIBILIDAD = ['Disponible', 'Bajo Pedido', 'Agotado'];
 const DEFAULT_FORM = {
     name: '',
     category_id: '',
+    subcategory_id: '',
     base_price_usd: '',
     unit_id: '',
     moq: '1',
@@ -68,12 +71,14 @@ export default function AddProductModal({ open, onOpenChange, initialData = null
     }, [defaultUnitOption?.value]);
 
     const set = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+    const { onCategoryChange, onSubcategoryChange } = useCategorySubcategoryHandlers(setForm);
 
     useEffect(() => {
         if (initialData && open) {
             setForm({
                 name: initialData.name || '',
                 category_id: initialData.category_id?.toString() || '',
+                subcategory_id: initialData.subcategory_id?.toString() || '',
                 base_price_usd: initialData.base_price_usd?.toString() || '',
                 unit_id: initialData.unit_id?.toString() || defaultUnitOption?.value || '',
                 moq: initialData.moq?.toString() || '1',
@@ -174,6 +179,7 @@ export default function AddProductModal({ open, onOpenChange, initialData = null
                 name: form.name.trim(),
                 description: form.description?.trim() || '',
                 category_id: form.category_id ? Number(form.category_id) : null,
+                subcategory_id: form.subcategory_id ? Number(form.subcategory_id) : null,
                 base_price_usd: Number(form.base_price_usd),
                 unit_id: form.unit_id ? Number(form.unit_id) : (Number(defaultUnitOption?.id) || null),
                 moq: Number(form.moq) || 1,
@@ -199,6 +205,7 @@ export default function AddProductModal({ open, onOpenChange, initialData = null
         formData.append('name', form.name.trim());
         formData.append('description', form.description?.trim() || '');
         if (form.category_id) formData.append('category_id', Number(form.category_id));
+        if (form.subcategory_id) formData.append('subcategory_id', Number(form.subcategory_id));
         formData.append('base_price_usd', Number(form.base_price_usd));
         formData.append('unit_id', form.unit_id ? Number(form.unit_id) : Number(defaultUnitOption?.id) || '');
         formData.append('moq', Number(form.moq) || 1);
@@ -291,7 +298,7 @@ export default function AddProductModal({ open, onOpenChange, initialData = null
 
                     <div className="space-y-2">
                         <Label>Categoría</Label>
-                        <Select value={form.category_id} onValueChange={(value) => set('category_id', value)}>
+                        <Select value={form.category_id} onValueChange={onCategoryChange}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Seleccionar" />
                             </SelectTrigger>
@@ -303,6 +310,15 @@ export default function AddProductModal({ open, onOpenChange, initialData = null
                                 ))}
                             </SelectContent>
                         </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Subcategoría</Label>
+                        <SubcategorySelect
+                            categoryValue={form.category_id}
+                            value={form.subcategory_id}
+                            onChange={onSubcategoryChange}
+                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">

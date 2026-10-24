@@ -14,6 +14,7 @@
     }
   },
   "requests": {
+    "subcategory": "Opcional. Precisa qué necesitas dentro de la categoría: los proveedores que trabajan esa subcategoría reciben tu solicitud primero.",
     "product": {
       "name": "Sé específico (ej. en lugar de 'Tubería', usa 'Tubería PVC 2 pulgadas') para recibir precios más exactos.",
       "category": "Seleccionar el rubro correcto notifica inmediatamente a los proveedores adecuados, acelerando sus respuestas.",

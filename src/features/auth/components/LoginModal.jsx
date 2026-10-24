@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import LoginSecondStep from './LoginSecondStep';
 
 export default function LoginModal({ open, onOpenChange, onSuccess }) {
     const { login } = useAuth();
@@ -15,6 +16,14 @@ export default function LoginModal({ open, onOpenChange, onSuccess }) {
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [secondStep, setSecondStep] = useState(null); // mfa_required | enrollment_required
+
+    const finish = () => {
+        setSecondStep(null);
+        onOpenChange(false);
+        // Resume the action that required authentication (e.g. request a quote)
+        onSuccess?.();
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -25,10 +34,9 @@ export default function LoginModal({ open, onOpenChange, onSuccess }) {
         setIsLoading(true);
         setError('');
         try {
-            await login(email, password);
-            onOpenChange(false);
-            // Resume the action that required authentication (e.g. request a quote)
-            onSuccess?.();
+            const result = await login(email, password);
+            if (result.status === 'authenticated') finish();
+            else setSecondStep(result);
         } catch (err) {
             // Error is handled by context/toaster, but we can set local if needed
         } finally {
@@ -43,12 +51,22 @@ export default function LoginModal({ open, onOpenChange, onSuccess }) {
 
     const handleForgotPasswordClick = () => {
         onOpenChange(false);
-        // navigate('/forgot-password');
+        navigate('/forgot-password');
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-[420px] p-0 overflow-hidden border-none shadow-2xl rounded-2xl">
+                {secondStep ? (
+                    <div className="p-8 max-h-[85vh] overflow-y-auto">
+                        <LoginSecondStep
+                            step={secondStep}
+                            onAuthenticated={finish}
+                            onBack={(message) => { setSecondStep(null); setPassword(''); if (message) setError(message); }}
+                        />
+                    </div>
+                ) : (
+                <>
                 <div className="p-8 pb-6 text-center">
                     <h2 className="text-2xl font-extrabold text-[#0B2046] mb-2 tracking-tight">
                         Bienvenido de vuelta
@@ -136,6 +154,8 @@ export default function LoginModal({ open, onOpenChange, onSuccess }) {
                         </button>
                     </p>
                 </div>
+                </>
+                )}
             </DialogContent>
         </Dialog>
     );
