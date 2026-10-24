@@ -7,12 +7,16 @@ import { copyToClipboard } from '@/utils/clipboard';
 
 function downloadCodes(codes) {
     const text = ['Códigos de respaldo de Bitobbu', 'Cada código sirve una sola vez.', '', ...codes, ''].join('\n');
-    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
     const link = document.createElement('a');
     link.href = url;
     link.download = 'bitobbu-codigos-de-respaldo.txt';
+    // Firefox only follows links that are in the document
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(url);
+    link.remove();
+    // Revoking right away can cancel the download in some browsers
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
 /** The one-time recovery codes: copy, download and an explicit "I saved them" before continuing. */
@@ -33,7 +37,7 @@ export default function RecoveryCodesPanel({ codes, onDone, doneLabel = 'Continu
                 <Button type="button" variant="outline" className="flex-1" onClick={copy}>
                     <Copy className="w-4 h-4 mr-2" /> Copiar
                 </Button>
-                <Button type="button" variant="outline" className="flex-1" onClick={() => downloadCodes(codes)}>
+                <Button type="button" variant="outline" className="flex-1" onClick={() => { downloadCodes(codes); toast.success('Descarga iniciada'); }}>
                     <Download className="w-4 h-4 mr-2" /> Descargar
                 </Button>
             </div>
