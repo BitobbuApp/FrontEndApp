@@ -69,6 +69,8 @@ export default function ReviewModal({ selectedConversation, user, onDone }) {
 
     const myCompanyId = user?.companyId || user?.company_id || user?.id;
     const isSupplier = transaction?.supplier_id === myCompanyId;
+    // Already reviewed (own side): nothing left to do in this chat, so no review form
+    const alreadyReviewed = (isSupplier ? transaction?.supplier_review_status : transaction?.buyer_review_status) === 'submitted';
 
     const submitMutation = useMutation({
         mutationFn: async (payload) => {
@@ -108,6 +110,8 @@ export default function ReviewModal({ selectedConversation, user, onDone }) {
             </div>
         );
     }
+
+    if (alreadyReviewed && !submitMutation.isSuccess) return null;
 
     if (submitMutation.isSuccess) {
         return (
