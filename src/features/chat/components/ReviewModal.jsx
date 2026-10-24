@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useReviewState } from '../hooks/useReviewState';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Star, FileText, CheckCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { reviewsApi } from '@/features/requests/services/reviewsApi';
-import { transactionsApi } from '@/features/transactions/services/transactionsApi';
 
 // Reusable Star Rater component
 const StarRater = ({ label, value, onChange }) => {
@@ -61,16 +61,8 @@ export default function ReviewModal({ selectedConversation, user, onDone }) {
     // We can assume that if `selectedConversation.status === 'pending_review'` we should show this.
     const isVisible = selectedConversation?.status === 'pending_review';
 
-    const { data: transaction, isLoading } = useQuery({
-        queryKey: ['transaction-detail', selectedConversation?.transaction_id],
-        queryFn: () => transactionsApi.getTransactionById(selectedConversation.transaction_id),
-        enabled: isVisible && !!selectedConversation?.transaction_id,
-    });
-
-    const myCompanyId = user?.companyId || user?.company_id || user?.id;
-    const isSupplier = transaction?.supplier_id === myCompanyId;
     // Already reviewed (own side): nothing left to do in this chat, so no review form
-    const alreadyReviewed = (isSupplier ? transaction?.supplier_review_status : transaction?.buyer_review_status) === 'submitted';
+    const { isLoading, isSupplier, alreadyReviewed } = useReviewState(selectedConversation, user);
 
     const submitMutation = useMutation({
         mutationFn: async (payload) => {
