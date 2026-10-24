@@ -1,22 +1,12 @@
 import React, { useState } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
-import { Copy, Download, Loader2, ShieldCheck, Smartphone } from 'lucide-react';
+import { Copy, Loader2, ShieldCheck, Smartphone } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
 import { copyToClipboard } from '@/utils/clipboard';
 import TwoFactorCodeInput from './TwoFactorCodeInput';
+import RecoveryCodesPanel from './RecoveryCodesPanel';
 import { enable2Fa, setup2Fa } from '../services/authApi';
-
-function downloadCodes(codes) {
-    const text = ['Códigos de respaldo de Bitobbu', 'Cada código sirve una sola vez.', '', ...codes, ''].join('\n');
-    const url = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'bitobbu-codigos-de-respaldo.txt';
-    link.click();
-    URL.revokeObjectURL(url);
-}
 
 /**
  * Turns on two-step verification: scan the QR, confirm one code, keep the recovery codes.
@@ -31,7 +21,6 @@ export default function TwoFactorEnrollment({ enrollmentToken, onEnabled, onComp
     const [code, setCode] = useState('');
     const [recoveryCodes, setRecoveryCodes] = useState([]);
     const [session, setSession] = useState(null);
-    const [saved, setSaved] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -153,31 +142,7 @@ export default function TwoFactorEnrollment({ enrollmentToken, onEnabled, onComp
                     </p>
                 </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 font-mono text-sm bg-muted rounded-xl p-4">
-                {recoveryCodes.map((item) => <span key={item} className="text-center select-all">{item}</span>)}
-            </div>
-            <div className="flex gap-2">
-                <Button type="button" variant="outline" className="flex-1" onClick={() => copy(recoveryCodes.join('\n'), 'Códigos copiados')}>
-                    <Copy className="w-4 h-4 mr-2" /> Copiar
-                </Button>
-                <Button type="button" variant="outline" className="flex-1" onClick={() => downloadCodes(recoveryCodes)}>
-                    <Download className="w-4 h-4 mr-2" /> Descargar
-                </Button>
-            </div>
-            <label htmlFor="codes-saved" className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-                <Checkbox id="codes-saved" checked={saved} onCheckedChange={(value) => setSaved(value === true)} />
-                Ya guardé mis códigos de respaldo
-            </label>
-            <div className="flex justify-end">
-                <Button
-                    type="button"
-                    disabled={!saved}
-                    onClick={() => onComplete(session)}
-                    className="bg-[#D2FC31] hover:bg-[#c4ed2d] text-slate-900 font-semibold"
-                >
-                    Continuar
-                </Button>
-            </div>
+            <RecoveryCodesPanel codes={recoveryCodes} onDone={() => onComplete(session)} />
         </div>
     );
 }

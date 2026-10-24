@@ -4,12 +4,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 /** Password input with a show/hide toggle. */
-export default function PasswordField({ id, label, value, onChange, autoComplete, placeholder = '••••••••', disabled, className = '' }) {
+export default function PasswordField({ id, label, value, onChange, autoComplete, placeholder = '••••••••', disabled, size = 'lg' }) {
     const [visible, setVisible] = useState(false);
 
     return (
         <div className="space-y-2">
-            {label && <Label htmlFor={id} className="text-sm font-medium text-slate-700">{label}</Label>}
+            {label && <Label htmlFor={id} className={size === 'md' ? undefined : 'text-sm font-medium text-slate-700'}>{label}</Label>}
             <div className="relative">
                 <Input
                     id={id}
@@ -19,7 +19,7 @@ export default function PasswordField({ id, label, value, onChange, autoComplete
                     placeholder={placeholder}
                     autoComplete={autoComplete}
                     disabled={disabled}
-                    className={`h-12 bg-background border-border pr-12 ${className}`}
+                    className={size === 'md' ? 'h-10 pr-10' : 'h-12 bg-background border-border pr-12'}
                 />
                 <button
                     type="button"

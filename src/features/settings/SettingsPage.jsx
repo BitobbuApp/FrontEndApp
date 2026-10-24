@@ -192,7 +192,7 @@ export default function SettingsPage() {
                 </TabsContent>
 
                 <TabsContent value="seguridad">
-                    <SecurityTab />
+                    <SecurityTab company={company} />
                 </TabsContent>
 
                 <TabsContent value="redes">
