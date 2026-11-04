@@ -46,8 +46,8 @@ const SYSTEM_MESSAGES_DICTIONARY = {
         isMe ? 'Has rechazado el pago.' 
              : 'El pago ha sido rechazado.',
     'transaction.order_shipped': (payload, isMe) => 
-        isMe ? 'Has marcado la orden como enviada.' 
-             : 'La orden ha sido enviada y va en camino.',
+        isMe ? 'Pedido despachado · el comprador recibió el aviso' 
+             : 'Pedido despachado · va en camino',
     'transaction.completed': (payload, isMe) => 
         isMe ? 'Has confirmado la entrega. Transacción completada.' 
              : 'Se ha confirmado la entrega. Transacción completada.',
@@ -71,11 +71,11 @@ export default function SystemMessageBubble({ message, currentCompanyId }) {
     // Fallback if the key is not defined in the dictionary yet
     const displayString = resolveText 
         ? resolveText(payload, isMe) 
-        : `Evento de sistema: ${message.event_key}`;
+        : `Evento: ${String(message.event_key || "").split(".").pop().replace(/_/g, " ")}`;
 
     return (
         <div className="flex w-full justify-center items-center my-4 mx-auto px-4">
-            <div className="px-4 py-1.5 flex flex-col items-center bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-lg text-xs font-medium text-center border border-slate-200 dark:border-slate-700 shadow-sm transition-all max-w-[90%] md:max-w-[70%] leading-relaxed">
+            <div className="px-4 py-1.5 flex flex-col items-center bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-2xl text-xs font-medium text-center border border-slate-200 dark:border-slate-700 shadow-sm transition-all max-w-[90%] md:max-w-[70%] leading-relaxed">
                 <span>{displayString}</span>
                 {(message.file_url || message.event_payload?.fileUrl) && (
                     <a
