@@ -30,6 +30,12 @@ import { useSocketConnectionState } from '../hooks/useSocketConnectionState';
 import { useTypingIndicator } from '../hooks/useTypingIndicator';
 import TypingBubble from './TypingBubble';
 import { WifiOff, Loader2 } from 'lucide-react';
+import { useDealState } from '../hooks/useDealState';
+import DealStatusPill from './DealStatusPill';
+import DealStepper from './DealStepper';
+import LockedTermsBanner from './LockedTermsBanner';
+import DealTermsCard from './DealTermsCard';
+import StageHintBar from './StageHintBar';
 
 export default function ChatArea({
     selectedConversation,
@@ -57,6 +63,7 @@ export default function ChatArea({
     // Closed negotiation (e.g. the buyer rejected the quote): history only, no new messages
     // Also read-only for the party that already reviewed while the other side is still pending
     const { alreadyReviewed } = useReviewState(selectedConversation, user);
+    const { stage } = useDealState(selectedConversation, user);
     const isClosed = selectedConversation?.status === 'cancelled' || alreadyReviewed;
 
     const handleMessageChange = (e) => {
@@ -158,13 +165,24 @@ export default function ChatArea({
                         )}
                     </div>
                 </div>
-                <Button variant="ghost" size="icon">
-                    <MoreVertical className="w-5 h-5 text-slate-400" />
-                </Button>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                    <DealStatusPill stage={stage} />
+                    <Button variant="ghost" size="icon">
+                        <MoreVertical className="w-5 h-5 text-slate-400" />
+                    </Button>
+                </div>
             </div>
 
+            {/* Deal progress */}
+            {stage && stage.step != null && (
+                <div className="px-4 pt-3 pb-2 bg-white border-b">
+                    <DealStepper step={stage.step} />
+                </div>
+            )}
+            {stage?.locked && <LockedTermsBanner terms={stage.terms} />}
+
             {/* Negotiation Info Bar */}
-            {(selectedConversation.request || selectedConversation.quote_response) && (
+            {!stage?.locked && (selectedConversation.request || selectedConversation.quote_response) && (
                 <div className="px-4 py-2 bg-slate-50 border-b flex items-center gap-6 overflow-x-auto no-scrollbar">
                     {selectedConversation.request && (
                         <div className="flex items-center gap-2 min-w-max">
@@ -280,6 +298,7 @@ export default function ChatArea({
                                 </React.Fragment>
                             );
                         })}
+                        <DealTermsCard stage={stage} />
                         {isOtherTyping && (
                             <TypingBubble name={otherParticipant.nombre} />
                         )}
@@ -289,7 +308,12 @@ export default function ChatArea({
             </ScrollArea>
 
             {/* Contextual Action Panel (State Machine) */}
-            <ChatActionPanel selectedConversation={selectedConversation} user={user} />
+            <ChatActionPanel
+                selectedConversation={selectedConversation}
+                user={user}
+                onSendText={(contenido) => sendMutation.mutate({ contenido, archivo: null, selectedConversation })}
+            />
+            <StageHintBar hint={stage?.hint} />
 
             {/* Input */}
             <div className="p-4 border-t bg-white pb-8 lg:pb-4">

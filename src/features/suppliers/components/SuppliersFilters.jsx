@@ -40,13 +40,13 @@ export default function SuppliersFilters({
     setRatingFilter,
 }) {
     return (
-        <Card className="border-0 shadow-sm">
+        <Card className="rounded-3xl border border-border shadow-sm">
             <CardContent className="p-4">
                 <div className="flex flex-col lg:flex-row gap-4">
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
                         <Input
-                            placeholder="Buscar proveedor..."
+                            placeholder="Buscar proveedor por nombre..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             className="pl-10 h-11"
@@ -54,25 +54,25 @@ export default function SuppliersFilters({
                     </div>
                     <div className="flex flex-wrap gap-2">
                         <Select value={sectorFilter} onValueChange={setSectorFilter}>
-                            <SelectTrigger className="w-40 h-11">
+                            <SelectTrigger className="w-48 h-11">
                                 <SelectValue placeholder="Sector" />
                             </SelectTrigger>
                             <SelectContent>
                                 {SECTORES.map((sector) => (
                                     <SelectItem key={sector} value={sector}>
-                                        {sector}
+                                        {sector === 'Todos' ? 'Todos los sectores' : sector}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                         <Select value={ratingFilter} onValueChange={setRatingFilter}>
-                            <SelectTrigger className="w-36 h-11">
+                            <SelectTrigger className="w-52 h-11">
                                 <SelectValue placeholder="Rating" />
                             </SelectTrigger>
                             <SelectContent>
                                 {RATINGS.map((rating) => (
                                     <SelectItem key={rating} value={rating}>
-                                        {rating}
+                                        {rating === 'Todos' ? 'Cualquier calificación' : rating}
                                     </SelectItem>
                                 ))}
                             </SelectContent>

@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useMarketplaceProduct } from './hooks/useMarketplaceProduct';
 import { useAuth } from '@/features/auth/AuthContext';
 import { Button } from '@/components/ui/button';
-import { ChevronRight, Star, User, Building, MapPin, Truck, Package, Package2, Lock, MessageCircle } from 'lucide-react';
+import { ChevronRight, Star, User, Building, MapPin, Truck, Package, Package2, Lock, MessageCircle, ArrowRight } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import LoginModal from '@/features/auth/components/LoginModal';
 import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
+import { buildDirectOffer } from './utils/directOffer';
 
 export default function ProductDetailPage() {
     const { id } = useParams();
@@ -20,6 +21,8 @@ export default function ProductDetailPage() {
     
     // Modals
     const [authModalOpen, setAuthModalOpen] = useState(false);
+    // Action to run once the visitor logs in from the modal (request quote / open company profile)
+    const pendingAction = useRef(null);
 
     if (isLoading) {
         return (
@@ -58,34 +61,28 @@ export default function ProductDetailPage() {
     // Direct RFQ: the request form receives the offer so it goes only to this supplier
     const goToDirectRequest = () => {
         navigate('/Requests/new', {
-            state: {
-                offer: {
-                    id: product.id,
-                    name,
-                    company_id: product.company_id,
-                    category_id: product.category_id,
-                    subcategory_id: product.subcategory_id,
-                    unit_id: product.unit_id,
-                    unit_of_measure: product.unit_of_measure,
-                    moq,
-                    base_price_usd: product.base_price_usd,
-                    pricing_tiers: pricing_tiers || [],
-                    trade_name: company_details?.trade_name,
-                }
-            }
+            state: { offer: buildDirectOffer(product, company_details?.trade_name) }
         });
     };
 
     const isOwnProduct = !!myCompany && myCompany.id === product.company_id;
     const cannotBuy = !!myCompany && !myCompany.can_buy;
 
-    const handleRequestQuote = () => {
+    const goToCompanyProfile = () => {
+        navigate(`/Perfil/${product.company_id}`);
+    };
+
+    const runOrAskLogin = (action) => {
         if (!isAuthenticated) {
+            pendingAction.current = action;
             setAuthModalOpen(true);
         } else {
-            goToDirectRequest();
+            action();
         }
     };
+
+    const handleRequestQuote = () => runOrAskLogin(goToDirectRequest);
+    const handleViewCompany = () => runOrAskLogin(goToCompanyProfile);
 
     return (
         <div className="max-w-7xl mx-auto py-8">
@@ -135,9 +132,14 @@ export default function ProductDetailPage() {
                 {/* Center: Details (Col span 4) */}
                 <div className="lg:col-span-4 flex flex-col">
                     {company_details?.trade_name && (
-                        <div className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                        <button
+                            type="button"
+                            onClick={handleViewCompany}
+                            className="self-start text-left text-sm font-semibold text-slate-500 uppercase tracking-wider mb-2 hover:text-[#0B2046] hover:underline"
+                            title="Ver perfil de la empresa"
+                        >
                             {company_details.trade_name}
-                        </div>
+                        </button>
                     )}
                     <h1 className="text-3xl font-extrabold text-[#0B2046] leading-tight mb-2">
                         {name}
@@ -224,7 +226,10 @@ export default function ProductDetailPage() {
                         )}
                         {!isOwnProduct && !cannotBuy && company_details?.trade_name && (
                             <p className="text-xs text-slate-500 text-center">
-                                La solicitud llegará directamente a <span className="font-semibold">{company_details.trade_name}</span>.
+                                La solicitud llegará directamente a{' '}
+                                <button type="button" onClick={handleViewCompany} className="font-semibold hover:underline">
+                                    {company_details.trade_name}
+                                </button>.
                             </p>
                         )}
 
@@ -346,6 +351,9 @@ export default function ProductDetailPage() {
                                     )}
                                 </div>
                             </div>
+                            <Button variant="outline" onClick={handleViewCompany} className="gap-2 rounded-xl">
+                                Ver perfil de la empresa <ArrowRight className="w-4 h-4" />
+                            </Button>
                         </div>
                     )}
 
@@ -369,7 +377,7 @@ export default function ProductDetailPage() {
             <LoginModal
                 open={authModalOpen}
                 onOpenChange={setAuthModalOpen}
-                onSuccess={goToDirectRequest}
+                onSuccess={() => pendingAction.current?.()}
             />
 
         </div>

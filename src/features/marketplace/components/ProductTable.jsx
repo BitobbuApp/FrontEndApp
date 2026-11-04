@@ -76,9 +76,14 @@ export default function ProductTable({ filteredProducts, handleViewDetail }) {
                                 <TableCell>
                                     <div className="flex items-center gap-2">
                                         <Building2 className="w-4 h-4 text-slate-400" />
-                                        <span className="text-slate-600">
+                                        <Link
+                                            to={`/Perfil/${product.company_id}`}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="text-slate-600 hover:text-[#0B2046] hover:underline"
+                                            title="Ver perfil de la empresa"
+                                        >
                                             {product.company_details?.trade_name || 'Proveedor'}
-                                        </span>
+                                        </Link>
                                     </div>
                                 </TableCell>
                                 <TableCell>

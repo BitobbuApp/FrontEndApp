@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
+import RequestImageGallery from '@/features/requests/components/RequestImageGallery';
+import { splitRequestFiles } from '@/features/requests/utils/files';
 
 const unitLabels = {
     Units: 'Unidades',
@@ -165,14 +167,16 @@ export default function ProspectDetailModal({
                         </div>
                     )}
 
+                    <RequestImageGallery images={splitRequestFiles(req.files).images} />
+
                     {/* Files */}
-                    {req.files && req.files.length > 0 && (
+                    {splitRequestFiles(req.files).documents.length > 0 && (
                         <div>
                             <p className="text-sm text-slate-500 mb-2">
-                                Archivos adjuntos ({req.files.length})
+                                Archivos adjuntos ({splitRequestFiles(req.files).documents.length})
                             </p>
                             <div className="space-y-2">
-                                {req.files.map((file) => (
+                                {splitRequestFiles(req.files).documents.map((file) => (
                                     <a
                                         key={file.id}
                                         href={file.url}

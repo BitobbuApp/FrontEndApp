@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Package } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -86,9 +87,14 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                             )}
                             
                             <div className="mt-3 pt-3 border-t border-slate-100">
-                                <span className="text-xs text-blue-600 hover:underline line-clamp-1 mb-1 font-medium">
+                                <Link
+                                    to={`/Perfil/${product.company_id}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="block text-xs text-blue-600 hover:underline line-clamp-1 mb-1 font-medium"
+                                    title="Ver perfil de la empresa"
+                                >
                                     {product.company_details?.trade_name || 'Proveedor'}
-                                </span>
+                                </Link>
                                 <div className="flex items-center text-[10px] sm:text-[11px] text-slate-500 gap-1">
                                     <span className="font-bold text-slate-700">Verificado</span>
                                     <span>-</span>

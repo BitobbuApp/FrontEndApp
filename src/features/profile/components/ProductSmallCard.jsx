@@ -5,7 +5,7 @@ import { Package, Tag, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
-export default function ProductSmallCard({ product, onEdit, onDelete }) {
+export default function ProductSmallCard({ product, onEdit, onDelete, onRequestQuote }) {
     const imageUrl = product.photos?.[0]?.url;
 
     return (
@@ -70,6 +70,15 @@ export default function ProductSmallCard({ product, onEdit, onDelete }) {
                     <p className="text-[11px] text-slate-400 line-clamp-2 mt-1 leading-tight">
                         {product.description}
                     </p>
+                )}
+                {onRequestQuote && (
+                    <Button
+                        size="sm"
+                        className="mt-2 w-full rounded-xl bg-[#D2FC31] font-semibold text-slate-900 hover:bg-[#c4ed2d]"
+                        onClick={(e) => { e.stopPropagation(); onRequestQuote(product); }}
+                    >
+                        Solicitar cotización
+                    </Button>
                 )}
             </CardContent>
         </Card>

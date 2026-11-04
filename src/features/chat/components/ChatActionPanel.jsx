@@ -18,7 +18,7 @@ const StatusBadge = ({ label, bgColor, textColor }) => (
     </span>
 );
 
-export default function ChatActionPanel({ selectedConversation, user }) {
+export default function ChatActionPanel({ selectedConversation, user, onSendText }) {
     const queryClient = useQueryClient();
     const [actionForm, setActionForm] = useState(null);
     const [formData, setFormData] = useState({});
@@ -216,8 +216,14 @@ export default function ChatActionPanel({ selectedConversation, user }) {
 
                                     {!actionForm && (
                                         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+                                            {onSendText && (
+                                                <Button size="sm" className="bg-[#0B2046] text-white hover:bg-[#16305a]"
+                                                        onClick={() => onSendText('Confirmo disponibilidad del producto.')}>
+                                                    <CheckCircle className="w-3 h-3 mr-1"/> Confirmo disponibilidad
+                                                </Button>
+                                            )}
                                             <Button size="sm" variant="outline" className="bg-white" onClick={() => setActionForm('price')}><Edit3 className="w-3 h-3 mr-1"/> Precio</Button>
-                                            <Button size="sm" variant="outline" className="bg-white" onClick={() => setActionForm('quantity')}><Package className="w-3 h-3 mr-1"/> Cantidad</Button>
+                                            <Button size="sm" variant="outline" className="bg-white" onClick={() => setActionForm('quantity')}><Package className="w-3 h-3 mr-1"/> Ajustar cantidad</Button>
                                             <Button size="sm" variant="outline" className="bg-white" onClick={() => setActionForm('terms')}><FileText className="w-3 h-3 mr-1"/> Specs</Button>
                                             <Button size="sm" variant="destructive" className="bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 border-red-100 sm:ml-auto" 
                                                     onClick={() => setIsWithdrawOpen(true)} disabled={quoteMutation.isPending}>
@@ -237,7 +243,7 @@ export default function ChatActionPanel({ selectedConversation, user }) {
                                 <>
                                     <Button size="sm" variant="outline" className="border-slate-300"
                                             onClick={() => quoteMutation.mutate({ action: 'formal_quote_requested' })} disabled={quoteMutation.isPending}>
-                                        <FileText className="w-4 h-4 mr-1.5" /> Solicitar PDF Formal
+                                        <FileText className="w-4 h-4 mr-1.5" /> Solicitar cotización formal
                                     </Button>
                                     {rejectQuoteButton}
                                     {rejectQuoteDialog}
@@ -423,13 +429,13 @@ export default function ChatActionPanel({ selectedConversation, user }) {
                         {currentStatus === 'preparing_order' && isSupplier && (
                             <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white"
                                     onClick={() => transactionMutation.mutate({ action: 'order_shipped', payload: { estimated_delivery_date: new Date().toISOString() } })} disabled={transactionMutation.isPending}>
-                                Confirmar Envío Activo
+                                <Truck className="w-4 h-4 mr-1.5" /> Marcar en ruta
                             </Button>
                         )}
                         {currentStatus === 'in_transit' && isBuyer && (
                             <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
                                     onClick={() => transactionMutation.mutate({ action: 'delivery_confirmed' })} disabled={transactionMutation.isPending}>
-                                <CheckCircle className="w-4 h-4 mr-1.5" /> Confirmar Entrega
+                                <CheckCircle className="w-4 h-4 mr-1.5" /> Confirmar recepción
                             </Button>
                         )}
                         {currentStatus === 'completed' && (
