@@ -62,7 +62,7 @@ export default function ProspectsFilters({
     };
 
     return (
-        <Card className="border-0 shadow-sm">
+        <Card className="rounded-3xl border border-border shadow-sm">
             <CardContent className="p-4 space-y-3">
                 <div className="flex flex-col lg:flex-row gap-3">
                     <div className="relative flex-1">

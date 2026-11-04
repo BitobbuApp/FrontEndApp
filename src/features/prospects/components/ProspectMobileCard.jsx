@@ -8,6 +8,7 @@ import DirectRequestBadge from '@/features/requests/components/DirectRequestBadg
 import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
+import { getDeadlineInfo } from '../utils/deadline';
 
 const unitLabels = {
     Units: 'Unidades', Kg: 'Kg', Liters: 'Litros', Meters: 'Metros',
@@ -26,12 +27,16 @@ export default function ProspectMobileCard({ req, onViewDetail, onQuickQuote }) 
         ? format(new Date(req.created_at), 'd MMM yyyy', { locale: es })
         : null;
 
-    const deadline = req.expiration_date
-        ? format(new Date(req.expiration_date), 'd MMM', { locale: es })
-        : null;
+    const deadlineInfo = getDeadlineInfo(req.expiration_date);
+    const deadline = deadlineInfo?.shortDateLabel;
+    const deadlineColor = deadlineInfo?.tone === 'danger'
+        ? 'text-red-600'
+        : deadlineInfo?.tone === 'warning'
+            ? 'text-amber-600'
+            : 'text-slate-500';
 
     return (
-        <div className="bg-background rounded-xl border border-border shadow-sm overflow-hidden flex flex-col">
+        <div className="bg-background rounded-2xl border border-border shadow-sm overflow-hidden flex flex-col">
             {/* Product image / placeholder */}
             <div className="relative h-36 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center">
                 {imageUrl ? (
@@ -69,10 +74,10 @@ export default function ProspectMobileCard({ req, onViewDetail, onQuickQuote }) 
                     <Badge 
                         variant="outline" 
                         className={cn(
-                            "text-[9px] px-1.5 py-0 h-4 leading-none uppercase tracking-wider font-bold whitespace-nowrap flex-shrink-0",
+                            "rounded-full border-0 text-[10px] px-2 py-0 h-5 leading-none uppercase tracking-wider font-bold whitespace-nowrap flex-shrink-0",
                             req.type === 'service' 
-                                ? "border-purple-200 bg-purple-50 text-purple-600" 
-                                : "border-blue-200 bg-blue-50 text-blue-600"
+                                ? "bg-purple-50 text-purple-600" 
+                                : "bg-blue-50 text-blue-600"
                         )}
                     >
                         {req.type === 'service' ? 'Servicio' : 'Producto'}
@@ -106,7 +111,7 @@ export default function ProspectMobileCard({ req, onViewDetail, onQuickQuote }) 
                         {req.quantity} {unitLabels[req.unit_of_measure] || req.unit_of_measure}
                     </span>
                     {deadline && (
-                        <span className="flex items-center gap-1 text-amber-600">
+                        <span className={cn("flex items-center gap-1", deadlineColor)}>
                             <Clock className="w-3.5 h-3.5" />
                             Hasta {deadline}
                         </span>
