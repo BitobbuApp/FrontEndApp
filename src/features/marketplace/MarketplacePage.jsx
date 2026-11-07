@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import EmptyState from '@/components/ui/EmptyState';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useMarketplaceData } from './hooks/useMarketplaceData';
 import MarketplaceFilters from './components/MarketplaceFilters';
@@ -11,21 +11,34 @@ import ProductGrid from './components/ProductGrid';
 import ProductTable from './components/ProductTable';
 import HeroSection from './components/HeroSection';
 import MarketplaceCTA from './components/MarketplaceCTA';
+import MarketplaceLaunchState from './components/MarketplaceLaunchState';
 import { useAuth } from '@/features/auth/AuthContext';
 
+const INITIAL_FILTERS = {
+    searchTerm: '',
+    categoryId: '',
+    subcategoryId: '',
+    countryId: '',
+    stateId: '',
+    minPrice: '',
+    maxPrice: '',
+    sortBy: 'newest',
+    page: 1,
+    limit: 12
+};
+
 export default function MarketplacePage() {
-    const [filters, setFilters] = useState({
-        searchTerm: '',
-        categoryId: '',
-        subcategoryId: '',
-        countryId: '',
-        stateId: '',
-        minPrice: '',
-        maxPrice: '',
-        sortBy: 'newest',
-        page: 1,
-        limit: 12
-    });
+    // Header search sends the term as /?q=...
+    const [searchParams] = useSearchParams();
+    const queryTerm = searchParams.get('q') || '';
+    const [filters, setFilters] = useState({ ...INITIAL_FILTERS, searchTerm: queryTerm });
+    useEffect(() => {
+        setFilters((prev) => (prev.searchTerm === queryTerm ? prev : { ...prev, searchTerm: queryTerm, page: 1 }));
+    }, [queryTerm]);
+    const hasActiveFilters = Boolean(
+        filters.searchTerm || filters.categoryId || filters.subcategoryId ||
+        filters.countryId || filters.stateId || filters.minPrice || filters.maxPrice
+    );
 
     const [viewMode, setViewMode] = useState('grid');
     const navigate = useNavigate();
@@ -36,6 +49,7 @@ export default function MarketplacePage() {
 
     const { isAuthenticated } = useAuth();
     const totalPages = Math.ceil(total / filters.limit) || 1;
+    const isCatalogEmpty = !isLoading && productos.length === 0 && !hasActiveFilters;
 
     // Categories panel of the hero: filter the products and scroll to them
     const scrollToProducts = () => document.getElementById('productos-section')?.scrollIntoView({ behavior: 'smooth' });
@@ -71,13 +85,15 @@ export default function MarketplacePage() {
             </div>
 
             {/* Filters */}
-            <MarketplaceFilters
-                filters={filters}
-                setFilters={setFilters}
-                viewMode={viewMode}
-                setViewMode={setViewMode}
-                priceRange={priceRange}
-            />
+            {!isCatalogEmpty && (
+                <MarketplaceFilters
+                    filters={filters}
+                    setFilters={setFilters}
+                    viewMode={viewMode}
+                    setViewMode={setViewMode}
+                    priceRange={priceRange}
+                />
+            )}
 
             {/* Products */}
             {isLoading ? (
@@ -90,17 +106,17 @@ export default function MarketplacePage() {
                         </div>
                     </CardContent>
                 </Card>
+            ) : isCatalogEmpty ? (
+                <MarketplaceLaunchState />
             ) : productos.length === 0 ? (
                 <Card className="border-0 shadow-sm">
                     <CardContent className="p-6">
                         <EmptyState
                             icon={ShoppingBag}
                             title="Sin productos"
-                            description={
-                                filters.searchTerm || filters.categoryId || filters.subcategoryId
-                                    ?'No se encontraron productos con esos criterios'
-                                    : 'Los productos del marketplace aparecerán aquí'
-                            }
+                            description="No se encontraron productos con esos criterios"
+                            actionLabel="Limpiar filtros"
+                            onAction={() => setFilters(INITIAL_FILTERS)}
                         />
                     </CardContent>
                 </Card>
@@ -120,8 +136,8 @@ export default function MarketplacePage() {
 
                     {/* Pagination */}
                     {total > 0 && (
-                        <div className="flex items-center justify-between mt-6">
-                            <p className="text-sm text-slate-500">
+                        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-between mt-6">
+                            <p className="text-sm text-slate-500 text-center sm:text-left">
                                 Mostrando {((filters.page - 1) * filters.limit) + 1} a {Math.min(filters.page * filters.limit, total)} de {total} productos
                             </p>
                             <div className="flex gap-2">
@@ -153,7 +169,7 @@ export default function MarketplacePage() {
             )}
 
             {/* CTA Section for guests */}
-            {!isAuthenticated && <MarketplaceCTA />}
+            {!isAuthenticated && !isCatalogEmpty && <MarketplaceCTA />}
         </div>
     );
 }

@@ -35,7 +35,7 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+            className="grid gap-4 grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
         >
             {filteredProducts.map((product) => (
                 <motion.div key={product.id} variants={itemVariants}>
@@ -71,21 +71,11 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                                 <p className="text-base sm:text-lg font-extrabold text-[#0B2046]">
                                     {getDisplayPrice(product).replace('$', 'USD ')}
                                 </p>
-                                <div className="flex items-center text-[11px] sm:text-xs text-slate-500 gap-1.5 mt-0.5">
-                                    <span>Pedido min: {product.moq} {product.unit_of_measure}</span>
-                                    <span className="text-slate-300">•</span>
-                                    <span>{product.id.charCodeAt(0) % 100 + 10} vendidos</span>
-                                </div>
+                                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                                    Pedido min: {product.moq} {product.unit_of_measure}
+                                </p>
                             </div>
-                            
-                            {/* Mock Envío Gratis */}
-                            {product.id.charCodeAt(1) % 2 === 0 && (
-                                <div className="flex items-center gap-1 text-[11px] font-bold text-[#0B2046] mt-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="16" height="13" x="2" y="6" rx="2"/><path d="M18 10h4v6h-4M6 21v-2M14 21v-2"/></svg>
-                                    ENVÍO GRATIS
-                                </div>
-                            )}
-                            
+
                             <div className="mt-3 pt-3 border-t border-slate-100">
                                 <Link
                                     to={`/Perfil/${product.company_id}`}
@@ -95,13 +85,11 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                                 >
                                     {product.company_details?.trade_name || 'Proveedor'}
                                 </Link>
-                                <div className="flex items-center text-[10px] sm:text-[11px] text-slate-500 gap-1">
-                                    <span className="font-bold text-slate-700">Verificado</span>
-                                    <span>-</span>
-                                    <span className="flex items-center text-amber-500 font-medium">{product.company_details?.average_rating || 5.0} ⭐</span>
-                                    <span>-</span>
-                                    <span className="line-clamp-1">{product.company_details?.locations?.[0] ? 'Distrito Capital' : 'Venezuela'}</span>
-                                </div>
+                                {Number(product.company_details?.average_rating) > 0 && (
+                                    <div className="flex items-center text-[10px] sm:text-[11px] font-medium text-amber-500">
+                                        {Number(product.company_details.average_rating).toFixed(1)} ⭐
+                                    </div>
+                                )}
                             </div>
                         </CardContent>
                     </Card>

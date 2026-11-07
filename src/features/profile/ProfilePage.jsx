@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import {
     Settings, Globe, MapPin, Package, Plus, Loader2, Calendar,
@@ -29,6 +29,7 @@ import { StatsStrip, TrustCard, CommercialCard, SocialCard } from './components/
 
 export default function ProfilePage() {
     const navigate = useNavigate();
+    const routerLocation = useLocation();
     const queryClient = useQueryClient();
     const [showAddProduct, setShowAddProduct] = useState(false);
     const [productToEdit, setProductToEdit] = useState(null);
@@ -65,6 +66,14 @@ export default function ProfilePage() {
         setProductToEdit(null);
         setShowAddProduct(true);
     };
+
+    // Deep link from the marketplace launch state: open the add-product modal once
+    useEffect(() => {
+        if (routerLocation.state?.openAddProduct) {
+            openAddProduct();
+            navigate(routerLocation.pathname, { replace: true, state: null });
+        }
+    }, [routerLocation.state]); // eslint-disable-line react-hooks/exhaustive-deps
 
     if (isLoading) {
         return (

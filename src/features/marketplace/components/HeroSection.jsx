@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronRight, Package, Truck, ShieldCheck, Zap, PackageCheck } from 'lucide-react';
+import { ChevronDown, ChevronRight, Package } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 import { cn } from '@/lib/utils';
@@ -94,9 +95,47 @@ function CategoriesPanel({ selectedCategoryId, selectedSubcategoryId, onSelectCa
     );
 }
 
-export default function HeroSection({ selectedCategoryId, selectedSubcategoryId, onSelectCategory, onSelectSubcategory }) {
+const STEPS = [
+    'Crea tu cuenta gratis',
+    'Publica lo que necesitas o lo que vendes',
+    'Recibe cotizaciones y conversa por chat',
+];
+
+/** Horizontal category chips for screens where the side panel is hidden. */
+function CategoryChips({ selectedCategoryId, onSelectCategory }) {
+    const { categoryOptions } = useAppMetadata();
+    if (categoryOptions.length === 0) return null;
+
     return (
-        <div className="w-full mb-10 pt-4">
+        <div className="lg:hidden -mx-4 px-4 sm:-mx-6 sm:px-6 overflow-x-auto">
+            <div className="flex gap-2 pb-1 w-max">
+                {categoryOptions.map((category) => (
+                    <button
+                        key={category.id}
+                        type="button"
+                        onClick={() => onSelectCategory(category.value)}
+                        className={cn(
+                            'whitespace-nowrap rounded-full border px-4 py-2 text-sm font-medium transition-colors',
+                            selectedCategoryId === category.value
+                                ? 'border-[#0B2046] bg-[#0B2046] text-white'
+                                : 'border-slate-200 bg-white text-slate-700 hover:border-[#0B2046]'
+                        )}
+                    >
+                        {category.label}
+                    </button>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export default function HeroSection({ selectedCategoryId, selectedSubcategoryId, onSelectCategory, onSelectSubcategory }) {
+    const navigate = useNavigate();
+
+    return (
+        <div id="hero-categorias" className="w-full mb-10 pt-4 space-y-4 scroll-mt-24">
+            <CategoryChips selectedCategoryId={selectedCategoryId} onSelectCategory={onSelectCategory} />
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
 
                 {/* Left Column: navigable categories / subcategories */}
@@ -107,106 +146,43 @@ export default function HeroSection({ selectedCategoryId, selectedSubcategoryId,
                     onSelectSubcategory={onSelectSubcategory}
                 />
 
-                {/* Center Column: Hero Carousel & Features */}
-                <div className="lg:col-span-6 flex flex-col gap-6">
-                    {/* Main Banner */}
-                    <div className="bg-slate-50 rounded-2xl p-8 lg:p-12 relative overflow-hidden flex-1 shadow-sm border border-slate-100 flex items-center">
-                        <div className="relative z-10 max-w-md">
-                            <span className="inline-block px-3 py-1 bg-[#D2FC31]/20 text-[#0B2046] rounded-full text-xs font-bold mb-4">
-                                Tecnología
-                            </span>
-                            <h2 className="text-3xl lg:text-5xl font-extrabold text-[#0B2046] leading-tight mb-4 tracking-tight">
-                                Monitores y Equipos IT B2B
-                            </h2>
-                            <p className="text-slate-600 text-lg">
-                                Actualiza tu flota corporativa con descuentos por volumen y garantía.
-                            </p>
-                        </div>
-                        {/* Decorative Mock Image Area */}
-                        <div className="absolute right-0 bottom-0 opacity-50 lg:opacity-100 w-1/2 h-full flex items-end justify-end pointer-events-none">
-                            <div className="w-full h-full bg-gradient-to-l from-slate-200 to-transparent flex items-center justify-center">
-                                <div className="w-40 h-32 bg-white rounded-lg shadow-md flex items-center justify-center border-4 border-slate-800">
-                                    <span className="text-slate-300 font-bold">MONITOR</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {/* Carousel Dots */}
-                        <div className="absolute bottom-6 left-12 flex gap-2">
-                            <div className="w-2 h-2 rounded-full bg-slate-300"></div>
-                            <div className="w-6 h-2 rounded-full bg-[#0B2046]"></div>
-                            <div className="w-2 h-2 rounded-full bg-slate-300"></div>
-                        </div>
+                {/* Welcome banner */}
+                <div className="lg:col-span-9 rounded-2xl bg-[#0B2046] p-5 sm:p-8 lg:p-12 shadow-sm flex flex-col justify-center">
+                    <h2 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-white leading-tight mb-3 tracking-tight max-w-2xl">
+                        Compra y vende entre empresas de Venezuela
+                    </h2>
+                    <p className="text-slate-300 text-base lg:text-lg max-w-xl mb-5 lg:mb-6">
+                        Pide cotizaciones o muestra tus productos. Sin intermediarios.
+                    </p>
+                    <div className="flex flex-col min-[400px]:flex-row gap-3 mb-6 lg:mb-8">
+                        <Button
+                            onClick={() => navigate('/register')}
+                            className="h-11 lg:h-12 flex-1 sm:flex-none sm:px-6 bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] font-bold"
+                        >
+                            Crear cuenta gratis
+                        </Button>
+                        <Button
+                            variant="outline"
+                            onClick={() => navigate('/login')}
+                            className="h-11 lg:h-12 flex-1 sm:flex-none sm:px-6 bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white font-semibold"
+                        >
+                            Ya tengo cuenta
+                        </Button>
                     </div>
 
-                    {/* Features Row */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-white p-4 rounded-xl flex items-center gap-3 shadow-sm border border-slate-100">
-                            <div className="bg-blue-50 p-2 rounded-lg text-blue-600">
-                                <Truck className="w-5 h-5" />
-                            </div>
-                            <span className="text-xs font-bold text-[#0B2046] leading-tight">Fletes Nacionales</span>
-                        </div>
-                        <div className="bg-white p-4 rounded-xl flex items-center gap-3 shadow-sm border border-slate-100">
-                            <div className="bg-green-50 p-2 rounded-lg text-green-600">
-                                <ShieldCheck className="w-5 h-5" />
-                            </div>
-                            <span className="text-xs font-bold text-[#0B2046] leading-tight">Proveedores Verificados</span>
-                        </div>
-                        <div className="bg-white p-4 rounded-xl flex items-center gap-3 shadow-sm border border-slate-100">
-                            <div className="bg-yellow-50 p-2 rounded-lg text-yellow-600">
-                                <Zap className="w-5 h-5" />
-                            </div>
-                            <span className="text-xs font-bold text-[#0B2046] leading-tight">Cotización Exprés</span>
-                        </div>
-                        <div className="bg-white p-4 rounded-xl flex items-center gap-3 shadow-sm border border-slate-100">
-                            <div className="bg-purple-50 p-2 rounded-lg text-purple-600">
-                                <PackageCheck className="w-5 h-5" />
-                            </div>
-                            <span className="text-xs font-bold text-[#0B2046] leading-tight">Garantía de Entrega</span>
-                        </div>
+                    <div id="como-funciona" className="scroll-mt-24 border-t border-white/10 pt-5">
+                        <p className="text-xs font-bold uppercase tracking-wide text-[#D2FC31] mb-3">Cómo funciona</p>
+                        <ol className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                            {STEPS.map((step, index) => (
+                                <li key={step} className="flex items-start gap-3 text-sm font-medium text-white">
+                                    <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#D2FC31] text-xs font-bold text-[#0B2046]">
+                                        {index + 1}
+                                    </span>
+                                    <span className="pt-0.5">{step}</span>
+                                </li>
+                            ))}
+                        </ol>
                     </div>
-                </div>
-
-                {/* Right Column: Recommendations */}
-                <div className="lg:col-span-3 flex flex-col gap-6">
-                    <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex-1">
-                        <h3 className="font-bold text-lg mb-4 text-[#0B2046]">Recomendados</h3>
-                        <div className="space-y-4">
-                            {/* Static Mock Products */}
-                            <div className="flex gap-3 items-center group cursor-pointer">
-                                <div className="w-14 h-14 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
-                                    <div className="w-full h-full bg-slate-300"></div>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-[#0B2046] group-hover:text-blue-600 line-clamp-2">Cemento Portland Tipo I</h4>
-                                    <p className="text-xs text-slate-500 mt-0.5">Min: 500 sacos</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-3 items-center group cursor-pointer">
-                                <div className="w-14 h-14 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
-                                    <div className="w-full h-full bg-slate-300"></div>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-[#0B2046] group-hover:text-blue-600 line-clamp-2">Tubería PVC 4"</h4>
-                                    <p className="text-xs text-slate-500 mt-0.5">Min: 1200 uds</p>
-                                </div>
-                            </div>
-                            <div className="flex gap-3 items-center group cursor-pointer">
-                                <div className="w-14 h-14 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0">
-                                    <div className="w-full h-full bg-slate-300"></div>
-                                </div>
-                                <div>
-                                    <h4 className="text-sm font-bold text-[#0B2046] group-hover:text-blue-600 line-clamp-2">Harina de Trigo 50kg</h4>
-                                    <p className="text-xs text-slate-500 mt-0.5">Min: 300 sacos</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <Button className="w-full h-14 bg-[#0B2046] hover:bg-[#16305a] text-white font-bold text-base rounded-xl shadow-md">
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        Publicar Requerimiento
-                    </Button>
                 </div>
             </div>
         </div>
