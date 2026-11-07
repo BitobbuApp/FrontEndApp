@@ -35,7 +35,7 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
+            className="grid gap-4 grid-cols-1 min-[400px]:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6"
         >
             {filteredProducts.map((product) => (
                 <motion.div key={product.id} variants={itemVariants}>
@@ -71,7 +71,7 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                                 <p className="text-base sm:text-lg font-extrabold text-[#0B2046]">
                                     {getDisplayPrice(product).replace('$', 'USD ')}
                                 </p>
-                                <div className="flex items-center text-[11px] sm:text-xs text-slate-500 gap-1.5 mt-0.5">
+                                <div className="flex flex-wrap items-center text-[11px] sm:text-xs text-slate-500 gap-x-1.5 mt-0.5">
                                     <span>Pedido min: {product.moq} {product.unit_of_measure}</span>
                                     <span className="text-slate-300">•</span>
                                     <span>{product.id.charCodeAt(0) % 100 + 10} vendidos</span>
@@ -95,7 +95,7 @@ export default function ProductGrid({ filteredProducts, handleViewDetail }) {
                                 >
                                     {product.company_details?.trade_name || 'Proveedor'}
                                 </Link>
-                                <div className="flex items-center text-[10px] sm:text-[11px] text-slate-500 gap-1">
+                                <div className="flex flex-wrap items-center text-[10px] sm:text-[11px] text-slate-500 gap-x-1">
                                     <span className="font-bold text-slate-700">Verificado</span>
                                     <span>-</span>
                                     <span className="flex items-center text-amber-500 font-medium">{product.company_details?.average_rating || 5.0} ⭐</span>
