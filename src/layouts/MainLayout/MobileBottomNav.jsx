@@ -9,7 +9,8 @@ import {
     Plus,
     Briefcase,
     Settings,
-    Menu
+    Menu,
+    ShoppingBag
 } from 'lucide-react';
 import { createPageUrl } from '@/utils';
 import { MENU_ITEMS } from './Sidebar';
@@ -56,11 +57,11 @@ export default function MobileBottomNav({
 
                 {/* Manual Reconstruction for best Mobile UX */}
                 
-                {/* 1. Dashboard */}
+                {/* 1. Marketplace */}
                 <NavLink 
-                    to="Dashboard" 
-                    icon={LayoutDashboard} 
-                    isActive={isActive('Dashboard')} 
+                    to="Marketplace"
+                    icon={ShoppingBag}
+                    isActive={isActive('Marketplace')}
                 />
 
                 {/* 2. Principal Action */}

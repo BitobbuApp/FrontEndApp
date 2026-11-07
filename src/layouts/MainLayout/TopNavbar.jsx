@@ -16,6 +16,8 @@ import {
     markAllNotificationsRead,
 } from '@/features/notifications/services/notificationsApi';
 
+const PAGE_TITLES = { Perfil: 'Mi perfil', Configuracion: 'Configuración' };
+
 export default function TopNavbar({
     currentPageName,
     notifications,
@@ -58,6 +60,7 @@ export default function TopNavbar({
                 {/* Page Title */}
                 <h1 className="text-lg font-semibold text-foreground lg:block">
                     {MENU_ITEMS.find((item) => item.page === normalizedPageName)?.name ||
+                        PAGE_TITLES[normalizedPageName] ||
                         normalizedPageName}
                 </h1>
 

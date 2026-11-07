@@ -50,7 +50,7 @@
 import Chat from './features/chat/ChatPage';
 import Configuracion from './features/settings/SettingsPage';
 import Dashboard from './features/dashboard/DashboardPage';
-// import Marketplace from './features/marketplace/MarketplacePage';
+import Marketplace from './features/marketplace/MarketplacePage';
 import Requests from './features/requests/RequestsPage';
 import RequestFormPage from './features/requests/RequestFormPage';
 import RequestSummaryPage from './features/requests/RequestSummaryPage';
@@ -61,13 +61,15 @@ import PosiblesClientes from './features/prospects/ProspectsPage';
 import ProspectDetailPage from './features/prospects/ProspectDetailPage';
 import Proveedores from './features/suppliers/SuppliersPage';
 import QuoteDetailPage from './features/requests/QuoteDetailPage';
+import ProductDetailPage from './features/marketplace/ProductDetailPage';
 import __Layout from './layouts/MainLayout/MainLayout.jsx';
 
 export const PAGES = {
     "Chat": Chat,
+    "Chat/:id": Chat,
     "Configuracion": Configuracion,
     "Dashboard": Dashboard,
-    //"Marketplace": Marketplace,
+    "Marketplace": Marketplace,
     "Requests": Requests,
     "Requests/new": RequestFormPage,
     "Requests/:id/edit": RequestFormPage,
@@ -79,10 +81,11 @@ export const PAGES = {
     "prospects/:id": ProspectDetailPage,
     "Proveedores": Proveedores,
     "Quotes/:id": QuoteDetailPage,
+    "Marketplace/producto/:id": ProductDetailPage,
 }
 
 export const pagesConfig = {
-    mainPage: "Dashboard",
+    mainPage: "Marketplace",
     Pages: PAGES,
     Layout: __Layout,
 };

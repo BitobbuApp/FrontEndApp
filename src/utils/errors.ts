@@ -125,6 +125,42 @@ const MASTER_ERROR_CATALOG: Record<string, ErrorMessageLocale> = {
     message_en: "Review period has expired.",
     message_es: "El periodo de revisión ha expirado."
   },
+  SESSION_REVOKED: {
+    message_en: "Your session was closed because your account security changed. Please sign in again.",
+    message_es: "Tu sesión se cerró porque cambió la seguridad de tu cuenta. Inicia sesión nuevamente."
+  },
+  RESET_TOKEN_INVALID: {
+    message_en: "This link is invalid or has expired.",
+    message_es: "El enlace es inválido o ha expirado."
+  },
+  PASSWORD_RECENTLY_USED: {
+    message_en: "You cannot reuse any of your last 5 passwords.",
+    message_es: "No puedes reutilizar ninguna de tus últimas 5 contraseñas."
+  },
+  PASSWORD_POLICY_VIOLATION: {
+    message_en: "The password does not meet the security policy.",
+    message_es: "La contraseña no cumple la política de seguridad."
+  },
+  TWO_FACTOR_REQUIRED: {
+    message_en: "Enter your two-factor code.",
+    message_es: "Ingresa tu código de verificación en dos pasos."
+  },
+  TWO_FACTOR_INVALID: {
+    message_en: "Incorrect verification code.",
+    message_es: "Código de verificación incorrecto."
+  },
+  MFA_TOKEN_INVALID: {
+    message_en: "The verification expired. Please sign in again.",
+    message_es: "La verificación expiró. Inicia sesión nuevamente."
+  },
+  TWO_FACTOR_ENFORCED_BY_COMPANY: {
+    message_en: "Your company requires two-factor authentication, so it cannot be turned off.",
+    message_es: "Tu empresa exige la autenticación en dos pasos, por eso no se puede desactivar."
+  },
+  TOO_MANY_REQUESTS: {
+    message_en: "Too many attempts. Please wait a few minutes and try again.",
+    message_es: "Demasiados intentos. Espera unos minutos e inténtalo de nuevo."
+  },
   BUSINESS_ERROR: {
     message_en: "This operation cannot be completed right now.",
     message_es: "Esta operación no puede completarse en este momento."

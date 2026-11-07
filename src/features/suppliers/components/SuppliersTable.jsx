@@ -26,7 +26,7 @@ export default function SuppliersTable({
         return viewMode === 'grid' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                    <div key={i} className="h-64 bg-slate-100 rounded-xl animate-pulse" />
+                    <div key={i} className="h-64 bg-slate-100 rounded-3xl animate-pulse" />
                 ))}
             </div>
         ) : (
@@ -102,7 +102,7 @@ export default function SuppliersTable({
             </div>
 
             {/* Desktop shows the selected list view */}
-            <Card className="hidden sm:block border-0 shadow-sm overflow-hidden">
+            <Card className="hidden sm:block rounded-3xl border border-border shadow-sm overflow-hidden">
                 {filteredProveedores.map((company) => (
                     <SupplierRow
                         key={company.id}

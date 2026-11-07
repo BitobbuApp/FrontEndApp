@@ -4,28 +4,14 @@ import {
     ArrowLeft,
     MapPin,
     Star,
-    FileText,
     Package,
-    Users,
     Loader2,
-    Phone,
-    Mail,
-    Globe,
-    Instagram,
-    Linkedin,
-    Music,
     Calendar,
-    BadgeCheck,
-    ShieldCheck,
-    Info,
 } from 'lucide-react';
-import { InfoTooltip } from '@/components/shared/InfoTooltip';
 import tooltips from '@/constants/tooltips.json';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Table,
     TableBody,
@@ -38,34 +24,20 @@ import Pagination from '@/components/atoms/Pagination';
 import usePublicProfileData from './hooks/usePublicProfileData';
 import useCompanyProducts from './hooks/useCompanyProducts';
 import ProductSmallCard from './components/ProductSmallCard';
+import CompanySubcategories from './components/CompanySubcategories';
+import { StatsStrip, TrustCard, CommercialCard, SocialCard } from './components/ProfileCards';
 import { useSupplierReviews } from '@/features/suppliers/hooks/useSupplierReviews';
+import { useMyCompany } from '@/features/settings/hooks/useMyCompany';
+import { buildDirectOffer } from '@/features/marketplace/utils/directOffer';
 
-function getMetadataLabel(value) {
-    if (typeof value === 'string') {
-        return value;
-    }
-
-    if (!value || typeof value !== 'object') {
-        return '';
-    }
-
-    if (typeof value.name === 'string') {
-        return value.name;
-    }
-
-    if (typeof value.method === 'string') {
-        return value.method;
-    }
-
-    if (value.method && typeof value.method === 'object') {
-        return value.method.name || value.method.name_es || value.method.name_en || '';
-    }
-
-    return value.name_es || value.name_en || '';
-}
+const SECTION_TABS = [
+    { value: 'vitrina', label: 'Vitrina' },
+    { value: 'resenas', label: 'Reseñas' },
+];
 
 export default function PublicProfilePage() {
     const navigate = useNavigate();
+    const [activeSection, setActiveSection] = React.useState('resenas');
 
     const {
         company,
@@ -83,8 +55,17 @@ export default function PublicProfilePage() {
         trustScore,
     } = usePublicProfileData();
 
+    const { data: myCompany } = useMyCompany();
+    const canRequestQuote = !isMyProfile && !!myCompany?.can_buy;
+
+    const handleRequestQuote = (product) => {
+        navigate('/Requests/new', {
+            state: { offer: buildDirectOffer(product, tradeName) },
+        });
+    };
+
     const { data: companyProducts = [], isLoading: isLoadingProducts } = useCompanyProducts(company?.id);
-    
+
     const [reviewPage, setReviewPage] = React.useState(1);
     const reviewsLimit = 5;
     const { reviews, total: totalReviewsCount, totalPages: reviewsTotalPages, loading: isLoadingReviews } = useSupplierReviews(company?.id, reviewPage, reviewsLimit);
@@ -100,13 +81,13 @@ export default function PublicProfilePage() {
     if (!company) {
         return (
             <div className="text-center py-20 text-slate-500">
-                No se encontro el perfil de la empresa.
+                No se encontró el perfil de la empresa.
             </div>
         );
     }
 
     return (
-        <div className="max-w-5xl mx-auto space-y-6">
+        <div className="mx-auto max-w-6xl space-y-6">
             <div>
                 <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="gap-1.5 text-slate-500">
                     <ArrowLeft className="w-4 h-4" />
@@ -114,215 +95,142 @@ export default function PublicProfilePage() {
                 </Button>
             </div>
 
-            <div className="relative">
-                <div className="h-36 w-full rounded-xl bg-gradient-to-br from-slate-800 to-slate-900" />
-                <div className="absolute -bottom-8 left-6">
-                    <div className="w-20 h-20 rounded-full bg-background border-4 border-white shadow flex items-center justify-center overflow-hidden">
+            {/* ── Header card: banner, identity, stats ── */}
+            <Card className="overflow-hidden rounded-3xl border border-border shadow-sm">
+                <div className="h-32 bg-gradient-to-br from-[#0B2046] via-[#0F2858] to-[#1c3a4f] sm:h-40" />
+
+                <div className="px-6 pb-6 sm:px-10">
+                    <div className="-mt-12 flex h-24 w-24 items-center justify-center overflow-hidden rounded-3xl border-4 border-white bg-white shadow-lg sm:-mt-14 sm:h-28 sm:w-28">
                         {company.logo_url ? (
-                            <img src={company.logo_url} alt={tradeName} className="w-full h-full object-cover" />
+                            <img src={company.logo_url} alt={tradeName} className="h-full w-full object-cover" />
                         ) : (
-                            <span className="text-3xl font-bold text-slate-700">{initial}</span>
+                            <span className="text-4xl font-bold text-[#0B2046]">{initial}</span>
+                        )}
+                    </div>
+
+                    <div className="mt-4 space-y-4 sm:mt-5">
+                        <h1 className="text-3xl font-bold text-[#0B2046] sm:text-4xl">{tradeName}</h1>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                            {companyType && (
+                                <Badge className="rounded-full bg-[#0B2046] px-3 py-1 text-sm font-semibold text-white hover:bg-[#0B2046]">
+                                    {companyType}
+                                </Badge>
+                            )}
+                            {sector && (
+                                <Badge className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-[#0B2046] hover:bg-slate-100">
+                                    {sector}
+                                </Badge>
+                            )}
+                        </div>
+
+                        <CompanySubcategories
+                            subcategories={company?.subcategories_of_interest}
+                            editable={isMyProfile}
+                        />
+
+                        {(company.founding_year || location) && (
+                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-slate-600">
+                                {company.founding_year && (
+                                    <span className="flex items-center gap-2">
+                                        <Calendar className="h-4 w-4 text-slate-400" />
+                                        Fundada en {company.founding_year}
+                                    </span>
+                                )}
+                                {location && (
+                                    <span className="flex items-center gap-2">
+                                        <MapPin className="h-4 w-4 text-slate-400" />
+                                        {location}
+                                        {company.locations?.[0]?.national_coverage && (
+                                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-600">
+                                                Cobertura nacional
+                                            </span>
+                                        )}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+
+                        {company.bio && (
+                            <p className="max-w-3xl leading-relaxed text-slate-600">{company.bio}</p>
                         )}
                     </div>
                 </div>
-            </div>
 
-            <div className="pt-12 pb-5 px-1">
-                <h1 className="text-2xl font-bold text-foreground">{tradeName}</h1>
-                <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                    {companyType && <Badge variant="secondary" className="text-xs">{companyType}</Badge>}
-                    {sector && <Badge variant="outline" className="text-xs">{sector}</Badge>}
-                </div>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 mt-2">
-                    {location && (
-                        <span className="flex items-center gap-1">
-                            <MapPin className="w-3.5 h-3.5" />
-                            {location}
-                        </span>
-                    )}
-                    <span className="flex items-center gap-1 text-amber-500">
-                        <Star className="w-3.5 h-3.5 fill-amber-400" />
-                        {rating.toFixed(1)} ({totalReviews} reseñas)
-                    </span>
-                    <span className="flex items-center gap-1">
-                        <FileText className="w-3.5 h-3.5" />
-                        {transactions} transacciones
-                    </span>
-                </div>
-                {company.bio && (
-                    <p className="text-sm text-slate-600 mt-3 max-w-2xl">{company.bio}</p>
-                )}
-            </div>
-
-            {/* ── Trust Score ── */}
-            <Card className="border border-border shadow-sm overflow-hidden bg-slate-50/50">
-                <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                            <ShieldCheck className="w-6 h-6 text-[#a8d92a]" />
-                            <h3 className="font-semibold text-foreground text-lg flex items-center">
-                                Nivel de Confianza
-                                <InfoTooltip content={tooltips.profile.trust_score} />
-                            </h3>
-                        </div>
-                        <span className="font-bold text-xl">{trustScore}%</span>
-                    </div>
-                    <Progress value={trustScore} className="h-3 mb-2" />
-                    <p className="text-sm text-slate-500">
-                        {trustScore >= 100 
-                            ? 'Este perfil esta verificado y completo. Es altamente confiable.' 
-                            : 'Este perfil no esta completo. Sugerimos tomar precauciones al hacer negocios.'}
-                    </p>
-                </CardContent>
+                <StatsStrip
+                    products={products}
+                    transactions={transactions}
+                    score={rating}
+                    reviews={totalReviews}
+                    tooltips={tooltips.profile}
+                />
             </Card>
 
-            <Card className="border border-border shadow-sm">
-                <CardContent className="p-6 space-y-5">
-                    <h3 className="text-base font-semibold text-foreground">Contacto y Redes</h3>
+            {/* ── Sidebar cards + vitrina / reseñas ── */}
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_2fr]">
+                <div className="space-y-6">
+                    <TrustCard trustScore={trustScore} info={tooltips.profile.trust_score} />
+                    <CommercialCard company={company} isOwner={isMyProfile} />
+                    <SocialCard company={company} />
+                </div>
 
-                    {location && (
-                        <div className="flex items-start gap-3">
-                            <MapPin className="w-5 h-5 text-slate-400 mt-0.5 flex-shrink-0" />
-                            <div>
-                                <p className="font-semibold text-foreground text-sm">{location}</p>
-                                {company.locations?.[0]?.national_coverage && (
-                                    <span className="inline-block mt-1 text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Cobertura Nacional</span>
-                                )}
+                <div className="space-y-4">
+                    <div className="flex gap-1 rounded-2xl bg-slate-100 p-1 w-fit">
+                        {SECTION_TABS.map(({ value, label }) => (
+                            <button
+                                key={value}
+                                type="button"
+                                onClick={() => setActiveSection(value)}
+                                className={`rounded-xl px-4 py-2 text-sm font-semibold transition-colors ${
+                                    activeSection === value
+                                        ? 'bg-white text-[#0B2046] shadow-sm'
+                                        : 'text-slate-500 hover:text-[#0B2046]'
+                                }`}
+                            >
+                                {label}
+                                <span className="ml-1.5 text-slate-500">
+                                    {value === 'vitrina' ? companyProducts.length : totalReviews}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
+
+                    {activeSection === 'vitrina' && (
+                        isLoadingProducts ? (
+                            <div className="py-12 flex justify-center">
+                                <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
                             </div>
-                        </div>
-                    )}
-
-                    {company.founding_year && (
-                        <div className="flex items-center gap-3">
-                            <Calendar className="w-5 h-5 text-slate-400 flex-shrink-0" />
-                            <p className="text-sm text-foreground">Fundada en {company.founding_year}</p>
-                        </div>
-                    )}
-
-                    {(() => {
-                        const PLATFORM_CONFIG = {
-                            instagram:       { label: 'Instagram',          icon: Instagram, color: 'text-pink-500' },
-                            tiktok:          { label: 'TikTok',             icon: Music,     color: 'text-slate-700' },
-                            facebook:        { label: 'Facebook',           icon: Globe,     color: 'text-blue-600' },
-                            website:         { label: 'Sitio Web',          icon: Globe,     color: 'text-slate-500' },
-                            google_business: { label: 'Google My Business', icon: Globe,     color: 'text-red-500'   },
-                            linkedin:        { label: 'LinkedIn',           icon: Linkedin,  color: 'text-blue-700' },
-                            twitter:         { label: 'X (Twitter)',        icon: Globe,     color: 'text-slate-700' },
-                        };
-
-                        const socialLinks = (company?.social_media || []).filter(sm => sm?.url);
-                        if (!socialLinks.length) return null;
-
-                        return (
-                            <div className="grid grid-cols-2 gap-2">
-                                {socialLinks.map(({ platform, url }) => {
-                                    const config = PLATFORM_CONFIG[platform];
-                                    if (!config) return null;
-                                    const Icon = config.icon;
-                                    return (
-                                        <a
-                                            key={platform}
-                                            href={url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-border text-sm text-slate-700 dark:text-slate-300 hover:bg-muted/50 transition-colors"
-                                        >
-                                            <Icon className={`w-4 h-4 flex-shrink-0 ${config.color}`} />
-                                            {config.label}
-                                        </a>
-                                    );
-                                })}
-                            </div>
-                        );
-                    })()}
-
-
-                    <div className="border-t border-border" />
-
-                    {company.commercial_profile?.works_with_credit && (
-                        <div className="flex items-center gap-2 text-sm text-blue-600">
-                            <BadgeCheck className="w-4 h-4" />
-                            Trabaja con credito
-                        </div>
-                    )}
-
-                    {company.payment_methods?.length > 0 && (
-                        <div>
-                            <p className="text-xs text-slate-400 mb-2">Metodos de pago:</p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {company.payment_methods.map((pm) => (
-                                    <span
-                                        key={getMetadataLabel(pm) || JSON.stringify(pm)}
-                                        className="inline-block text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full"
-                                    >
-                                        {getMetadataLabel(pm)}
-                                    </span>
+                        ) : companyProducts.length > 0 ? (
+                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                                {companyProducts.map((p) => (
+                                    <ProductSmallCard
+                                        key={p.id}
+                                        product={p}
+                                        onRequestQuote={canRequestQuote ? handleRequestQuote : undefined}
+                                    />
                                 ))}
                             </div>
-                        </div>
+                        ) : (
+                            <Card className="rounded-3xl border border-border shadow-sm">
+                                <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
+                                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+                                        <Package className="h-8 w-8 text-slate-400" />
+                                    </div>
+                                    <p className="text-lg font-semibold text-[#0B2046]">Vitrina vacía</p>
+                                    <p className="text-slate-500">Esta empresa aún no tiene productos publicados</p>
+                                </CardContent>
+                            </Card>
+                        )
                     )}
-                </CardContent>
-            </Card>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                    { icon: Package, label: 'Productos', value: products, color: 'text-blue-500', info: tooltips.profile.products },
-                    { icon: Users, label: 'Transacciones', value: transactions, color: 'text-purple-500', info: tooltips.profile.transactions },
-                    { icon: Star, label: 'Calificacion', value: rating.toFixed(1), color: 'text-amber-500', info: tooltips.profile.rating },
-                    { icon: FileText, label: 'Reseñas', value: totalReviews, color: 'text-slate-400', info: tooltips.profile.reviews },
-                ].map(({ icon: Icon, label, value, color, info }) => (
-                    <Card key={label} className="border border-border shadow-sm">
-                        <CardContent className="p-5 flex flex-col items-center gap-2 text-center">
-                            <Icon className={`w-7 h-7 ${color}`} />
-                            <p className="text-2xl font-bold text-foreground">{value}</p>
-                            <p className="text-xs text-slate-500 flex items-center justify-center">
-                                {label}
-                                <InfoTooltip content={info} />
-                            </p>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            <Tabs defaultValue="resenas">
-                <TabsList className="bg-slate-100 p-1">
-                    <TabsTrigger value="vitrina">Vitrina</TabsTrigger>
-                    <TabsTrigger value="resenas">Reseñas</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="vitrina" className="mt-4">
-                    {isLoadingProducts ? (
-                        <div className="py-12 flex justify-center">
-                            <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
-                        </div>
-                    ) : companyProducts.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                            {companyProducts.map((p) => (
-                                <ProductSmallCard key={p.id} product={p} />
-                            ))}
-                        </div>
-                    ) : (
-                        <Card className="border-0 shadow-sm">
-                            <CardContent className="py-16 flex flex-col items-center gap-3 text-center">
-                                <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
-                                    <Package className="w-8 h-8 text-slate-300" />
-                                </div>
-                                <p className="font-medium text-slate-600">Vitrina vacia</p>
-                                <p className="text-sm text-slate-400">Esta empresa aun no tiene productos publicados</p>
-                            </CardContent>
-                        </Card>
-                    )}
-                </TabsContent>
-
-                <TabsContent value="resenas" className="mt-4">
-                    <Card className="border-0 shadow-sm">
-                        <CardContent className="p-6">
-                            {isLoadingReviews ? (
-                                <div className="py-12 flex justify-center">
-                                    <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
-                                </div>
-                            ) : reviews.length > 0 ? (
-                                <div className="space-y-4">
+                    {activeSection === 'resenas' && (
+                        <Card className="rounded-3xl border border-border shadow-sm">
+                            <CardContent className="p-6">
+                                {isLoadingReviews ? (
+                                    <div className="py-12 flex justify-center">
+                                        <Loader2 className="w-6 h-6 animate-spin text-slate-300" />
+                                    </div>
+                                ) : reviews.length > 0 ? (
                                     <div className="rounded-xl border border-border overflow-hidden">
                                         <Table>
                                             <TableHeader className="bg-slate-50/50">
@@ -378,20 +286,20 @@ export default function PublicProfilePage() {
                                             className="bg-slate-50/30"
                                         />
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="py-16 flex flex-col items-center gap-3 text-center">
-                                    <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center">
-                                        <Star className="w-8 h-8 text-slate-300" />
+                                ) : (
+                                    <div className="py-16 flex flex-col items-center gap-3 text-center">
+                                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
+                                            <Star className="h-8 w-8 text-slate-400" />
+                                        </div>
+                                        <p className="text-lg font-semibold text-[#0B2046]">Sin reseñas aún</p>
+                                        <p className="text-slate-500">Esta empresa no ha recibido reseñas todavía</p>
                                     </div>
-                                    <p className="font-medium text-slate-600">Sin reseñas aun</p>
-                                    <p className="text-sm text-slate-400">Esta empresa no ha recibido reseñas todavia</p>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

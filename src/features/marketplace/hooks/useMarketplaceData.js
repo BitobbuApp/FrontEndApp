@@ -1,24 +1,64 @@
-import { useQuery } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { marketplaceApi } from '../services/marketplaceApi';
+import useDebounce from '@/hooks/useDebounce';
 
-export function useMarketplaceData(searchTerm, categoryFilter, typeFilter) {
-    const { data: productos = [], isLoading } = useQuery({
-        queryKey: ['productos'],
-        queryFn: () => base44.entities.ProductoCatalogo.filter({ activo: true }, '-created_date'),
-    });
+export function useMarketplaceData(filters) {
+    const {
+        searchTerm,
+        categoryId,
+        subcategoryId,
+        countryId,
+        stateId,
+        minPrice,
+        maxPrice,
+        sortBy,
+        page,
+        limit,
+    } = filters;
 
-    const filteredProducts = productos.filter((prod) => {
-        const matchesSearch =
-            prod.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            prod.proveedor_nombre?.toLowerCase().includes(searchTerm.toLowerCase());
-        const matchesCategory = categoryFilter === 'Todas' || prod.categoria === categoryFilter;
-        const matchesType = typeFilter === 'Todos' || prod.tipo_proveedor === typeFilter;
-        return matchesSearch && matchesCategory && matchesType;
+    // Debounce the search term to avoid spamming the backend
+    const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
+    const { data, isLoading, error } = useQuery({
+        queryKey: [
+            'marketplace-products',
+            debouncedSearchTerm,
+            categoryId,
+            subcategoryId,
+            countryId,
+            stateId,
+            minPrice,
+            maxPrice,
+            sortBy,
+            page,
+            limit,
+        ],
+        queryFn: async () => {
+            const params = {
+                searchTerm: debouncedSearchTerm || undefined,
+                categoryId: categoryId || undefined,
+                subcategoryId: subcategoryId || undefined,
+                countryId: countryId || undefined,
+                stateId: stateId || undefined,
+                minPrice: minPrice || undefined,
+                maxPrice: maxPrice || undefined,
+                sortBy: sortBy || undefined,
+                page,
+                limit,
+            };
+
+            const response = await marketplaceApi.getMarketplaceOffers(params);
+            return response; // { data: [...], total: X }
+        },
+        // v5: keep showing the previous page while the next one loads (no flicker)
+        placeholderData: keepPreviousData,
     });
 
     return {
-        productos,
-        filteredProducts,
+        productos: data?.data?.data || [],
+        total: data?.data?.total || 0,
+        priceRange: data?.data?.priceRange || { min: 0, max: 0 },
         isLoading,
+        error,
     };
 }

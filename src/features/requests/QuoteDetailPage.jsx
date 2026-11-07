@@ -21,12 +21,14 @@ import CompanyProfileCard from '@/components/shared/CompanyProfileCard';
 // Feature specific
 import ReviewModal from '@/features/suppliers/components/ReviewModal';
 import { quoteResponsesApi } from './services/quoteResponsesApi';
+import RejectQuoteDialog, { FINAL_QUOTE_STATUSES } from './components/RejectQuoteDialog';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 
 export default function QuoteDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+    const [isRejectOpen, setIsRejectOpen] = useState(false);
     const { 
         paymentConditionOptions, 
         deliveryMethodOptions, 
@@ -103,6 +105,7 @@ export default function QuoteDetailPage() {
         notes: data.notes || "Sin observaciones adicionales.",
         hasGuarantee: data.has_guarantee
     };
+    const isFinal = FINAL_QUOTE_STATUSES.includes(data.status);
 
     const ratingMetrics = [
         { label: "Cumplimiento", value: Number(supplier.avg_compliance_seller) || 0 },
@@ -151,14 +154,17 @@ export default function QuoteDetailPage() {
             }
             footerActions={
                 <>
-                    <Button 
-                        variant="outline" 
-                        className="flex-1 h-12 rounded-xl border-slate-200 text-slate-600 font-bold hover:bg-slate-50 hover:text-red-600 hover:border-red-100 transition-all gap-2"
-                    >
-                        <X className="w-4 h-4" /> Rechazar Oferta
-                    </Button>
-                    <Button 
-                        disabled={startNegotiationMutation.isPending}
+                    {!isFinal && (
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsRejectOpen(true)}
+                            className="flex-1 h-12 rounded-xl border-slate-200 text-slate-600 font-bold hover:bg-slate-50 hover:text-red-600 hover:border-red-100 transition-all gap-2"
+                        >
+                            <X className="w-4 h-4" /> Rechazar Oferta
+                        </Button>
+                    )}
+                    <Button
+                        disabled={startNegotiationMutation.isPending || data.status === 'rejected' || data.status === 'expired'}
                         onClick={() => startNegotiationMutation.mutate()}
                         className="flex-[2] h-12 rounded-xl bg-[#D2FC31] hover:bg-[#c4ee2a] text-slate-900 font-black gap-2 shadow-sm border border-[#D2FC31] transition-all"
                     >
@@ -214,11 +220,18 @@ export default function QuoteDetailPage() {
                 </CardContent>
             </Card>
 
-            <ReviewModal 
+            <ReviewModal
                 open={isReviewModalOpen}
                 onOpenChange={setIsReviewModalOpen}
                 companyId={quote.supplierId}
                 companyName={supplier.trade_name}
+            />
+
+            <RejectQuoteDialog
+                open={isRejectOpen}
+                onOpenChange={setIsRejectOpen}
+                quoteId={quote.id}
+                supplierName={supplier.trade_name}
             />
         </DetailLayout>
     );

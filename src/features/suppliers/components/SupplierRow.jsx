@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Star, Eye, CheckCircle } from 'lucide-react';
+import { MapPin, Star, ArrowRight, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -23,7 +23,7 @@ export default function SupplierRow({ company, onViewProfile }) {
     return (
         <div className="flex items-center gap-4 px-4 py-3 border-b border-border last:border-0 hover:bg-muted/50 transition-colors">
             {/* Avatar */}
-            <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
                 {company.logo_url ? (
                     <img src={company.logo_url} alt={company.trade_name} className="w-full h-full object-cover" />
                 ) : (
@@ -65,8 +65,8 @@ export default function SupplierRow({ company, onViewProfile }) {
                     className="text-xs px-3 h-8 gap-1"
                     onClick={() => onViewProfile(company)}
                 >
-                    <Eye className="w-3.5 h-3.5" />
-                    Ver Perfil
+                    <ArrowRight className="w-3.5 h-3.5" />
+                    Ver perfil
                 </Button>
             </div>
         </div>

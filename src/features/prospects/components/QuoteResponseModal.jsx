@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import { getTierUnitPrice } from '@/features/marketplace/utils/pricing';
 import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesApi';
 import {
   Dialog,
@@ -27,6 +29,9 @@ import {
 
 export default function QuoteResponseModal({ open, onOpenChange, request }) {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  // Direct RFQ: quoting opens the negotiation (chat) with the buyer right away
+  const isDirect = !!request?.is_direct;
 
   const { paymentConditionOptions, deliveryMethodOptions } = useAppMetadata();
 
@@ -43,11 +48,14 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
   });
 
   // Pre-fill quantity with the requested quantity when opened
+  // (and, for direct RFQs, the unit price from the offer's pricing tiers)
   useEffect(() => {
     if (open && request) {
+      const tierPrice = request.is_direct ? getTierUnitPrice(request.offer, request.quantity) : null;
       setFormData(prev => ({
         ...prev,
         quantity: request.quantity?.toString() || '',
+        unit_price_usd: prev.unit_price_usd || (tierPrice != null ? tierPrice.toString() : ''),
       }));
     }
   }, [open, request]);
@@ -80,16 +88,24 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
 
       return quoteResponsesApi.createQuoteResponse(payload);
     },
-    onSuccess: () => {
+    onSuccess: (response) => {
       // Invalidate both quote-responses if a list exists, and the marketplace requests since it might update response count
       queryClient.invalidateQueries({ queryKey: ['quote-responses'] });
       queryClient.invalidateQueries({ queryKey: ['marketplace-requests'] });
       // Also invalidate the specific request detail so it can show updated response stats
       queryClient.invalidateQueries({ queryKey: ['requestDetail', request?.id] });
-      
-      toast.success('Cotización enviada exitosamente');
+
       onOpenChange(false);
       resetForm();
+
+      const conversationId = response?.data?.conversation_id;
+      if (isDirect && conversationId) {
+        queryClient.invalidateQueries({ queryKey: ['conversaciones'] });
+        toast.success('Cotización enviada. La negociación con el comprador ya está abierta.');
+        navigate(`/Chat/${conversationId}`);
+        return;
+      }
+      toast.success('Cotización enviada exitosamente');
     },
     onError: (error) => {
       const message = error.response?.data?.message || 'Error al enviar la cotización';
@@ -139,6 +155,13 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
           <p className="text-sm text-slate-500 mt-1">
             Respondiendo a: <span className="font-semibold text-slate-700">{request.product_service}</span>
           </p>
+          {isDirect && (
+            <p className="text-xs text-slate-500 mt-2">
+              Es una solicitud directa sobre tu producto
+              {request.offer?.name ? <> <span className="font-medium">{request.offer.name}</span></> : ''}.
+              Al enviar tu cotización se abrirá la negociación con el comprador.
+            </p>
+          )}
         </DialogHeader>
 
         <div className="overflow-y-auto flex-1 px-6 py-5">
@@ -330,7 +353,7 @@ export default function QuoteResponseModal({ open, onOpenChange, request }) {
             {createMutation.isPending && (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             )}
-            Enviar Cotización
+            {isDirect ? 'Enviar cotización e iniciar negociación' : 'Enviar Cotización'}
           </Button>
         </DialogFooter>
       </DialogContent>

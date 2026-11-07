@@ -39,19 +39,50 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    const login = async (email, password) => {
-        const loggedUser = await authApi.loginUser(email, password);
-        authApi.saveSession(loggedUser);
+    /** Stores a full session (login, 2FA challenge, enrollment) and opens the app for that user */
+    const completeLogin = (session) => {
+        authApi.saveSession(session);
 
-        setUser(loggedUser);
+        setUser(session);
         setIsAuthenticated(true);
         setAuthError(null);
         connectSocket(); // Conectar socket inmediatamente después del login
-        
+
         // Invalidate metadata cache to trigger re-fetch with new token (for delivery methods, etc)
         queryClientInstance.invalidateQueries({ queryKey: [APP_METADATA_QUERY_KEY] });
 
-        return loggedUser;
+        return session;
+    };
+
+    /**
+     * First step of the login. Resolves to:
+     *  - { status: 'authenticated', user }
+     *  - { status: 'mfa_required', mfaToken }: the user has 2FA, a code is needed (verifyLogin2Fa)
+     *  - { status: 'enrollment_required', enrollmentToken }: the company requires 2FA and the user must set it up
+     * Nothing is stored until a full session exists.
+     */
+    const login = async (email, password) => {
+        const result = await authApi.loginUser(email, password);
+        if (result?.mfa_required) return { status: 'mfa_required', mfaToken: result.mfa_token };
+        if (result?.two_factor_enrollment_required) return { status: 'enrollment_required', enrollmentToken: result.enrollment_token };
+        return { status: 'authenticated', user: completeLogin(result) };
+    };
+
+    /** Adopts a fresh JWT for the current session (password change, 2FA enabled/disabled bump token_version) */
+    const refreshToken = (token) => authApi.saveToken(token);
+
+    const register = async (userData) => {
+        const registeredUser = await authApi.registerUser(userData);
+        authApi.saveSession(registeredUser);
+
+        setUser(registeredUser);
+        setIsAuthenticated(true);
+        setAuthError(null);
+        connectSocket();
+        
+        queryClientInstance.invalidateQueries({ queryKey: [APP_METADATA_QUERY_KEY] });
+
+        return registeredUser;
     };
 
     const logout = () => {
@@ -63,8 +94,8 @@ export const AuthProvider = ({ children }) => {
         // Invalidate metadata on logout so it re-fetches public version (without private methods)
         queryClientInstance.invalidateQueries({ queryKey: [APP_METADATA_QUERY_KEY] });
 
-        // Redirect to login page
-        window.location.href = '/login';
+        // Redirect to marketplace/root
+        window.location.href = '/';
     };
 
     const updateSession = (updates) => {
@@ -94,6 +125,9 @@ export const AuthProvider = ({ children }) => {
             authError,
             appPublicSettings,
             login,
+            completeLogin,
+            refreshToken,
+            register,
             logout,
             updateSession,
             navigateToLogin,

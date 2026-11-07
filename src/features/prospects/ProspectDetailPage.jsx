@@ -16,6 +16,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import EmptyState from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,9 @@ import QuoteResponseModal from './components/QuoteResponseModal';
 import ReviewModal from '@/features/suppliers/components/ReviewModal';
 import { useProspectDetail } from './hooks/useProspectDetail';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
+import RequestImageGallery from '@/features/requests/components/RequestImageGallery';
+import { splitRequestFiles } from '@/features/requests/utils/files';
 
 const unitLabels = {
     Units: 'Unidades',
@@ -95,6 +99,8 @@ export default function ProspectDetailPage() {
     ];
 
     // Info blocks for the sidebar
+    const { images, documents } = splitRequestFiles(prospect.files);
+
     const locationString = company?.locations?.[0] 
         ? resolveLocation(company.locations[0].country_id, company.locations[0].state_id) 
         : "No especificada";
@@ -156,13 +162,14 @@ export default function ProspectDetailPage() {
                                     </Badge>
                                     {prospect.category && (
                                         <Badge className="bg-slate-900 text-slate-50 border-0 rounded-full px-3 py-1 font-bold text-[10px]">
-                                            {prospect.category}
+                                            {formatCategory(prospect.category, prospect.subcategory)}
                                         </Badge>
                                     )}
                                 </div>
                                 <h2 className="text-2xl font-bold tracking-tight text-slate-950 leading-tight">
                                     {prospect.product_service}
                                 </h2>
+                                <DirectRequestBadge request={prospect} perspective="supplier" className="mt-2" />
                             </div>
 
                             {/* Metrics Grid */}
@@ -217,13 +224,22 @@ export default function ProspectDetailPage() {
                             </div>
                         )}
 
-                        {prospect.files?.length > 0 && (
+                        {images.length > 0 && (
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-bold text-slate-950 uppercase tracking-widest">
+                                    Imágenes
+                                </h3>
+                                <RequestImageGallery images={images} />
+                            </div>
+                        )}
+
+                        {documents.length > 0 && (
                             <div className="space-y-4">
                                 <h3 className="text-sm font-bold text-slate-950 uppercase tracking-widest">
                                     Archivos y Documentos
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                    {prospect.files.map((file) => (
+                                    {documents.map((file) => (
                                         <a
                                             key={file.id}
                                             href={file.url}

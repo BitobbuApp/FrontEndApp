@@ -14,6 +14,8 @@ import StatusBadge from '@/components/ui/StatusBadge';
 import { FileText, Calendar, Package, Layers, Tag, Loader2, CreditCard, MapPin, ImageIcon } from 'lucide-react';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
+import RequestImageGallery from './RequestImageGallery';
+import { splitRequestFiles } from '../utils/files';
 import tooltips from '@/constants/tooltips.json';
 
 const unitLabels = {
@@ -63,32 +65,7 @@ export default function RequestDetailModal({ open, onOpenChange, requestId }) {
                     ) : req ? (
                         <div className="space-y-5">
                             {/* Images Gallery (Conditional) */}
-                            {(() => {
-                                const images = req.files?.filter(f => 
-                                    /\.(jpg|jpeg|png|webp|gif)$/i.test(f.url) || 
-                                    /\.(jpg|jpeg|png|webp|gif)$/i.test(f.file_name)
-                                ) || [];
-                                
-                                if (images.length === 0) return null;
-
-                                return (
-                                    <div className="grid grid-cols-2 gap-2 mb-4">
-                                        {images.map((img, idx) => (
-                                            <div 
-                                                key={img.id} 
-                                                className={`relative rounded-xl overflow-hidden border border-slate-100 shadow-sm aspect-video bg-slate-50 ${images.length === 1 ? 'col-span-2 aspect-[21/9]' : ''}`}
-                                            >
-                                                <img 
-                                                    src={img.url} 
-                                                    alt={`Imagen ${idx + 1}`}
-                                                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-zoom-in"
-                                                    onClick={() => window.open(img.url, '_blank')}
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                );
-                            })()}
+                            <RequestImageGallery images={splitRequestFiles(req.files).images} className="mb-4" />
 
                             {/* Product & Status */}
                             <div className="flex items-start justify-between gap-4">
@@ -186,14 +163,14 @@ export default function RequestDetailModal({ open, onOpenChange, requestId }) {
                             )}
 
                             {/* Files */}
-                            {req.files && req.files.length > 0 && (
+                            {splitRequestFiles(req.files).documents.length > 0 && (
                                 <div>
                                     <h4 className="text-sm font-semibold text-slate-500 mb-2 flex items-center gap-2">
                                         <FileText className="w-4 h-4" />
-                                        Archivos adjuntos ({req.files.length})
+                                        Archivos adjuntos ({splitRequestFiles(req.files).documents.length})
                                     </h4>
                                     <div className="space-y-2">
-                                        {req.files.map((file) => (
+                                        {splitRequestFiles(req.files).documents.map((file) => (
                                             <a
                                                 key={file.id}
                                                 href={file.url}

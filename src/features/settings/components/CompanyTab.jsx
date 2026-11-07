@@ -3,9 +3,6 @@ import { Building2, Upload } from 'lucide-react';
 import {
     Card,
     CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,13 +32,9 @@ export default function CompanyTab({
 
     return (
         <Card className="border-0 shadow-sm">
-            <CardHeader>
-                <CardTitle>Informacion de la Empresa</CardTitle>
-                <CardDescription>Datos principales de tu negocio</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 pt-6">
                 <div className="flex items-center gap-6">
-                    <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-border bg-slate-100">
+                    <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-slate-100">
                         {formData.logo_url ? (
                             <img src={formData.logo_url} alt="Logo" className="h-full w-full object-cover" />
                         ) : (
@@ -60,18 +53,18 @@ export default function CompanyTab({
                             <Button variant="outline" asChild className="cursor-pointer">
                                 <span>
                                     <Upload className="mr-2 h-4 w-4" />
-                                    {uploadLogoPending ? 'Cargando...' : 'Cambiar Logo'}
+                                    {uploadLogoPending ? 'Cargando...' : 'Cambiar logo'}
                                 </span>
                             </Button>
                         </label>
-                        <p className="mt-2 text-xs text-slate-500">PNG, JPG hasta 5MB</p>
+                        <p className="mt-2 text-xs text-slate-500">PNG o JPG hasta 5 MB · Lo verán compradores y proveedores</p>
                     </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
                         <Label className="flex items-center">
-                            Nombre Comercial *
+                            Nombre comercial *
                             <InfoTooltip content={tooltips.settings.company.trade_name} />
                         </Label>
                         <Input
@@ -84,7 +77,7 @@ export default function CompanyTab({
                     </div>
                     <div className="space-y-2">
                         <Label className="flex items-center">
-                            Nombre Legal *
+                            Nombre legal *
                             <InfoTooltip content={tooltips.settings.company.legal_name} />
                         </Label>
                         <Input
@@ -110,7 +103,7 @@ export default function CompanyTab({
                     </div>
                     <div className="space-y-2">
                         <Label className="flex items-center">
-                            Año de Fundacion
+                            Año de fundación
                             <InfoTooltip content={tooltips.settings.company.founding_year} />
                         </Label>
                         <Input
@@ -163,7 +156,7 @@ export default function CompanyTab({
                     </div>
                     <div className="space-y-2">
                         <Label className="flex items-center">
-                            Tipo de Empresa
+                            Tipo de empresa
                             <InfoTooltip content={tooltips.settings.company.type} />
                         </Label>
                         <Select
@@ -187,13 +180,14 @@ export default function CompanyTab({
                 </div>
 
                 <div className="space-y-2">
-                    <Label>Bio / Descripcion</Label>
+                    <Label>Descripción</Label>
                     <Textarea
                         value={formData.bio}
                         onChange={(e) => setFormData((prev) => ({ ...prev, bio: e.target.value }))}
                         placeholder="Describe tu empresa, productos y servicios..."
                         className="min-h-[100px]"
                     />
+                    <p className="text-xs text-slate-500">Se muestra en tu perfil público.</p>
                 </div>
             </CardContent>
         </Card>

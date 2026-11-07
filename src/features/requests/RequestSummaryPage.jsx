@@ -6,10 +6,11 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import {
     ArrowLeft, Package, MapPin, CreditCard, Calendar,
-    TrendingDown, TrendingUp, ArrowUpDown, Zap, Flame, Loader2,
+    TrendingDown, TrendingUp, ArrowUpDown, Zap, Flame, Loader2, FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import { Card, CardContent } from '@/components/ui/card';
 import StatusBadge from '@/components/ui/StatusBadge';
 import { toast } from 'sonner';
@@ -18,6 +19,9 @@ import { quoteResponsesApi } from '@/features/requests/services/quoteResponsesAp
 import RequestOffersTable from './components/RequestOffersTable';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
 import tooltips from '@/constants/tooltips.json';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
+import RequestImageGallery from './components/RequestImageGallery';
+import { splitRequestFiles } from './utils/files';
 
 // Unit labels map
 const unitLabels = {
@@ -116,13 +120,16 @@ export default function RequestSummaryPage() {
             {/* Request Summary Card */}
             <Card className="border-0 shadow-sm">
                 <CardContent className="p-6 space-y-5">
+                    <RequestImageGallery images={splitRequestFiles(req.files).images} />
+
                     {/* Title + status */}
                     <div className="flex items-start justify-between gap-4">
                         <div>
                             <h2 className="text-xl font-bold text-foreground">{req.product_service}</h2>
                             {req.category && (
-                                <Badge variant="secondary" className="mt-1.5 text-xs">{req.category}</Badge>
+                                <Badge variant="secondary" className="mt-1.5 text-xs">{formatCategory(req.category, req.subcategory)}</Badge>
                             )}
+                            <DirectRequestBadge request={req} className="mt-1.5 ml-1" />
                         </div>
                         <StatusBadge status={req.status} />
                     </div>
@@ -183,6 +190,26 @@ export default function RequestSummaryPage() {
                         <div>
                             <p className="text-xs text-slate-400 mb-1">Alcance del Servicio</p>
                             <p className="text-sm text-slate-700 bg-muted/50 rounded-lg p-3">{req.reach_service}</p>
+                        </div>
+                    )}
+
+                    {splitRequestFiles(req.files).documents.length > 0 && (
+                        <div>
+                            <p className="text-xs text-slate-400 mb-1">Archivos adjuntos</p>
+                            <div className="space-y-2">
+                                {splitRequestFiles(req.files).documents.map((file) => (
+                                    <a
+                                        key={file.id}
+                                        href={file.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex items-center gap-3 rounded-xl border border-border bg-muted/50 px-4 py-3 text-sm text-blue-600 transition-colors hover:bg-blue-50"
+                                    >
+                                        <FileText className="h-5 w-5 flex-shrink-0" />
+                                        <span className="truncate">{file.file_name}</span>
+                                    </a>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </CardContent>

@@ -9,6 +9,8 @@ import { AuthProvider, useAuth } from '@/features/auth/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import LoginPage from '@/features/auth/LoginPage';
 import RegisterPage from '@/features/auth/RegisterPage';
+import ForgotPasswordPage from '@/features/auth/ForgotPasswordPage';
+import ResetPasswordPage from '@/features/auth/ResetPasswordPage';
 import { useState, useEffect } from 'react';
 import { ThemeProvider } from '@/components/theme-provider';
 import AppMetadataBootstrap from '@/features/appMetadata/AppMetadataBootstrap';
@@ -19,11 +21,26 @@ const { Pages, Layout, mainPage } = pagesConfig;
 const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 const MainPage = mainPageKey ? Pages[mainPageKey] : <></>;
 
-const LayoutWrapper = ({ children, currentPageName }) => Layout ?
-  <Layout currentPageName={currentPageName}>{children}</Layout>
-  : <>{children}</>;
+const LayoutWrapper = ({ children, currentPageName }) => {
+  const { isAuthenticated } = useAuth();
+  
+  // Use PublicLayout only if on a public route AND not authenticated
+  if (PUBLIC_ROUTES.includes(currentPageName) && !isAuthenticated) {
+    return <PublicLayout currentPageName={currentPageName}>{children}</PublicLayout>;
+  }
+  
+  // Otherwise use the standard MainLayout (which includes the Sidebar)
+  return Layout ? <Layout currentPageName={currentPageName}>{children}</Layout> : <>{children}</>;
+};
 
 import RoleGuard from '@/components/shared/RoleGuard';
+import ProtectedRoute from '@/components/shared/ProtectedRoute';
+import PublicLayout from '@/layouts/PublicLayout/PublicLayout';
+
+const PUBLIC_ROUTES = [
+  "Marketplace",
+  "Marketplace/producto/:id"
+];
 
 const BUYER_ROUTES = [
   "Requests",
@@ -92,24 +109,42 @@ const AuthenticatedApp = () => {
     return <UserNotRegisteredError />;
   }
 
-  if (!isAuthenticated) {
-    if (showRegister) {
-      return (
-        <RegisterPage
-          onGoToLogin={() => setShowRegister(false)}
-        />
-      );
-    }
-    return <LoginPage onGoToRegister={() => setShowRegister(true)} />;
-  }
-
   return (
     <Routes>
-      <Route path="/" element={
-        <LayoutWrapper currentPageName={mainPageKey}>
-          <MainPage />
-        </LayoutWrapper>
+      <Route path="/login" element={
+        !isAuthenticated ? (
+          <LoginPage />
+        ) : (
+          <Navigate to={`/${mainPageKey}`} replace />
+        )
       } />
+
+      {/* Recovery pages stay reachable while logged in: the link may belong to another account */}
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+      <Route path="/register" element={
+        !isAuthenticated ? (
+          <RegisterPage />
+        ) : (
+          <Navigate to={`/${mainPageKey}`} replace />
+        )
+      } />
+
+      <Route path="/" element={
+        PUBLIC_ROUTES.includes(mainPageKey) ? (
+          <LayoutWrapper currentPageName={mainPageKey}>
+            <MainPage />
+          </LayoutWrapper>
+        ) : (
+          <ProtectedRoute>
+            <LayoutWrapper currentPageName={mainPageKey}>
+              <MainPage />
+            </LayoutWrapper>
+          </ProtectedRoute>
+        )
+      } />
+
       {Object.entries(Pages).map(([path, Page]) => {
         let content = (
           <LayoutWrapper currentPageName={path}>
@@ -117,11 +152,15 @@ const AuthenticatedApp = () => {
           </LayoutWrapper>
         );
 
-        // Apply Role Guards
-        if (BUYER_ROUTES.includes(path)) {
-          content = <RoleGuard require="buy">{content}</RoleGuard>;
-        } else if (SELLER_ROUTES.includes(path)) {
-          content = <RoleGuard require="sell">{content}</RoleGuard>;
+        // Apply Role Guards for private routes
+        if (!PUBLIC_ROUTES.includes(path)) {
+            if (BUYER_ROUTES.includes(path)) {
+              content = <RoleGuard require="buy">{content}</RoleGuard>;
+            } else if (SELLER_ROUTES.includes(path)) {
+              content = <RoleGuard require="sell">{content}</RoleGuard>;
+            }
+            // Wrap in ProtectedRoute
+            content = <ProtectedRoute>{content}</ProtectedRoute>;
         }
 
         return (
@@ -132,9 +171,9 @@ const AuthenticatedApp = () => {
           />
         );
       })}
-      {/* Unknown routes: send authenticated users to Dashboard, unauthenticated users
-          are already handled above by the !isAuthenticated guard (shows LoginPage) */}
-      <Route path="*" element={<Navigate to="/Dashboard" replace />} />
+
+      {/* Unknown routes */}
+      <Route path="*" element={<Navigate to={`/${mainPageKey}`} replace />} />
     </Routes>
   );
 };

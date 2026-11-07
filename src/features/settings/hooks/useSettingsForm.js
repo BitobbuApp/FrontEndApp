@@ -39,6 +39,7 @@ const INITIAL_FORM_DATA = {
     corporate_email: '',
     interest: 'Ambos',
     interest_category_ids: [],
+    interest_subcategory_ids: [],
     retention_agent: false,
     works_with_credit: false,
     payment_method_ids: [],
@@ -85,6 +86,8 @@ export function useSettingsForm() {
 
     const {
         categoryOptions,
+        subcategoryOptions,
+        getSubcategoryOptions,
         companyTypeOptions,
         paymentMethodOptions,
         companySizeOptions,
@@ -153,6 +156,10 @@ export function useSettingsForm() {
                         || findOptionValueByLabel(categoryOptions, category.name || category.category);
                 })
                 .filter(Boolean),
+            // Only active subcategories come back from the API (inactive links are kept hidden)
+            interest_subcategory_ids: (company.subcategories_of_interest || [])
+                .map((subcategory) => findOptionValueById(subcategoryOptions, subcategory.id))
+                .filter(Boolean),
             social_media_links: [
                 { platform: 'instagram', url: '' },
                 { platform: 'tiktok', url: '' },
@@ -168,6 +175,7 @@ export function useSettingsForm() {
         }));
     }, [
         categoryOptions,
+        subcategoryOptions,
         company,
         companyTypeOptions,
         paymentMethodOptions,
@@ -205,6 +213,8 @@ export function useSettingsForm() {
                 monthly_transactions_id: data.monthly_transactions_id || null,
                 payment_method_ids: toNumberIdList(data.payment_method_ids),
                 interest_category_ids: toNumberIdList(data.interest_category_ids),
+                // The backend also adds the parent category of every subcategory
+                interest_subcategory_ids: toNumberIdList(data.interest_subcategory_ids),
                 social_media_links: (data.social_media_links || []).filter(item => item.url && item.url.trim() !== ''),
             };
 
@@ -298,9 +308,12 @@ export function useSettingsForm() {
     const toggleCategoria = (categoryId) => {
         const current = formData.interest_category_ids || [];
         if (current.includes(categoryId)) {
+            // Removing a category also removes its subcategories
+            const childValues = new Set(getSubcategoryOptions(categoryId).map((option) => option.value));
             setFormData((prev) => ({
                 ...prev,
                 interest_category_ids: current.filter((value) => value !== categoryId),
+                interest_subcategory_ids: (prev.interest_subcategory_ids || []).filter((value) => !childValues.has(value)),
             }));
             return;
         }
@@ -309,6 +322,28 @@ export function useSettingsForm() {
             ...prev,
             interest_category_ids: [...current, categoryId],
         }));
+    };
+
+    const toggleSubcategoria = (subcategoryValue) => {
+        const option = subcategoryOptions.find((item) => item.value === subcategoryValue);
+        if (!option) return;
+
+        setFormData((prev) => {
+            const subcategories = prev.interest_subcategory_ids || [];
+            if (subcategories.includes(subcategoryValue)) {
+                return { ...prev, interest_subcategory_ids: subcategories.filter((value) => value !== subcategoryValue) };
+            }
+
+            // Choosing a subcategory also selects its parent category
+            const categories = prev.interest_category_ids || [];
+            return {
+                ...prev,
+                interest_subcategory_ids: [...subcategories, subcategoryValue],
+                interest_category_ids: categories.includes(option.categoryValue)
+                    ? categories
+                    : [...categories, option.categoryValue],
+            };
+        });
     };
 
     const toggleMetodoPago = (paymentMethodId) => {
@@ -339,8 +374,10 @@ export function useSettingsForm() {
         handleSave,
         handleLogoChange,
         toggleCategoria,
+        toggleSubcategoria,
         toggleMetodoPago,
         categoryOptions,
+        getSubcategoryOptions,
         companyTypeOptions,
         paymentMethodOptions,
         companySizeOptions,

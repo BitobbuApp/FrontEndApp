@@ -11,6 +11,10 @@ const API_BASE = import.meta.env.VITE_API_BASE;
 const SESSION_KEY = 'bitobbu_session';
 const TOKEN_KEY = 'bitobbu_token';
 
+// 401s that are an answer to the user's input (wrong password / 2FA code), not an expired session:
+// they must not wipe the session or redirect to /login.
+const NON_SESSION_401_CODES = new Set(['USER_INVALID_CREDENTIALS', 'TWO_FACTOR_INVALID', 'MFA_TOKEN_INVALID']);
+
 const apiClient = axios.create({
     baseURL: API_BASE,
     headers: {
@@ -22,7 +26,8 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem(TOKEN_KEY);
-        if (token) {
+        // An explicit Authorization (e.g. the 2FA enrollment token during login) wins over the stored session
+        if (token && !config.headers['Authorization']) {
             config.headers['Authorization'] = `Bearer ${token}`;
         }
         return config;
@@ -71,7 +76,10 @@ apiClient.interceptors.response.use(
             error.normalizedError = normalizedError;
             error.userMessage = userMessage;
 
-            if (status === 401) {
+            if (status === 401 && NON_SESSION_401_CODES.has(normalizedError.code)) {
+                // Handled by the caller; `silent` requests render the message inline
+                if (!error.config?.silent) toast.error(userMessage);
+            } else if (status === 401) {
                 // No autorizado: Limpiar sesión y recargar base44 o app
                 localStorage.removeItem(SESSION_KEY);
                 localStorage.removeItem(TOKEN_KEY);

@@ -23,10 +23,19 @@ import { toast } from 'sonner';
 import EmptyState from '@/components/ui/EmptyState';
 import ChatActionPanel from './ChatActionPanel';
 import ReviewModal from './ReviewModal';
+import { useReviewState } from '../hooks/useReviewState';
 import SystemMessageBubble from './SystemMessageBubble';
 import FilePreview from './FilePreview';
 import { useSocketConnectionState } from '../hooks/useSocketConnectionState';
+import { useTypingIndicator } from '../hooks/useTypingIndicator';
+import TypingBubble from './TypingBubble';
 import { WifiOff, Loader2 } from 'lucide-react';
+import { useDealState } from '../hooks/useDealState';
+import DealStatusPill from './DealStatusPill';
+import DealStepper from './DealStepper';
+import LockedTermsBanner from './LockedTermsBanner';
+import DealTermsCard from './DealTermsCard';
+import StageHintBar from './StageHintBar';
 
 export default function ChatArea({
     selectedConversation,
@@ -37,6 +46,7 @@ export default function ChatArea({
     sendMutation,
     isMobile = false,
     onBack = () => { },
+    onLeave = () => { },
     className = "",
 }) {
     const [messageText, setMessageText] = useState('');
@@ -44,13 +54,29 @@ export default function ChatArea({
     const messagesEndRef = useRef(null);
     const fileInputRef = useRef(null);
     const connectionStatus = useSocketConnectionState();
+    const { isOtherTyping, notifyTyping, stopTyping } = useTypingIndicator(selectedConversation?.id, user?.email);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [mensajes]);
+    }, [mensajes, isOtherTyping]);
+
+    // Closed negotiation (e.g. the buyer rejected the quote): history only, no new messages
+    // Also read-only for the party that already reviewed while the other side is still pending
+    const { alreadyReviewed } = useReviewState(selectedConversation, user);
+    const { stage } = useDealState(selectedConversation, user);
+    const isClosed = selectedConversation?.status === 'cancelled' || alreadyReviewed;
+
+    const handleMessageChange = (e) => {
+        const value = e.target.value;
+        setMessageText(value);
+        if (value.trim() && !isClosed) notifyTyping();
+        else stopTyping();
+    };
 
     const handleSend = () => {
+        if (isClosed) return;
         if (!messageText.trim() && !attachedFile) return;
+        stopTyping();
         sendMutation.mutate(
             { contenido: messageText, archivo: attachedFile, selectedConversation },
             {
@@ -95,7 +121,7 @@ export default function ChatArea({
     return (
         <Card className={`flex-1 border-0 shadow-sm flex flex-col overflow-hidden relative ${className}`}>
             {/* Review Overlay */}
-            <ReviewModal selectedConversation={selectedConversation} user={user} />
+            <ReviewModal selectedConversation={selectedConversation} user={user} onDone={onLeave} />
 
             {/* Chat Header */}
             <div className="p-3 lg:p-4 border-b flex items-center justify-between bg-white sticky top-0 z-10">
@@ -132,16 +158,31 @@ export default function ChatArea({
                                 </Badge>
                             )}
                         </div>
-                        <p className="text-xs text-slate-500">En línea</p>
+                        {isOtherTyping ? (
+                            <p className="text-xs text-[#059669] font-medium">escribiendo…</p>
+                        ) : (
+                            <p className="text-xs text-slate-500">En línea</p>
+                        )}
                     </div>
                 </div>
-                <Button variant="ghost" size="icon">
-                    <MoreVertical className="w-5 h-5 text-slate-400" />
-                </Button>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                    <DealStatusPill stage={stage} />
+                    <Button variant="ghost" size="icon">
+                        <MoreVertical className="w-5 h-5 text-slate-400" />
+                    </Button>
+                </div>
             </div>
 
+            {/* Deal progress */}
+            {stage && stage.step != null && (
+                <div className="px-4 pt-3 pb-2 bg-white border-b">
+                    <DealStepper step={stage.step} />
+                </div>
+            )}
+            {stage?.locked && <LockedTermsBanner terms={stage.terms} />}
+
             {/* Negotiation Info Bar */}
-            {(selectedConversation.request || selectedConversation.quote_response) && (
+            {!stage?.locked && (selectedConversation.request || selectedConversation.quote_response) && (
                 <div className="px-4 py-2 bg-slate-50 border-b flex items-center gap-6 overflow-x-auto no-scrollbar">
                     {selectedConversation.request && (
                         <div className="flex items-center gap-2 min-w-max">
@@ -257,13 +298,22 @@ export default function ChatArea({
                                 </React.Fragment>
                             );
                         })}
+                        <DealTermsCard stage={stage} />
+                        {isOtherTyping && (
+                            <TypingBubble name={otherParticipant.nombre} />
+                        )}
                         <div ref={messagesEndRef} />
                     </div>
                 )}
             </ScrollArea>
 
             {/* Contextual Action Panel (State Machine) */}
-            <ChatActionPanel selectedConversation={selectedConversation} user={user} />
+            <ChatActionPanel
+                selectedConversation={selectedConversation}
+                user={user}
+                onSendText={(contenido) => sendMutation.mutate({ contenido, archivo: null, selectedConversation })}
+            />
+            <StageHintBar hint={stage?.hint} />
 
             {/* Input */}
             <div className="p-4 border-t bg-white pb-8 lg:pb-4">
@@ -305,19 +355,20 @@ export default function ChatArea({
                         className="hidden"
                         onChange={handleFileSelect}
                     />
-                    <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()}>
+                    <Button variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} disabled={isClosed}>
                         <Paperclip className="w-5 h-5 text-slate-400" />
                     </Button>
                     <Input
-                        placeholder="Escribe un mensaje..."
+                        placeholder={isClosed ? (alreadyReviewed ? 'Ya calificaste: el chat quedó solo como historial' : 'Esta negociación fue cerrada') : 'Escribe un mensaje...'}
                         value={messageText}
-                        onChange={(e) => setMessageText(e.target.value)}
+                        onChange={handleMessageChange}
                         onKeyPress={handleKeyPress}
+                        disabled={isClosed}
                         className="flex-1 h-11"
                     />
                     <Button
                         onClick={handleSend}
-                        disabled={(!messageText.trim() && !attachedFile) || sendMutation.isPending || connectionStatus === 'offline'}
+                        disabled={isClosed || (!messageText.trim() && !attachedFile) || sendMutation.isPending || connectionStatus === 'offline'}
                         className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] h-11 px-4 disabled:opacity-50"
                     >
                         <Send className="w-5 h-5" />

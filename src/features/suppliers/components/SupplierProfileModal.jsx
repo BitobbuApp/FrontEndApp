@@ -9,6 +9,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import RatingStars from '@/components/ui/RatingStars';
+import CompanySubcategories from '@/features/profile/components/CompanySubcategories';
 
 function getMetadataLabel(value) {
     if (typeof value === 'string') {
@@ -184,6 +185,9 @@ export default function SupplierProfileModal({
                             </div>
                         </div>
                     )}
+
+                    {/* Subcategories */}
+                    <CompanySubcategories subcategories={company.subcategories_of_interest} />
 
                     {/* Actions */}
                     <div className="flex gap-2 pt-2">
