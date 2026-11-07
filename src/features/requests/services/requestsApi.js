@@ -42,10 +42,17 @@ export const requestsApi = {
     },
 
     /**
-     * GET /requests/marketplace?page=X&limit=Y
-     * Lists active requests from other companies.
+     * GET /requests/marketplace?page=X&limit=Y&category_id=Z&subcategory_ids=1,2
+     * Lists active requests from other companies (filtered in the backend).
      */
-    async getMarketplaceRequests({ page = 1, limit = 10 } = {}) {
-        return await apiClient.get('/requests/marketplace', { params: { page, limit } });
+    async getMarketplaceRequests({ page = 1, limit = 10, category_id, subcategory_ids } = {}) {
+        return await apiClient.get('/requests/marketplace', {
+            params: {
+                page,
+                limit,
+                ...(category_id && { category_id }),
+                ...(subcategory_ids?.length && { subcategory_ids: subcategory_ids.join(',') }),
+            },
+        });
     },
 };

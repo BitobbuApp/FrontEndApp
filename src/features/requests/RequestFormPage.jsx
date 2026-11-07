@@ -8,6 +8,7 @@ import TypeSelector from './components/TypeSelector';
 import ProductRequestForm from './components/ProductRequestForm';
 import ServiceRequestForm from './components/ServiceRequestForm';
 import FileUpload from './components/FileUpload';
+import DirectOfferBanner from './components/DirectOfferBanner';
 
 export default function RequestFormPage() {
     const navigate = useNavigate();
@@ -26,6 +27,8 @@ export default function RequestFormPage() {
         handleFileChange,
         removeFile,
         handleSubmit,
+        directOffer,
+        clearDirectOffer,
         isPending,
         categoryOptions,
         unitOptions,
@@ -66,6 +69,12 @@ export default function RequestFormPage() {
             <Card className="border-0 shadow-sm overflow-hidden">
 
                     <CardContent className="p-6 space-y-6">
+                        <DirectOfferBanner
+                            offer={directOffer}
+                            quantity={productForm.quantity}
+                            onRemove={clearDirectOffer}
+                        />
+
                         <ProductRequestForm
                             form={productForm}
                             setForm={setProductForm}
@@ -99,7 +108,7 @@ export default function RequestFormPage() {
                                 className="bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] px-8 font-medium"
                             >
                                 {isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                                {isEditing ? 'Guardar Cambios' : 'Publicar Solicitud'}
+                                {isEditing ? 'Guardar Cambios' : directOffer ? 'Enviar Solicitud' : 'Publicar Solicitud'}
                             </Button>
                         </div>
                     </CardContent>

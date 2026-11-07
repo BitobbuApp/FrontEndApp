@@ -54,6 +54,15 @@ export const companyApi = {
     },
 
     /**
+     * PATCH /companies/:id/settings
+     * Company-wide settings. `two_factor_required` makes every user of the company set up 2FA.
+     * Only a user of that company can change it.
+     */
+    async updateCompanySettings(id, data) {
+        return await apiClient.patch(`/companies/${id}/settings`, data, { silent: true });
+    },
+
+    /**
      * GET /companies?page=X&limit=Y&sector=Z&interest=W
      * Lists companies with pagination and optional filters.
      */

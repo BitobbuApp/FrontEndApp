@@ -32,18 +32,20 @@ export default function RequestRowExpanded({ request }) {
     const navigate = useNavigate();
     const { paymentConditionOptions } = useAppMetadata();
 
-    const acceptQuoteMutation = useMutation({
+    // Status changes go through the state machine: open the negotiation and continue in the chat
+    const startNegotiationMutation = useMutation({
         mutationFn: async (resp) => {
-            const status = 'accepted';
-            await quoteResponsesApi.updateQuoteResponse(resp.id, { status });
-            // ... (rest of logic could go to a generic handler if needed, but keeping it brief)
+            const res = await quoteResponsesApi.performAction(resp.id, { action: 'negotiation_started' });
+            return res.data;
         },
-        onSuccess: () => {
-            toast.success('Oferta aceptada');
+        onSuccess: (data) => {
             queryClient.invalidateQueries({ queryKey: ['quote-responses', request.id] });
             queryClient.invalidateQueries({ queryKey: ['requestDetail', request.id] });
+            queryClient.invalidateQueries({ queryKey: ['conversaciones'] });
+            toast.success('Negociación iniciada con éxito');
+            navigate(data?.conversation_id ? `/Chat/${data.conversation_id}` : '/Chat');
         },
-        onError: (err) => toast.error(err.message || 'Error al aceptar')
+        onError: (err) => toast.error(err?.response?.data?.message || err.message || 'Error al iniciar negociación')
     });
 
     // Fetch actual data from backend - LIMIT 2 as requested
@@ -82,7 +84,8 @@ export default function RequestRowExpanded({ request }) {
                     <OfferPreviewCard 
                         offer={bestPrice} 
                         type={showFastest ? "price" : "both"} 
-                        onAccept={() => acceptQuoteMutation.mutate(bestPrice)}
+                        onNegotiate={() => startNegotiationMutation.mutate(bestPrice)}
+                        isNegotiating={startNegotiationMutation.isPending}
                         paymentConditionOptions={paymentConditionOptions}
                     />
                 )}
@@ -92,7 +95,8 @@ export default function RequestRowExpanded({ request }) {
                     <OfferPreviewCard 
                         offer={fastestDelivery} 
                         type="delivery" 
-                        onAccept={() => acceptQuoteMutation.mutate(fastestDelivery)}
+                        onNegotiate={() => startNegotiationMutation.mutate(fastestDelivery)}
+                        isNegotiating={startNegotiationMutation.isPending}
                         paymentConditionOptions={paymentConditionOptions}
                     />
                 )}
@@ -112,7 +116,7 @@ export default function RequestRowExpanded({ request }) {
     );
 }
 
-function OfferPreviewCard({ offer, type, onAccept, paymentConditionOptions }) {
+function OfferPreviewCard({ offer, type, onNegotiate, isNegotiating, paymentConditionOptions }) {
     const isPrice = type === 'price';
     const isBoth = type === 'both';
     const paymentLabel = paymentConditionOptions.find(opt => opt.value === String(offer.payment_condition_id))?.label || '—';
@@ -178,7 +182,12 @@ function OfferPreviewCard({ offer, type, onAccept, paymentConditionOptions }) {
             </div>
 
             <div className="mt-6 w-full">
-                <Button variant="outline" className="w-full h-10 rounded-xl text-xs font-bold border-slate-100 hover:bg-slate-50 gap-2">
+                <Button
+                    variant="outline"
+                    onClick={onNegotiate}
+                    disabled={isNegotiating}
+                    className="w-full h-10 rounded-xl text-xs font-bold border-slate-100 hover:bg-slate-50 gap-2"
+                >
                     <MessageSquare className="w-3.5 h-3.5" /> Negociar
                 </Button>
             </div>

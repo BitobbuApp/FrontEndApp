@@ -28,7 +28,7 @@ export default function SuppliersPage() {
             <div className="flex items-start justify-between">
                 <div>
                     <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
-                        Directorio de Proveedores
+                        Directorio de proveedores
                     </h1>
                     <p className="text-slate-500 mt-1">
                         Encuentra proveedores confiables para tu negocio

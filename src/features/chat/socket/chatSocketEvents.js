@@ -6,12 +6,14 @@ export const CHAT_SOCKET_EVENTS = {
     SEND_MESSAGE: 'send_message',
     RECEIVE_MESSAGE: 'receive_message',
     CONVERSATION_READ: 'conversation_read',
+    TYPING: 'typing',
+    USER_TYPING: 'user_typing',
 
     // Business states
     STATE_EVENTS: [
         'quote:negotiation_started', 'quote:updated', 'quote:formal_requested',
         'quote:formal_attached', 'quote:formal_rejected', 'quote:accepted',
-        'quote:canceled', 'quote:expired',
+        'quote:canceled', 'quote:rejected', 'quote:expired',
         'transaction:payment_uploaded', 'transaction:payment_approved',
         'transaction:payment_rejected', 'transaction:order_shipped',
         'transaction:delivery_confirmed', 'transaction:canceled', 'transaction:dispute_raised',

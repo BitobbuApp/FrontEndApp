@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProspectsData } from './hooks/useProspectsData';
+import { useProspectsData, EMPTY_PROSPECT_FILTERS } from './hooks/useProspectsData';
 import ProspectsFilters from './components/ProspectsFilters';
 import ProspectsTable from './components/ProspectsTable';
 import QuoteResponseModal from './components/QuoteResponseModal';
@@ -9,7 +9,7 @@ import ViewToggle from '@/components/shared/ViewToggle';
 export default function ProspectsPage() {
     const navigate = useNavigate();
     const [searchTerm, setSearchTerm] = useState('');
-    const [categoryFilter, setCategoryFilter] = useState('Todas');
+    const [filters, setFilters] = useState(EMPTY_PROSPECT_FILTERS);
     const [quoteModalOpen, setQuoteModalOpen] = useState(false);
     const [quoteRequest, setQuoteRequest] = useState(null);
     const [viewMode, setViewMode] = useState('list');
@@ -20,7 +20,10 @@ export default function ProspectsPage() {
         page,
         setPage,
         totalPages,
-    } = useProspectsData(searchTerm, categoryFilter);
+        myCategoryValues,
+        hasMySubcategories,
+    } = useProspectsData(searchTerm, filters);
+    const hasFilters = !!(searchTerm || filters.categoryId || filters.subcategoryId || filters.onlyMine);
 
     const handleViewDetail = (req) => {
         navigate(`/prospects/${req.id}`, {
@@ -54,16 +57,17 @@ export default function ProspectsPage() {
             <ProspectsFilters
                 searchTerm={searchTerm}
                 setSearchTerm={setSearchTerm}
-                categoryFilter={categoryFilter}
-                setCategoryFilter={setCategoryFilter}
+                filters={filters}
+                setFilters={setFilters}
+                myCategoryValues={myCategoryValues}
+                hasMySubcategories={hasMySubcategories}
             />
 
             {/* Leads Table */}
             <ProspectsTable
                 filteredSolicitudes={filteredSolicitudes}
                 isLoading={isLoading}
-                searchTerm={searchTerm}
-                categoryFilter={categoryFilter}
+                hasFilters={hasFilters}
                 handleViewDetail={handleViewDetail}
                 handleQuickQuote={handleQuoteRequest}
                 page={page}

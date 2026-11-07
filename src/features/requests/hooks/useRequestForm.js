@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { requestsApi } from '../services/requestsApi';
 import { toast } from 'sonner';
@@ -11,6 +11,7 @@ import useAppMetadata, {
 const DEFAULT_PRODUCT_FORM = {
     product_service: '',
     category_id: '',
+    subcategory_id: '',
     quantity: '',
     unit_id: '',
     country_id: '',
@@ -24,6 +25,7 @@ const DEFAULT_PRODUCT_FORM = {
 const DEFAULT_SERVICE_FORM = {
     product_service: '',
     category_id: '',
+    subcategory_id: '',
     description: '',
     execution_date: '',
     reach_service: '',
@@ -45,8 +47,14 @@ export default function useRequestForm() {
     const [files, setFiles] = useState([]);
     const [existingFiles, setExistingFiles] = useState([]);
 
+    // Direct RFQ: offer sent from a marketplace product (ProductDetailPage)
+    const location = useLocation();
+    const [directOffer, setDirectOffer] = useState(() => (isEditing ? null : location.state?.offer || null));
+    const directOfferPrefilled = useRef(false);
+
     const {
         categoryOptions,
+        subcategoryOptions,
         unitOptions,
         defaultUnitOption,
         paymentConditionOptions,
@@ -73,6 +81,25 @@ export default function useRequestForm() {
         ));
     }, [defaultUnitOption?.value, isEditing]);
 
+    // Prefill the product form from the marketplace offer once metadata is available
+    useEffect(() => {
+        if (!directOffer || directOfferPrefilled.current || isLoadingMetadata) {
+            return;
+        }
+        directOfferPrefilled.current = true;
+
+        setProductForm((prev) => ({
+            ...prev,
+            product_service: directOffer.name || prev.product_service,
+            category_id: findOptionValueById(categoryOptions, directOffer.category_id) || prev.category_id,
+            subcategory_id: findOptionValueById(subcategoryOptions, directOffer.subcategory_id) || prev.subcategory_id,
+            unit_id: findOptionValueById(unitOptions, directOffer.unit_id) || prev.unit_id,
+            quantity: prev.quantity || directOffer.moq || '',
+        }));
+    }, [directOffer, isLoadingMetadata, categoryOptions, subcategoryOptions, unitOptions]);
+
+    const clearDirectOffer = () => setDirectOffer(null);
+
     useEffect(() => {
         if (!isEditing || !requestData) {
             return;
@@ -91,6 +118,7 @@ export default function useRequestForm() {
                 category_id: findOptionValueById(categoryOptions, requestData.category_id)
                     || findOptionValueByLabel(categoryOptions, requestData.category)
                     || '',
+                subcategory_id: findOptionValueById(subcategoryOptions, requestData.subcategory_id) || '',
                 description: requestData.description || '',
                 execution_date: requestData.expiration_date
                     ? new Date(requestData.expiration_date).toISOString().split('T')[0]
@@ -112,6 +140,7 @@ export default function useRequestForm() {
             category_id: findOptionValueById(categoryOptions, requestData.category_id)
                 || findOptionValueByLabel(categoryOptions, requestData.category)
                 || '',
+            subcategory_id: findOptionValueById(subcategoryOptions, requestData.subcategory_id) || '',
             quantity: requestData.quantity || '',
             unit_id: findOptionValueById(unitOptions, requestData.unit_id)
                 || findOptionValueByLabel(unitOptions, requestData.unit_of_measure)
@@ -129,6 +158,7 @@ export default function useRequestForm() {
     }, [
         defaultUnitOption?.value,
         categoryOptions,
+        subcategoryOptions,
         isEditing,
         requestData,
         unitOptions,
@@ -139,6 +169,8 @@ export default function useRequestForm() {
             const { raw_files_payload, ...data } = payload;
 
             Object.keys(data).forEach((key) => {
+                // On edit, a null subcategory must reach the backend to clear it
+                if (isEditing && key === 'subcategory_id' && data[key] === null) return;
                 if (data[key] === '' || data[key] === null || data[key] === undefined) {
                     delete data[key];
                 }
@@ -161,7 +193,13 @@ export default function useRequestForm() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['requests'] });
-            toast.success(isEditing ? 'Solicitud actualizada' : 'Solicitud publicada');
+            if (isEditing) {
+                toast.success('Solicitud actualizada');
+            } else if (directOffer) {
+                toast.success(`Solicitud enviada directamente a ${directOffer.trade_name || 'el proveedor'}`);
+            } else {
+                toast.success('Solicitud publicada');
+            }
             navigate('/Requests');
         },
         onError: (err) => {
@@ -214,6 +252,7 @@ export default function useRequestForm() {
         const commonPayload = {
             product_service: form.product_service.trim(),
             category_id: form.category_id ? Number(form.category_id) : null,
+            subcategory_id: form.subcategory_id ? Number(form.subcategory_id) : null,
             expiration_date: form.expiration_date || null,
             description: form.description?.trim() || null,
         };
@@ -228,6 +267,7 @@ export default function useRequestForm() {
                 country_id: productForm.country_id ? Number(productForm.country_id) : 1, // Defaulting to VENEZUELA_ID if tracking allows
                 state_id: productForm.state_id ? Number(productForm.state_id) : null,
                 city_id: productForm.city_id ? Number(productForm.city_id) : null,
+                company_offer_id: directOffer?.id || null,
                 raw_files_payload: files
             });
             return;
@@ -261,6 +301,8 @@ export default function useRequestForm() {
         handleFileChange,
         removeFile,
         handleSubmit,
+        directOffer,
+        clearDirectOffer,
         isPending: mutation.isPending,
         isLoadingMetadata,
         categoryOptions,

@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { RotateCcw, MoreHorizontal, MessageSquare, Flame, Zap, Eye, Star } from 'lucide-react';
+import { RotateCcw, MoreHorizontal, MessageSquare, Flame, Zap, Eye, Star, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -12,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from 'sonner';
 import { quoteResponsesApi } from '../services/quoteResponsesApi';
+import RejectQuoteDialog, { FINAL_QUOTE_STATUSES } from './RejectQuoteDialog';
 import Pagination from '@/components/atoms/Pagination';
 import useAppMetadata from '@/features/appMetadata/hooks/useAppMetadata';
 import { InfoTooltip } from '@/components/shared/InfoTooltip';
@@ -43,22 +45,8 @@ export default function RequestOffersTable({
 }) {
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+    const [offerToReject, setOfferToReject] = useState(null);
     const { paymentConditionOptions } = useAppMetadata();
-
-    const updateOfferMutation = useMutation({
-        mutationFn: async ({ offerId, status }) => {
-            const response = await quoteResponsesApi.updateQuoteResponse(offerId, { status });
-            return response.data;
-        },
-        onSuccess: (_, { status }) => {
-            queryClient.invalidateQueries({ queryKey: ['quote-responses', requestId] });
-            queryClient.invalidateQueries({ queryKey: ['requestDetail', requestId] });
-            toast.success(`Oferta ${status === 'accepted' ? 'aceptada' : status === 'negotiating' ? 'en negociación' : 'rechazada'} exitosamente`);
-        },
-        onError: (error) => {
-            toast.error(error?.response?.data?.message || 'Error al actualizar la oferta');
-        },
-    });
 
     const startNegotiationMutation = useMutation({
         mutationFn: async (offerId) => {
@@ -220,7 +208,7 @@ export default function RequestOffersTable({
                                                     variant="ghost" 
                                                     size="sm" 
                                                     className="h-8 w-8 p-0 hover:bg-slate-100"
-                                                    disabled={updateOfferMutation.isPending}
+                                                    disabled={startNegotiationMutation.isPending}
                                                 >
                                                     <MoreHorizontal className="h-4 w-4 text-slate-500" />
                                                 </Button>
@@ -241,6 +229,15 @@ export default function RequestOffersTable({
                                                     <MessageSquare className="w-4 h-4" />
                                                     Negociar
                                                 </DropdownMenuItem>
+                                                {!FINAL_QUOTE_STATUSES.includes(offer.status) && (
+                                                    <DropdownMenuItem
+                                                        className="flex items-center gap-2 py-2 cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50 font-medium"
+                                                        onClick={() => setOfferToReject(offer)}
+                                                    >
+                                                        <XCircle className="w-4 h-4" />
+                                                        Rechazar
+                                                    </DropdownMenuItem>
+                                                )}
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </td>
@@ -260,6 +257,12 @@ export default function RequestOffersTable({
                     itemsLabelPlural="ofertas"
                 />
             )}
+            <RejectQuoteDialog
+                open={!!offerToReject}
+                onOpenChange={(open) => { if (!open) setOfferToReject(null); }}
+                quoteId={offerToReject?.id}
+                supplierName={offerToReject?.supplier?.trade_name}
+            />
         </Card>
     );
 }

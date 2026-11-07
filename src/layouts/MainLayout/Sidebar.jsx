@@ -6,11 +6,14 @@ import {
     FileText,
     Users,
     Store,
+    ShoppingBag,
     MessageSquare,
     ChevronLeft,
     ChevronRight,
     Plus,
     ShieldCheck,
+    Package,
+    Settings,
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -20,8 +23,14 @@ const MENU_ITEMS = [
     { name: 'Resumen', icon: LayoutDashboard, page: 'Dashboard', roles: ['buyer', 'supplier'] },
     { name: 'Mis Solicitudes', icon: FileText, page: 'Requests', roles: ['buyer'] },
     { name: 'Posibles Clientes', icon: Users, page: 'PosiblesClientes', roles: ['supplier'] },
-    { name: 'Proveedores', icon: Store, page: 'Proveedores', roles: ['buyer'] },
     { name: 'Chat', icon: MessageSquare, page: 'Chat', roles: ['buyer', 'supplier'] },
+    { name: 'Marketplace', icon: ShoppingBag, page: 'Marketplace', roles: ['buyer', 'supplier', 'public'] },
+    { name: 'Proveedores', icon: Store, page: 'Proveedores', roles: ['buyer'] },
+];
+
+const COMPANY_ITEMS = [
+    { name: 'Mi vitrina', icon: Package, page: 'Perfil' },
+    { name: 'Configuración', icon: Settings, page: 'Configuracion', showPendingDot: true },
 ];
 
 export { MENU_ITEMS };
@@ -65,10 +74,52 @@ export default function Sidebar({
     }
 
     const filteredItems = MENU_ITEMS.filter(item => {
+        if (item.roles.includes('public')) return true;
         const hasBuyerRole = item.roles.includes('buyer') && myCompany?.can_buy;
         const hasSupplierRole = item.roles.includes('supplier') && myCompany?.can_sell;
         return hasBuyerRole || hasSupplierRole;
     });
+
+    const renderItem = (item) => {
+        const badgeCount = getBadgeCount(item.page);
+        const showDot = item.showPendingDot && trustScore < 100;
+
+        return (
+            <Link
+                key={item.page}
+                to={createPageUrl(item.page)}
+                onClick={onClose}
+                title={collapsed ? item.name : undefined}
+                className={`flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
+                    collapsed ? 'justify-center' : ''
+                } ${isActive(item.page)
+                    ? 'bg-[#0B2046] text-white shadow-sm'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-accent hover:text-accent-foreground'
+                }`}
+            >
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                {!collapsed && (
+                    <span className="flex-1 whitespace-nowrap">{item.name}</span>
+                )}
+                {!collapsed && badgeCount > 0 && (
+                    <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                        {badgeCount}
+                    </span>
+                )}
+                {collapsed && badgeCount > 0 && (
+                    <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                        {badgeCount}
+                    </span>
+                )}
+                {showDot && (
+                    <span
+                        className={`bg-amber-500 rounded-full w-2 h-2 ${collapsed ? 'absolute top-1.5 right-1.5' : 'mr-1'}`}
+                        title="Completa tu perfil"
+                    />
+                )}
+            </Link>
+        );
+    };
 
     return (
         <div className="flex flex-col h-full relative">
@@ -101,10 +152,10 @@ export default function Sidebar({
 
             {/* Create RFQ Button */}
             {myCompany?.can_buy && (
-                <div className={`pt-2 px-2 ${collapsed ? 'flex justify-center' : ''}`}>
+                <div className={`flex-shrink-0 pt-4 pb-2 px-3 ${collapsed ? 'flex justify-center' : ''}`}>
                     <Button 
                         asChild
-                        className={`w-full bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] shadow-sm font-semibold ${collapsed ? 'w-10 h-10 p-0 rounded-xl' : 'rounded-xl h-10'}`}
+                        className={`w-full bg-[#D2FC31] text-slate-900 hover:bg-[#c4ed2d] shadow-sm font-semibold ${collapsed ? 'w-10 h-10 p-0 rounded-xl' : 'rounded-xl h-11'}`}
                     >
                         <Link to={createPageUrl('Requests/new')} onClick={onClose} title="Crear Solicitud">
                             <Plus className={collapsed ? 'w-5 h-5' : 'w-4 h-4 mr-2'} />
@@ -116,39 +167,25 @@ export default function Sidebar({
 
             {/* Navigation */}
             <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto">
-                {filteredItems.map((item) => {
-                    const badgeCount = getBadgeCount(item.page);
+                {!collapsed && (
+                    <p className="px-2.5 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                        Menú
+                    </p>
+                )}
+                {filteredItems.map((item) => renderItem(item))}
 
-                    return (
-                        <Link
-                            key={item.page}
-                            to={createPageUrl(item.page)}
-                            onClick={onClose}
-                            title={collapsed ? item.name : undefined}
-                            className={`flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 relative ${
-                                collapsed ? 'justify-center' : ''
-                            } ${isActive(item.page)
-                                ? 'bg-[#D2FC31] text-slate-900'
-                                : 'text-slate-600 dark:text-slate-300 hover:bg-accent hover:text-accent-foreground'
-                            }`}
-                        >
-                            <item.icon className="w-5 h-5 flex-shrink-0" />
-                            {!collapsed && (
-                                <span className="flex-1 whitespace-nowrap">{item.name}</span>
-                            )}
-                            {!collapsed && badgeCount > 0 && (
-                                <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                                    {badgeCount}
-                                </span>
-                            )}
-                            {collapsed && badgeCount > 0 && (
-                                <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                                    {badgeCount}
-                                </span>
-                            )}
-                        </Link>
-                    );
-                })}
+                {myCompany && (
+                    <>
+                        {collapsed ? (
+                            <div className="my-2 mx-2 border-t border-border" />
+                        ) : (
+                            <p className="px-2.5 pt-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                                Mi empresa
+                            </p>
+                        )}
+                        {COMPANY_ITEMS.map((item) => renderItem(item))}
+                    </>
+                )}
             </nav>
 
             {/* Trust Score & Plan Badge Area */}

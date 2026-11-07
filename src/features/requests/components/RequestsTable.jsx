@@ -26,8 +26,10 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import DirectRequestBadge from '@/features/requests/components/DirectRequestBadge';
 import StatusBadge from '@/components/ui/StatusBadge';
 import EmptyState from '@/components/ui/EmptyState';
+import { formatCategory } from '@/features/appMetadata/utils/subcategoryGroups';
 
 // Map English unit_of_measure values to Spanish labels
 const unitLabels = {
@@ -169,9 +171,10 @@ export default function RequestsTable({
                                                     </p>
                                                     {req.category && (
                                                         <Badge variant="secondary" className="text-xs mt-1">
-                                                            {req.category}
+                                                            {formatCategory(req.category, req.subcategory)}
                                                         </Badge>
                                                     )}
+                                                    <DirectRequestBadge request={req} className="mt-1 ml-1" />
                                                 </div>
                                             </div>
                                         </TableCell>
