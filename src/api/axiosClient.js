@@ -92,6 +92,12 @@ apiClient.interceptors.response.use(
                         window.location.href = '/login';
                     }, 1500);
                 }
+            } else if (status === 402 && normalizedError.code === 'PLAN_LIMIT_REACHED') {
+                // Quota of the plan reached (quotes per month / active offers): offer the upgrade.
+                // The backend message carries the numbers (e.g. 5/5), so show it as is.
+                toast.error(normalizedError.message, {
+                    action: { label: 'Ver planes', onClick: () => { window.location.href = '/Configuracion?tab=suscripcion'; } },
+                });
             } else if (status === 403) {
                 toast.error(userMessage);
             } else if (status >= 500) {
