@@ -180,7 +180,7 @@ export default function SettingsPage() {
                             estimatedMonthlyTransactionOptions={estimatedMonthlyTransactionOptions}
                         />
                     )}
-                    {activeTab === 'suscripcion' && <SubscriptionTab company={company} />}
+                    {activeTab === 'suscripcion' && <SubscriptionTab />}
                     {activeTab === 'verificacion' && <VerificationTab company={company} />}
                     {activeTab === 'notificaciones' && (
                         <NotificationsTab formData={formData} setFormData={setFormData} />

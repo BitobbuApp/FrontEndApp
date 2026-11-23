@@ -18,6 +18,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useMySubscription, isFreePlan, planLabel } from '@/features/subscription/hooks/useMySubscription';
 
 const MENU_ITEMS = [
     { name: 'Resumen', icon: LayoutDashboard, page: 'Dashboard', roles: ['buyer', 'supplier'] },
@@ -50,6 +51,10 @@ export default function Sidebar({
         : currentPageName;
 
     const isActive = (page) => normalizedPageName === page;
+
+    const { data: subscription } = useMySubscription({ enabled: !!myCompany });
+    const isPaidPlan = !!subscription && !isFreePlan(subscription.plan);
+    const planName = planLabel(subscription?.plan);
 
     const getBadgeCount = (page) => {
         if (page === 'Requests') return solicitudesCount;
@@ -216,38 +221,38 @@ export default function Sidebar({
                     >
                         <div
                             className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold transition-transform group-hover:scale-105 ${
-                                myCompany?.plan_suscripcion === 'Premium'
+                                isPaidPlan
                                     ? 'bg-amber-100 text-amber-700 shadow-sm'
                                     : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                             }`}
-                            title={myCompany?.plan_suscripcion === 'Premium' ? 'Gestionar Plan Premium' : 'Actualizar a Premium'}
+                            title={isPaidPlan ? `Gestionar plan ${planName}` : 'Mejorar mi plan'}
                         >
-                            {myCompany?.plan_suscripcion === 'Premium' ? '★' : 'G'}
+                            {isPaidPlan ? '★' : 'G'}
                         </div>
                     </Link>
                 ) : (
                     /* Expanded: clickeable card */
                     <Link
                         to={createPageUrl('Configuracion') + '?tab=suscripcion'}
-                        className={`block p-3 rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${myCompany?.plan_suscripcion === 'Premium'
+                        className={`block p-3 rounded-xl transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 ${isPaidPlan
                             ? 'bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 hover:border-amber-300'
                             : 'bg-muted/50 dark:bg-slate-800 hover:bg-muted border border-transparent'
                             }`}
                     >
                         <div className="flex items-center gap-2 mb-2">
-                            {myCompany?.plan_suscripcion === 'Premium' ? (
-                                <Badge className="bg-amber-500 hover:bg-amber-600 text-white shadow-sm">Premium</Badge>
+                            {isPaidPlan ? (
+                                <Badge className="bg-amber-500 hover:bg-amber-600 text-white shadow-sm">{planName}</Badge>
                             ) : (
-                                <Badge variant="secondary">Gratuito</Badge>
+                                <Badge variant="secondary">{planName}</Badge>
                             )}
                             {myCompany?.badge_fundador && (
                                 <Badge className="bg-[#1E293B] text-white">Fundador</Badge>
                             )}
                         </div>
                         <span className={`text-xs font-medium block mt-1 ${
-                             myCompany?.plan_suscripcion === 'Premium' ? 'text-amber-700' : 'text-slate-500'
+                             isPaidPlan ? 'text-amber-700' : 'text-slate-500'
                         }`}>
-                            {myCompany?.plan_suscripcion === 'Premium' ? 'Gestionar mi plan →' : 'Actualizar a Premium ✨'}
+                            {isPaidPlan ? 'Gestionar mi plan →' : 'Mejorar mi plan ✨'}
                         </span>
                     </Link>
                 )}
