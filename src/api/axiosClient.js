@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { toast } from 'sonner';
 import { normalizeApiError, getUserFriendlyErrorMessage } from '../utils/errors';
+import { getAnalyticsHeaders } from '../lib/analytics';
 
 // Usa la variable de entorno o un fallback local
 const API_BASE = import.meta.env.VITE_API_BASE;
@@ -29,6 +30,13 @@ apiClient.interceptors.request.use(
         // An explicit Authorization (e.g. the 2FA enrollment token during login) wins over the stored session
         if (token && !config.headers['Authorization']) {
             config.headers['Authorization'] = `Bearer ${token}`;
+        }
+        // Forward browser attribution context (_fbp, _fbc, source URL) on mutating requests for server-side CAPI
+        if (config.method && config.method.toLowerCase() === 'post') {
+            const analyticsHeaders = getAnalyticsHeaders();
+            for (const [k, v] of Object.entries(analyticsHeaders)) {
+                if (!config.headers[k]) config.headers[k] = v;
+            }
         }
         return config;
     },
