@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:analytics": "node scripts/deploy-analytics.mjs",
+    "deploy:vercel:analytics": "node scripts/deploy-analytics.mjs --vercel",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",

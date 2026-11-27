@@ -1,11 +1,10 @@
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '@/features/auth/AuthContext';
 import { pagesConfig } from '@/pages.config';
+import { analytics } from '@/lib/analytics';
 
 export default function NavigationTracker() {
     const location = useLocation();
-    const { isAuthenticated } = useAuth();
     const { Pages, mainPage } = pagesConfig;
     const mainPageKey = mainPage ?? Object.keys(Pages)[0];
 
@@ -21,15 +20,20 @@ export default function NavigationTracker() {
             const matchedKey = pageKeys.find(
                 key => key.toLowerCase() === pathSegment.toLowerCase()
             );
-            pageName = matchedKey || null;
+            pageName = matchedKey || pathname;
         }
 
-        // Navigation logging — currently a no-op.
-        // TODO: Implement analytics endpoint if needed.
-        if (isAuthenticated && pageName) {
-            // console.debug('[NavigationTracker]', pageName);
+        analytics.pageView(pathname, pageName);
+
+        // Track product detail views on the public Marketplace
+        const productMatch = pathname.match(/^\/marketplace\/producto\/([^/]+)/i);
+        if (productMatch) {
+            analytics.track('view_content', {
+                contentIds: [productMatch[1]],
+                contentType: 'product',
+            });
         }
-    }, [location, isAuthenticated, Pages, mainPageKey]);
+    }, [location.pathname, Pages, mainPageKey]);
 
     return null;
 }
